@@ -21,6 +21,9 @@ import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -33,6 +36,8 @@ import javax.swing.UIManager;
 import javax.swing.border.BevelBorder;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
+import org.apache.pdfbox.cos.COSArray;
+import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.tools.gui.PDFTreeModel;
 import org.apache.pdfbox.tools.gui.PDFTreeCellRenderer;
 import org.apache.pdfbox.tools.gui.ArrayEntry;
@@ -55,6 +60,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.io.IOException;
+import org.apache.pdfbox.tools.pdfdebugger.colorpane.CSSeparation;
 import org.apache.pdfbox.tools.util.FileOpenSaveDialog;
 import org.apache.pdfbox.tools.pdfdebugger.ui.Tree;
 import org.apache.pdfbox.tools.pdfdebugger.treestatus.TreeStatus;
@@ -69,11 +75,13 @@ import org.apache.pdfbox.tools.util.RecentFiles;
 public class PDFDebugger extends javax.swing.JFrame
 {
     private TreeStatusPane statusPane;
+    private RecentFiles recentFiles;
 
     private PDDocument document = null;
     private String currentFilePath = null;
 
-    private RecentFiles recentFiles;
+    List<COSName> specialColorSpaces =
+            Arrays.asList(COSName.INDEXED, COSName.SEPARATION, COSName.DEVICEN);
 
     private static final String PASSWORD = "-password";
 
@@ -268,6 +276,19 @@ public class PDFDebugger extends javax.swing.JFrame
             try
             {
                 Object selectedNode = path.getLastPathComponent();
+                if (isSpecialColorSpace(selectedNode))
+                {
+                    System.out.println("true");
+                    showColorPane(selectedNode);
+                    return;
+                }
+                else
+                {
+                    if (!jSplitPane1.getRightComponent().equals(jScrollPane2))
+                    {
+                        jSplitPane1.setRightComponent(jScrollPane2);
+                    }
+                }
                 String data=convertToString(selectedNode);
                 if (data != null)
                 {
@@ -284,6 +305,55 @@ public class PDFDebugger extends javax.swing.JFrame
             }
         }
     }//GEN-LAST:event_jTree1ValueChanged
+
+    private boolean isSpecialColorSpace(Object selectedNode)
+    {
+        if (selectedNode instanceof MapEntry)
+        {
+            selectedNode = ((MapEntry) selectedNode).getValue();
+        }
+        else if (selectedNode instanceof ArrayEntry)
+        {
+            selectedNode = ((ArrayEntry) selectedNode).getValue();
+        }
+
+        if (selectedNode instanceof COSArray)
+        {
+            COSBase arrayEntry = ((COSArray)selectedNode).get(0);
+            if (arrayEntry instanceof COSName)
+            {
+                COSName name = (COSName) arrayEntry;
+                return specialColorSpaces.contains(name);
+            }
+        }
+        return false;
+    }
+
+    public void showColorPane(Object csNode)
+    {
+        if (csNode instanceof MapEntry)
+        {
+            csNode = ((MapEntry) csNode).getValue();
+        }
+        else if (csNode instanceof ArrayEntry)
+        {
+            csNode = ((ArrayEntry) csNode).getValue();
+        }
+
+        if (csNode instanceof COSArray)
+        {
+            COSArray array = (COSArray)csNode;
+            COSBase arrayEntry = array.get(0);
+            if (arrayEntry instanceof COSName)
+            {
+                COSName csName = (COSName) arrayEntry;
+                if (csName.equals(COSName.SEPARATION))
+                {
+                    jSplitPane1.setRightComponent(new CSSeparation(array).getPanel());
+                }
+            }
+        }
+    }
 
     private String convertToString( Object selectedNode )
     {
