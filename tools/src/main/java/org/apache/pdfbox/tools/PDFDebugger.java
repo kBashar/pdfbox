@@ -502,7 +502,7 @@ public class PDFDebugger extends javax.swing.JFrame
         statusPane.updateTreeStatus(treeStatus);
         TreeModel model=new PDFTreeModel(document);
         tree.setModel(model);
-        tree.setSelectionPath(treeStatus.getPathForString("Root"));
+        tree.setSelectionPath(treeStatus.getPathForString("Root/Pages/Kids/[0]/Resources/ColorSpace/CS0"));
         setTitle("PDFBox - " + file.getAbsolutePath());
         addRecentFileItems();
     }
