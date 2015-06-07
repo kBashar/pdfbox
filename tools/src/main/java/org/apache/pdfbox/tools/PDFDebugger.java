@@ -278,7 +278,6 @@ public class PDFDebugger extends javax.swing.JFrame
                 Object selectedNode = path.getLastPathComponent();
                 if (isSpecialColorSpace(selectedNode))
                 {
-                    System.out.println("true");
                     showColorPane(selectedNode);
                     return;
                 }
@@ -329,7 +328,13 @@ public class PDFDebugger extends javax.swing.JFrame
         return false;
     }
 
-    public void showColorPane(Object csNode)
+    /**
+     * Show a Panel describing the special color spaces in more detail and interactive way.
+     * For now only Separation Color space is shown.
+     * @param csNode the special color space containing node.
+     */
+    //TODO implement DeviceN and Indexed color spaces related features
+    private void showColorPane(Object csNode)
     {
         if (csNode instanceof MapEntry)
         {
@@ -350,6 +355,13 @@ public class PDFDebugger extends javax.swing.JFrame
                 if (csName.equals(COSName.SEPARATION))
                 {
                     jSplitPane1.setRightComponent(new CSSeparation(array).getPanel());
+                }
+                else
+                {
+                    if (!jSplitPane1.getRightComponent().equals(jScrollPane2))
+                    {
+                        jSplitPane1.setRightComponent(jScrollPane2);
+                    }
                 }
             }
         }
@@ -502,7 +514,6 @@ public class PDFDebugger extends javax.swing.JFrame
         statusPane.updateTreeStatus(treeStatus);
         TreeModel model=new PDFTreeModel(document);
         tree.setModel(model);
-        
         tree.setSelectionPath(treeStatus.getPathForString("Root"));
         setTitle("PDFBox - " + file.getAbsolutePath());
         addRecentFileItems();

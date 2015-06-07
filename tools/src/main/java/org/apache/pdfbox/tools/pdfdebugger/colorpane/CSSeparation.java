@@ -1,3 +1,19 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.apache.pdfbox.tools.pdfdebugger.colorpane;
 
 import java.awt.Color;
@@ -22,7 +38,11 @@ import org.apache.pdfbox.cos.COSArray;
 import org.apache.pdfbox.pdmodel.graphics.color.PDSeparation;
 
 /**
- * Author by Khyrul Bashar.
+ * @author Khyrul Bashar.
+ */
+
+/**
+ *A class that provides the necessary UI and functionalities to show the Separation color space.
  */
 public class CSSeparation implements ChangeListener, ActionListener
 {
@@ -34,6 +54,10 @@ public class CSSeparation implements ChangeListener, ActionListener
     private PDSeparation separation;
     private float tintValue = 1;
 
+    /**
+     * Constructor
+     * @param array COSArray instance of the separation color space.
+     */
     public CSSeparation(COSArray array)
     {
         try
@@ -48,25 +72,33 @@ public class CSSeparation implements ChangeListener, ActionListener
         initValues();
     }
 
+    /**
+     * initialize all the UI elements and arrange them.
+     */
     private void initUI()
     {
         Font boldFont = new Font("Monospaced", Font.BOLD, 20);
 
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(2, 2, 2, 2);
-        
+
         JPanel inputPanel = new JPanel(new GridBagLayout());
 
         slider = new JSlider(0, 100, 50);
         slider.setMajorTickSpacing(50);
         slider.setPaintTicks(true);
+
         Hashtable labelTable = new Hashtable();
         JLabel lightest = new JLabel("lightest");
         lightest.setFont(new Font("Monospaced", Font.BOLD, 10));
         JLabel darkest = new JLabel("darkest");
         darkest.setFont(new Font("Monospaced", Font.BOLD, 10));
+        JLabel midPoint = new JLabel("0.5");
+        midPoint.setFont(new Font("Monospaced", Font.BOLD, 10));
         labelTable.put(new Integer(0), lightest);
+        labelTable.put(new Integer(50), midPoint);
         labelTable.put(new Integer(100), darkest);
+
         slider.setPaintLabels(true);
         slider.setLabelTable(labelTable);
         slider.addChangeListener(this);
@@ -144,22 +176,31 @@ public class CSSeparation implements ChangeListener, ActionListener
         tintField.setText(Float.toString(tintValue));
     }
 
+    /**
+     * return the main panel that hold all the UI elements.
+     * @return JPanel instance
+     */
     public JPanel getPanel()
     {
         return panel;
     }
 
-    //input changed in slider
+    /**.
+     * input changed in slider.
+     * @param changeEvent
+     */
     @Override
     public void stateChanged(ChangeEvent changeEvent)
     {
-            int value = slider.getValue();
-            tintValue = getFloatRepresentation(value);
-            tintField.setText(Float.toString(tintValue));
-            updateColorBar();
+        int value = slider.getValue();
+        tintValue = getFloatRepresentation(value);
+        tintField.setText(Float.toString(tintValue));
+        updateColorBar();
     }
 
-    //input changed in text field.
+    /**
+     * input changed in text field.
+     */
     @Override
     public void actionPerformed(ActionEvent actionEvent)
     {
@@ -185,10 +226,13 @@ public class CSSeparation implements ChangeListener, ActionListener
         }
         catch (IOException e)
         {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
 
+    /**
+     * Set a little border around colorbar. color of the border is the darkest of the colorant.
+     */
     private void setColorBarBorder()
     {
         try
@@ -199,7 +243,7 @@ public class CSSeparation implements ChangeListener, ActionListener
         }
         catch (IOException e)
         {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
 
