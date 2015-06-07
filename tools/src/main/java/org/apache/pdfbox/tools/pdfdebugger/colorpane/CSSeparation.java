@@ -25,8 +25,8 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.util.Dictionary;
 import java.util.Hashtable;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
@@ -88,16 +88,16 @@ public class CSSeparation implements ChangeListener, ActionListener
         slider.setMajorTickSpacing(50);
         slider.setPaintTicks(true);
 
-        Hashtable labelTable = new Hashtable();
+        Dictionary labelTable = new Hashtable();
         JLabel lightest = new JLabel("lightest");
         lightest.setFont(new Font("Monospaced", Font.BOLD, 10));
         JLabel darkest = new JLabel("darkest");
         darkest.setFont(new Font("Monospaced", Font.BOLD, 10));
         JLabel midPoint = new JLabel("0.5");
         midPoint.setFont(new Font("Monospaced", Font.BOLD, 10));
-        labelTable.put(new Integer(0), lightest);
-        labelTable.put(new Integer(50), midPoint);
-        labelTable.put(new Integer(100), darkest);
+        labelTable.put(0, lightest);
+        labelTable.put(50, midPoint);
+        labelTable.put(100, darkest);
 
         slider.setPaintLabels(true);
         slider.setLabelTable(labelTable);
@@ -185,7 +185,7 @@ public class CSSeparation implements ChangeListener, ActionListener
         return panel;
     }
 
-    /**.
+    /**
      * input changed in slider.
      * @param changeEvent
      */
@@ -200,6 +200,7 @@ public class CSSeparation implements ChangeListener, ActionListener
 
     /**
      * input changed in text field.
+     * @param actionEvent
      */
     @Override
     public void actionPerformed(ActionEvent actionEvent)

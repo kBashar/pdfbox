@@ -21,8 +21,6 @@ import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.lang.reflect.Array;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import javax.swing.AbstractAction;
@@ -36,6 +34,8 @@ import javax.swing.UIManager;
 import javax.swing.border.BevelBorder;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
+import javax.swing.tree.TreeModel;
+import javax.swing.tree.TreePath;
 import org.apache.pdfbox.cos.COSArray;
 import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.tools.gui.PDFTreeModel;
@@ -52,9 +52,6 @@ import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.COSNull;
 import org.apache.pdfbox.cos.COSStream;
 import org.apache.pdfbox.cos.COSString;
-
-import javax.swing.tree.TreeModel;
-import javax.swing.tree.TreePath;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -281,21 +278,18 @@ public class PDFDebugger extends javax.swing.JFrame
                     showColorPane(selectedNode);
                     return;
                 }
-                else
+                if (!jSplitPane1.getRightComponent().equals(jScrollPane2))
                 {
-                    if (!jSplitPane1.getRightComponent().equals(jScrollPane2))
-                    {
-                        jSplitPane1.setRightComponent(jScrollPane2);
-                    }
+                    jSplitPane1.setRightComponent(jScrollPane2);
                 }
-                String data=convertToString(selectedNode);
+                String data = convertToString(selectedNode);
                 if (data != null)
                 {
                     jTextPane1.setText(data);
                 }
                 else
                 {
-                    jTextPane1.setText( "" );
+                    jTextPane1.setText("");
                 }
             }
             catch (Exception e)
@@ -574,9 +568,9 @@ public class PDFDebugger extends javax.swing.JFrame
     {
         System.err.println(
                 "usage: java -jar pdfbox-app-x.y.z.jar PDFDebugger [OPTIONS] <input-file>\n" +
-                "  -password <password>      Password to decrypt the document\n" +
-                "  <input-file>              The PDF document to be loaded\n"
-                );
+                        "  -password <password>      Password to decrypt the document\n" +
+                        "  <input-file>              The PDF document to be loaded\n"
+        );
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
