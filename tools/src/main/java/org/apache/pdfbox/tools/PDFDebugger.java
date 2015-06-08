@@ -57,6 +57,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.io.IOException;
+import org.apache.pdfbox.tools.pdfdebugger.colorpane.CSDeviceN;
 import org.apache.pdfbox.tools.pdfdebugger.colorpane.CSSeparation;
 import org.apache.pdfbox.tools.util.FileOpenSaveDialog;
 import org.apache.pdfbox.tools.pdfdebugger.ui.Tree;
@@ -327,7 +328,7 @@ public class PDFDebugger extends javax.swing.JFrame
      * For now only Separation Color space is shown.
      * @param csNode the special color space containing node.
      */
-    //TODO implement DeviceN and Indexed color spaces related features
+    //TODO implement Indexed color spaces related features
     private void showColorPane(Object csNode)
     {
         if (csNode instanceof MapEntry)
@@ -349,6 +350,10 @@ public class PDFDebugger extends javax.swing.JFrame
                 if (csName.equals(COSName.SEPARATION))
                 {
                     jSplitPane1.setRightComponent(new CSSeparation(array).getPanel());
+                }
+                else if (csName.equals(COSName.DEVICEN))
+                {
+                    jSplitPane1.setRightComponent(new CSDeviceN(array).getPanel());
                 }
                 else
                 {

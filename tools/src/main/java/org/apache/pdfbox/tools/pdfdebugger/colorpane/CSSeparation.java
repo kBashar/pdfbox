@@ -63,13 +63,13 @@ public class CSSeparation implements ChangeListener, ActionListener
         try
         {
             separation = new PDSeparation(array);
+            initUI();
+            initValues();
         }
         catch (IOException e)
         {
             throw new RuntimeException(e);
         }
-        initUI();
-        initValues();
     }
 
     /**
