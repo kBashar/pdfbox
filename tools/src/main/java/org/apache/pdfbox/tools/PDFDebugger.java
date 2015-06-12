@@ -58,6 +58,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.IOException;
 import org.apache.pdfbox.tools.pdfdebugger.colorpane.CSDeviceN;
+import org.apache.pdfbox.tools.pdfdebugger.colorpane.CSIndexed;
 import org.apache.pdfbox.tools.pdfdebugger.colorpane.CSSeparation;
 import org.apache.pdfbox.tools.util.FileOpenSaveDialog;
 import org.apache.pdfbox.tools.pdfdebugger.ui.Tree;
@@ -354,6 +355,10 @@ public class PDFDebugger extends javax.swing.JFrame
                 else if (csName.equals(COSName.DEVICEN))
                 {
                     jSplitPane1.setRightComponent(new CSDeviceN(array).getPanel());
+                }
+                else if (csName.equals(COSName.INDEXED))
+                {
+                    jSplitPane1.setRightComponent(new CSIndexed(array).getPanel());
                 }
                 else
                 {
