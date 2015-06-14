@@ -3,8 +3,11 @@ package org.apache.pdfbox.tools.pdfdebugger.colorpane;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.io.IOException;
-import java.util.Arrays;
+import javax.swing.BoxLayout;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import org.apache.pdfbox.cos.COSArray;
@@ -17,7 +20,7 @@ import org.apache.pdfbox.pdmodel.graphics.color.PDIndexed;
 public class CSIndexed
 {
     private PDIndexed indexed;
-    private JScrollPane panel;
+    private JPanel panel;
     private int colorCount;
 
     public CSIndexed(COSArray array)
@@ -56,6 +59,18 @@ public class CSIndexed
 
     private void initUI(IndexedColorant[] colorants)
     {
+        panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setPreferredSize(new Dimension(300, 500));
+
+        JLabel colorSpaceLabel = new JLabel("Indexed colorspace");
+        colorSpaceLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        colorSpaceLabel.setFont(new Font(Font.MONOSPACED, Font.BOLD, 30));
+
+        JLabel colorCountLabel = new JLabel("Total Color Count: " + colorCount);
+        colorCountLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        colorCountLabel.setFont(new Font(Font.MONOSPACED, Font.BOLD, 20));
+
         IndexedTableModel tableModel = new IndexedTableModel(colorants);
         JTable table = new JTable(tableModel);
         table.setDefaultRenderer(Color.class, new ColorBarCellRenderer());
@@ -65,9 +80,12 @@ public class CSIndexed
         table.getColumnModel().getColumn(1).setMinWidth(100);
         table.getColumnModel().getColumn(1).setMaxWidth(100);
 
-        panel = new JScrollPane();
-        panel.setPreferredSize(new Dimension(300, 500));
-        panel.setViewportView(table);
+        JScrollPane scrollPane = new JScrollPane();
+        scrollPane.setViewportView(table);
+
+        panel.add(colorSpaceLabel);
+        panel.add(colorCountLabel);
+        panel.add(scrollPane);
     }
 
     /**

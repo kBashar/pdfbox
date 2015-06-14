@@ -16,20 +16,27 @@
  */
 package org.apache.pdfbox.tools.pdfdebugger.colorpane;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.util.Arrays;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import java.io.IOException;
 
+import javax.swing.border.BevelBorder;
 import org.apache.pdfbox.cos.COSArray;
 import org.apache.pdfbox.pdmodel.graphics.color.PDDeviceN;
 
 
 /**
- *@author  Khyrul Bashar.
+ *@author Khyrul Bashar.
  */
 
 /**
@@ -38,10 +45,11 @@ import org.apache.pdfbox.pdmodel.graphics.color.PDDeviceN;
 public class CSDeviceN
 {
     private PDDeviceN deviceN;
-    private JScrollPane panel;
+    private JPanel panel;
 
     /**
      * Constructor
+     *
      * @param array COSArray instance that holds DeviceN color space
      */
     public CSDeviceN(COSArray array)
@@ -49,7 +57,7 @@ public class CSDeviceN
         try
         {
             deviceN = new PDDeviceN(array);
-            IndexdColorant[] colorants = getColorantData();
+            DeviceNColorant[] colorants = getColorantData();
             initUI(colorants);
         }
         catch (IOException e)
@@ -59,51 +67,57 @@ public class CSDeviceN
     }
 
     /**
-     * Parses the colorant data from the array and return.
-     * @return
+     * Parses the colorant data from the array.
+     *
+     * @return the parsed colorants.
+     * @throws java.io.IOException if the color conversion fails.
      */
-    private IndexdColorant[] getColorantData()
+    private DeviceNColorant[] getColorantData() throws IOException
     {
         int componentCount = deviceN.getNumberOfComponents();
-        IndexdColorant[] colorants = new IndexdColorant[componentCount];
-        for (int i=0; i<componentCount; i++)
+        DeviceNColorant[] colorants = new DeviceNColorant[componentCount];
+        for (int i = 0; i < componentCount; i++)
         {
-            IndexdColorant colorant = new IndexdColorant();
+            DeviceNColorant colorant = new DeviceNColorant();
 
             colorant.setName(deviceN.getColorantNames().get(i));
             float[] maximum = new float[componentCount];
             Arrays.fill(maximum, 0);
             float[] minimum = new float[componentCount];
-            Arrays.fill(minimum,1);
+            Arrays.fill(minimum, 1);
             maximum[i] = 1;
             minimum[i] = 0;
-            try
-            {
-                colorant.setMaximum(getColorObj(deviceN.toRGB(maximum)));
-                colorant.setMinimum(getColorObj(deviceN.toRGB(minimum)));
-            }
-            catch (IOException e)
-            {
-                throw new RuntimeException();
-            }
+            colorant.setMaximum(getColorObj(deviceN.toRGB(maximum)));
+            colorant.setMinimum(getColorObj(deviceN.toRGB(minimum)));
             colorants[i] = colorant;
         }
         return colorants;
     }
 
-    private void initUI(IndexdColorant[] colorants)
+    private void initUI(DeviceNColorant[] colorants)
     {
+        panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setPreferredSize(new Dimension(300, 500));
+
+        JLabel colorSpaceLabel = new JLabel("DeviceN colorspace");
+        colorSpaceLabel.setAlignmentX((float) 0.5);
+        colorSpaceLabel.setFont(new Font(Font.MONOSPACED, Font.BOLD, 30));
+
         DeviceNTableModel tableModel = new DeviceNTableModel(colorants);
         JTable table = new JTable(tableModel);
         table.setDefaultRenderer(Color.class, new ColorBarCellRenderer());
         table.setRowHeight(60);
-        panel = new JScrollPane();
-        panel.setPreferredSize(new Dimension(300, 500));
-        panel.setViewportView(table);
+        JScrollPane scrollPane = new JScrollPane();
+        scrollPane.setViewportView(table);
+
+        panel.add(colorSpaceLabel);
+        panel.add(scrollPane);
     }
 
     /**
      * return the main panel that hold all the UI elements.
+     *
      * @return JPanel instance
      */
     public Component getPanel()

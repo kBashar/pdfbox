@@ -22,7 +22,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JComponent;
@@ -79,8 +81,8 @@ public class PDFDebugger extends javax.swing.JFrame
     private PDDocument document = null;
     private String currentFilePath = null;
 
-    List<COSName> specialColorSpaces =
-            Arrays.asList(COSName.INDEXED, COSName.SEPARATION, COSName.DEVICEN);
+    private static final Set<COSName> SPECIALCOLORSPACES =
+            new HashSet<COSName>(Arrays.asList(COSName.INDEXED, COSName.SEPARATION, COSName.DEVICEN));
 
     private static final String PASSWORD = "-password";
 
@@ -318,7 +320,7 @@ public class PDFDebugger extends javax.swing.JFrame
             if (arrayEntry instanceof COSName)
             {
                 COSName name = (COSName) arrayEntry;
-                return specialColorSpaces.contains(name);
+                return SPECIALCOLORSPACES.contains(name);
             }
         }
         return false;
@@ -329,7 +331,6 @@ public class PDFDebugger extends javax.swing.JFrame
      * For now only Separation Color space is shown.
      * @param csNode the special color space containing node.
      */
-    //TODO implement Indexed color spaces related features
     private void showColorPane(Object csNode)
     {
         if (csNode instanceof MapEntry)
@@ -359,13 +360,6 @@ public class PDFDebugger extends javax.swing.JFrame
                 else if (csName.equals(COSName.INDEXED))
                 {
                     jSplitPane1.setRightComponent(new CSIndexed(array).getPanel());
-                }
-                else
-                {
-                    if (!jSplitPane1.getRightComponent().equals(jScrollPane2))
-                    {
-                        jSplitPane1.setRightComponent(jScrollPane2);
-                    }
                 }
             }
         }

@@ -27,6 +27,7 @@ import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.util.Dictionary;
 import java.util.Hashtable;
+import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
@@ -63,13 +64,13 @@ public class CSSeparation implements ChangeListener, ActionListener
         try
         {
             separation = new PDSeparation(array);
-            initUI();
-            initValues();
         }
         catch (IOException e)
         {
             throw new RuntimeException(e);
         }
+        initUI();
+        initValues();
     }
 
     /**
@@ -77,11 +78,11 @@ public class CSSeparation implements ChangeListener, ActionListener
      */
     private void initUI()
     {
-        Font boldFont = new Font("Monospaced", Font.BOLD, 20);
+        Font boldFont = new Font(Font.MONOSPACED, Font.BOLD, 20);
 
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(2, 2, 2, 2);
-
+        
         JPanel inputPanel = new JPanel(new GridBagLayout());
 
         slider = new JSlider(0, 100, 50);
@@ -90,11 +91,11 @@ public class CSSeparation implements ChangeListener, ActionListener
 
         Dictionary labelTable = new Hashtable();
         JLabel lightest = new JLabel("lightest");
-        lightest.setFont(new Font("Monospaced", Font.BOLD, 10));
+        lightest.setFont(new Font(Font.MONOSPACED, Font.BOLD, 10));
         JLabel darkest = new JLabel("darkest");
-        darkest.setFont(new Font("Monospaced", Font.BOLD, 10));
+        darkest.setFont(new Font(Font.MONOSPACED, Font.BOLD, 10));
         JLabel midPoint = new JLabel("0.5");
-        midPoint.setFont(new Font("Monospaced", Font.BOLD, 10));
+        midPoint.setFont(new Font(Font.MONOSPACED, Font.BOLD, 10));
         labelTable.put(0, lightest);
         labelTable.put(50, midPoint);
         labelTable.put(100, darkest);
@@ -148,7 +149,7 @@ public class CSSeparation implements ChangeListener, ActionListener
         contentPanel.add(colorBar, gbc2);
         setColorBarBorder();
 
-        panel = new JPanel(new GridBagLayout());
+        JPanel mainpanel = new JPanel(new GridBagLayout());
 
         JLabel colorantNameLabel = new JLabel("Colorant: " + separation.getColorantName());
         colorantNameLabel.setFont(boldFont);
@@ -159,15 +160,25 @@ public class CSSeparation implements ChangeListener, ActionListener
         maingbc.weightx = 1;
         maingbc.weighty = 0.03;
         maingbc.anchor = GridBagConstraints.FIRST_LINE_START;
-        panel.add(colorantNameLabel, maingbc);
+        mainpanel.add(colorantNameLabel, maingbc);
 
         maingbc.gridx = 0;
         maingbc.gridy = 1;
         maingbc.weighty = 0.97;
         maingbc.gridwidth = 10;
         maingbc.fill = GridBagConstraints.HORIZONTAL;
-        panel.add(contentPanel, maingbc);
+        mainpanel.add(contentPanel, maingbc);
 
+        panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setPreferredSize(new Dimension(300, 500));
+
+        JLabel colorSpaceLabel = new JLabel("Separation colorspace");
+        colorSpaceLabel.setAlignmentX((float) 0.5);
+        colorSpaceLabel.setFont(new Font(Font.MONOSPACED, Font.BOLD, 30));
+
+        panel.add(colorSpaceLabel);
+        panel.add(mainpanel);
     }
 
     private void initValues()
@@ -192,10 +203,10 @@ public class CSSeparation implements ChangeListener, ActionListener
     @Override
     public void stateChanged(ChangeEvent changeEvent)
     {
-        int value = slider.getValue();
-        tintValue = getFloatRepresentation(value);
-        tintField.setText(Float.toString(tintValue));
-        updateColorBar();
+            int value = slider.getValue();
+            tintValue = getFloatRepresentation(value);
+            tintField.setText(Float.toString(tintValue));
+            updateColorBar();
     }
 
     /**
@@ -244,7 +255,7 @@ public class CSSeparation implements ChangeListener, ActionListener
         }
         catch (IOException e)
         {
-            throw new RuntimeException(e);
+           throw new RuntimeException(e);
         }
     }
 

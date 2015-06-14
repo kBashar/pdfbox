@@ -28,14 +28,14 @@ import javax.swing.table.AbstractTableModel;
  */
 public class DeviceNTableModel extends AbstractTableModel
 {
-    private String[] columnNames = new String[]{"Colorant", "Maximum", "Minimum"};
-    private IndexdColorant[] data;
+    private static final String[] columnNames = new String[]{"Colorant", "Maximum", "Minimum"};
+    private DeviceNColorant[] data;
 
     /**
      * Constructor
      * @param colorants
      */
-    public DeviceNTableModel(IndexdColorant[] colorants)
+    public DeviceNTableModel(DeviceNColorant[] colorants)
     {
         data = colorants;
     }

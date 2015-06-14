@@ -21,7 +21,7 @@ import java.awt.Color;
 /**
  * @author Khyrul Bashar.
  */
-public class IndexdColorant
+public class DeviceNColorant
 {
     private String name;
     private Color maximum;
@@ -30,22 +30,7 @@ public class IndexdColorant
     /**
      * Constructor
      */
-    public IndexdColorant()
-    {
-    }
-
-    /**
-     * Constructor
-     * @param colorantName String instance
-     * @param maxi maximum color
-     * @param mini minimum color
-     */
-    public IndexdColorant(String colorantName, Color maxi, Color mini)
-    {
-        name = colorantName;
-        maximum = maxi;
-        minimum = mini;
-    }
+    public DeviceNColorant(){}
 
     public String getName()
     {

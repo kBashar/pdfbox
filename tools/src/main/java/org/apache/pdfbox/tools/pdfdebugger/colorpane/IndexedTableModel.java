@@ -9,7 +9,7 @@ import javax.swing.table.AbstractTableModel;
 public class IndexedTableModel extends AbstractTableModel
 {
 
-    private final String[] columnsName = new String[] {"Index", "RGB value", "Color"};
+    private static final String[] columnsName = new String[] {"Index", "RGB value", "Color"};
     private IndexedColorant[] data;
 
     public IndexedTableModel(IndexedColorant[] colorants)

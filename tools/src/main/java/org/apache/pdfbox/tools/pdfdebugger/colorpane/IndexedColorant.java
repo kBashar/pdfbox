@@ -10,15 +10,7 @@ public class IndexedColorant
     private int index;
     private float[] rgbValues;
 
-    public IndexedColorant()
-    {
-    }
-
-    public IndexedColorant(int index, float[] rgbValues)
-    {
-        this.index = index;
-        this.rgbValues = rgbValues;
-    }
+    public IndexedColorant(){}
 
     public int getIndex()
     {
