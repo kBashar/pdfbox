@@ -295,6 +295,10 @@ public class PDFDebugger extends javax.swing.JFrame
                     showPage(selectedNode);
                     return;
                 }
+                if (isParentNode(selectedNode))
+                {
+                    redirectToParent(path);
+                }
                 if (!jSplitPane1.getRightComponent().equals(jScrollPane2))
                 {
                     jSplitPane1.setRightComponent(jScrollPane2);
@@ -315,6 +319,37 @@ public class PDFDebugger extends javax.swing.JFrame
             }
         }
     }//GEN-LAST:event_jTree1ValueChanged
+
+    /**
+     * If the node is a parent keyed node then it'll be redirected to it's parent node.
+     * @param path TreePath
+     */
+    private void redirectToParent(TreePath path)
+    {
+        Object selectednode = path.getLastPathComponent();
+        selectednode = getUnderneathObject(selectednode);
+        path = path.getParentPath();
+        while (path != null)
+        {
+            Object node = path.getLastPathComponent();
+            if (selectednode.equals(getUnderneathObject(node)))
+            {
+                tree.setSelectionPath(path);
+                tree.scrollPathToVisible(path);
+                return;
+            }
+            path = path.getParentPath();
+        }
+    }
+
+    private boolean isParentNode(Object selectedNode)
+    {
+        if (selectedNode instanceof MapEntry && ((MapEntry)selectedNode).getKey().equals(COSName.PARENT))
+        {
+            return true;
+        }
+        return false;
+    }
 
     private boolean isSpecialColorSpace(Object selectedNode)
     {
@@ -372,7 +407,7 @@ public class PDFDebugger extends javax.swing.JFrame
     {
         csNode = getUnderneathObject(csNode);
 
-        if (csNode instanceof COSArray)
+        if (csNode instanceof COSArray && ((COSArray) csNode).size() > 0)
         {
             COSArray array = (COSArray)csNode;
             COSBase arrayEntry = array.get(0);
