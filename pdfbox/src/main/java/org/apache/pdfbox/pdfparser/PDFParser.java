@@ -50,7 +50,7 @@ public class PDFParser extends COSParser
     /**
      * Constructor.
      * 
-     * @param input source representing the pdf.
+     * @param source source representing the pdf.
      * @throws IOException If something went wrong.
      */
     public PDFParser(RandomAccessRead source) throws IOException
@@ -164,7 +164,7 @@ public class PDFParser extends COSParser
      */
     public PDDocument getPDDocument() throws IOException
     {
-        return new PDDocument( getDocument(), this, accessPermission );
+        return new PDDocument( getDocument(), pdfSource, accessPermission );
     }
 
     /**
@@ -228,7 +228,6 @@ public class PDFParser extends COSParser
         }
         finally
         {
-            IOUtils.closeQuietly(pdfSource);
             IOUtils.closeQuietly(keyStoreInputStream);
     
             if (exceptionOccurred && document != null)

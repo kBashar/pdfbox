@@ -21,10 +21,10 @@ import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.lang.reflect.Array;
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JComponent;
@@ -36,6 +36,9 @@ import javax.swing.UIManager;
 import javax.swing.border.BevelBorder;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.tree.TreeModel;
+import javax.swing.tree.TreePath;
 import org.apache.pdfbox.cos.COSArray;
 import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.tools.gui.PDFTreeModel;
@@ -53,14 +56,17 @@ import org.apache.pdfbox.cos.COSNull;
 import org.apache.pdfbox.cos.COSStream;
 import org.apache.pdfbox.cos.COSString;
 
-import javax.swing.tree.TreeModel;
-import javax.swing.tree.TreePath;
-
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.io.IOException;
+import org.apache.pdfbox.cos.COSDictionary;
+import org.apache.pdfbox.cos.COSObject;
+import org.apache.pdfbox.tools.pdfdebugger.colorpane.CSDeviceN;
+import org.apache.pdfbox.tools.pdfdebugger.colorpane.CSIndexed;
+import org.apache.pdfbox.tools.pdfdebugger.colorpane.CSArrayBased;
 import org.apache.pdfbox.tools.pdfdebugger.colorpane.CSSeparation;
+import org.apache.pdfbox.tools.pdfdebugger.pagepane.PagePane;
 import org.apache.pdfbox.tools.util.FileOpenSaveDialog;
 import org.apache.pdfbox.tools.pdfdebugger.ui.Tree;
 import org.apache.pdfbox.tools.pdfdebugger.treestatus.TreeStatus;
@@ -80,8 +86,11 @@ public class PDFDebugger extends javax.swing.JFrame
     private PDDocument document = null;
     private String currentFilePath = null;
 
-    List<COSName> specialColorSpaces =
-            Arrays.asList(COSName.INDEXED, COSName.SEPARATION, COSName.DEVICEN);
+    private static final Set<COSName> SPECIALCOLORSPACES =
+            new HashSet(Arrays.asList(COSName.INDEXED, COSName.SEPARATION, COSName.DEVICEN));
+
+    private static final Set<COSName> OTHERCOLORSPACES =
+            new HashSet(Arrays.asList(COSName.ICCBASED, COSName.PATTERN, COSName.CALGRAY, COSName.CALRGB, COSName.LAB));
 
     private static final String PASSWORD = "-password";
 
@@ -251,7 +260,7 @@ public class PDFDebugger extends javax.swing.JFrame
 
     private void openMenuItemActionPerformed(ActionEvent evt)
     {
-        ExtensionFileFilter pdfFilter = new ExtensionFileFilter(new String[] {"pdf", "PDF"}, "PDF Files");
+        FileFilter pdfFilter = new ExtensionFileFilter(new String[] {"pdf", "PDF"}, "PDF Files");
         FileOpenSaveDialog openDialog = new FileOpenSaveDialog(this, pdfFilter);
         try
         {
@@ -276,27 +285,28 @@ public class PDFDebugger extends javax.swing.JFrame
             try
             {
                 Object selectedNode = path.getLastPathComponent();
-                if (isSpecialColorSpace(selectedNode))
+                if (isSpecialColorSpace(selectedNode) || isOtherColorSpace(selectedNode))
                 {
-                    System.out.println("true");
                     showColorPane(selectedNode);
                     return;
                 }
-                else
+                if (isPage(selectedNode))
                 {
-                    if (!jSplitPane1.getRightComponent().equals(jScrollPane2))
-                    {
-                        jSplitPane1.setRightComponent(jScrollPane2);
-                    }
+                    showPage(selectedNode);
+                    return;
                 }
-                String data=convertToString(selectedNode);
+                if (!jSplitPane1.getRightComponent().equals(jScrollPane2))
+                {
+                    jSplitPane1.setRightComponent(jScrollPane2);
+                }
+                String data = convertToString(selectedNode);
                 if (data != null)
                 {
                     jTextPane1.setText(data);
                 }
                 else
                 {
-                    jTextPane1.setText( "" );
+                    jTextPane1.setText("");
                 }
             }
             catch (Exception e)
@@ -316,20 +326,85 @@ public class PDFDebugger extends javax.swing.JFrame
         {
             selectedNode = ((ArrayEntry) selectedNode).getValue();
         }
+        
+        if (selectedNode instanceof COSObject)
+        {
+            selectedNode = ((COSObject)selectedNode).getObject();
+        }
 
-        if (selectedNode instanceof COSArray)
+        if (selectedNode instanceof COSArray && ((COSArray) selectedNode).size() > 0)
         {
             COSBase arrayEntry = ((COSArray)selectedNode).get(0);
             if (arrayEntry instanceof COSName)
             {
                 COSName name = (COSName) arrayEntry;
-                return specialColorSpaces.contains(name);
+                return SPECIALCOLORSPACES.contains(name);
             }
         }
         return false;
     }
 
-    public void showColorPane(Object csNode)
+    private boolean isOtherColorSpace(Object selectedNode)
+    {
+        if (selectedNode instanceof MapEntry)
+        {
+            selectedNode = ((MapEntry) selectedNode).getValue();
+        }
+        else if (selectedNode instanceof ArrayEntry)
+        {
+            selectedNode = ((ArrayEntry) selectedNode).getValue();
+        }
+
+        if (selectedNode instanceof COSObject)
+        {
+            selectedNode = ((COSObject) selectedNode).getObject();
+        }
+
+        if (selectedNode instanceof COSArray && ((COSArray) selectedNode).size() > 0)
+        {
+            COSBase arrayEntry = ((COSArray)selectedNode).get(0);
+            if (arrayEntry instanceof COSName)
+            {
+                COSName name = (COSName) arrayEntry;
+                return OTHERCOLORSPACES.contains(name);
+            }
+        }
+        return false;
+    }
+
+    private boolean isPage(Object selectedNode)
+    {
+        if (selectedNode instanceof MapEntry)
+        {
+            selectedNode = ((MapEntry) selectedNode).getValue();
+        }
+        else if (selectedNode instanceof ArrayEntry)
+        {
+            selectedNode = ((ArrayEntry) selectedNode).getValue();
+        }
+
+        if (selectedNode instanceof COSObject)
+        {
+            selectedNode = ((COSObject) selectedNode).getObject();
+        }
+
+        if (selectedNode instanceof COSDictionary)
+        {
+            COSDictionary dict = (COSDictionary) selectedNode;
+            COSBase typeItem = dict.getItem(COSName.TYPE);
+            if (COSName.PAGE.equals(typeItem))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Show a Panel describing color spaces in more detail and interactive way.
+     * @param csNode the special color space containing node.
+     */
+    private void showColorPane(Object csNode)
     {
         if (csNode instanceof MapEntry)
         {
@@ -339,8 +414,13 @@ public class PDFDebugger extends javax.swing.JFrame
         {
             csNode = ((ArrayEntry) csNode).getValue();
         }
+        
+        if (csNode instanceof COSObject)
+        {
+            csNode = ((COSObject)csNode).getObject();
+        }
 
-        if (csNode instanceof COSArray)
+        if (csNode instanceof COSArray && ((COSArray) csNode).size() > 0)
         {
             COSArray array = (COSArray)csNode;
             COSBase arrayEntry = array.get(0);
@@ -351,6 +431,46 @@ public class PDFDebugger extends javax.swing.JFrame
                 {
                     jSplitPane1.setRightComponent(new CSSeparation(array).getPanel());
                 }
+                else if (csName.equals(COSName.DEVICEN))
+                {
+                    jSplitPane1.setRightComponent(new CSDeviceN(array).getPanel());
+                }
+                else if (csName.equals(COSName.INDEXED))
+                {
+                    jSplitPane1.setRightComponent(new CSIndexed(array).getPanel());
+                }
+                else if (OTHERCOLORSPACES.contains(csName))
+                {
+                    jSplitPane1.setRightComponent(new CSArrayBased(array).getPanel());
+                }
+            }
+        }
+    }
+
+    private void showPage(Object selectedNode)
+    {
+        if (selectedNode instanceof MapEntry)
+        {
+            selectedNode = ((MapEntry) selectedNode).getValue();
+        }
+        else if (selectedNode instanceof ArrayEntry)
+        {
+            selectedNode = ((ArrayEntry) selectedNode).getValue();
+        }
+     
+        if (selectedNode instanceof COSObject)
+        {
+            selectedNode = ((COSObject) selectedNode).getObject();
+        }
+        
+        if (selectedNode instanceof COSDictionary)
+        {
+            COSDictionary page = (COSDictionary) selectedNode;
+            COSBase typeItem = page.getItem(COSName.TYPE);
+            if (COSName.PAGE.equals(typeItem))
+            {
+                PagePane pagePane = new PagePane(document, page);
+                jSplitPane1.setRightComponent(new JScrollPane(pagePane.getPanel()));
             }
         }
     }
@@ -562,9 +682,9 @@ public class PDFDebugger extends javax.swing.JFrame
     {
         System.err.println(
                 "usage: java -jar pdfbox-app-x.y.z.jar PDFDebugger [OPTIONS] <input-file>\n" +
-                "  -password <password>      Password to decrypt the document\n" +
-                "  <input-file>              The PDF document to be loaded\n"
-                );
+                        "  -password <password>      Password to decrypt the document\n" +
+                        "  <input-file>              The PDF document to be loaded\n"
+        );
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

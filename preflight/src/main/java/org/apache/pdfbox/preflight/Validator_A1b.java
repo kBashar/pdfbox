@@ -31,8 +31,10 @@ import java.util.List;
 
 import javax.activation.FileDataSource;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
@@ -57,7 +59,8 @@ import org.w3c.dom.Element;
 public class Validator_A1b
 {
 
-    public static void main(String[] args) throws Exception
+    public static void main(String[] args) 
+            throws IOException, TransformerException, ParserConfigurationException
     {
         if (args.length == 0)
         {
@@ -123,9 +126,6 @@ public class Validator_A1b
                     }
                 }
             }
-
-
-
         } 
         else
         {
@@ -163,7 +163,7 @@ public class Validator_A1b
         System.out.println("Version : " + version);
     }
 
-    private static int runSimple(File file) throws Exception
+    private static int runSimple(File file) throws IOException
     {
         ValidationResult result;
         PreflightParser parser = new PreflightParser(file);

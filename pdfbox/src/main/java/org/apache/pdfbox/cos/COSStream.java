@@ -21,22 +21,21 @@ import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.pdfbox.filter.DecodeResult;
 import org.apache.pdfbox.filter.Filter;
 import org.apache.pdfbox.filter.FilterFactory;
 import org.apache.pdfbox.io.IOUtils;
 import org.apache.pdfbox.io.RandomAccess;
 import org.apache.pdfbox.io.RandomAccessBuffer;
-import org.apache.pdfbox.io.RandomAccessFile;
 import org.apache.pdfbox.io.RandomAccessFileInputStream;
 import org.apache.pdfbox.io.RandomAccessFileOutputStream;
+import org.apache.pdfbox.io.RandomAccessRead;
+import org.apache.pdfbox.io.RandomAccessReadWrapper;
+import org.apache.pdfbox.io.ScratchFile;
 
 /**
  * This class represents a stream object in a PDF document.
@@ -45,11 +44,6 @@ import org.apache.pdfbox.io.RandomAccessFileOutputStream;
  */
 public class COSStream extends COSDictionary implements Closeable
 {
-    /**
-     * Log instance.
-     */
-    private static final Log LOG = LogFactory.getLog(COSStream.class);
-
     private static final int BUFFER_SIZE=16384;
 
     /**
@@ -70,11 +64,7 @@ public class COSStream extends COSDictionary implements Closeable
     private RandomAccessFileOutputStream unFilteredStream;
     private DecodeResult decodeResult;
 
-    private File scratchFileFiltered;
-    private File scratchFileUnfiltered;
-
-    private final boolean scratchFiles;
-    private final File scratchFileDirectory;
+    private final ScratchFile scratchFile;
 
     /**
      * Constructor.  Creates a new stream with an empty dictionary.
@@ -82,7 +72,7 @@ public class COSStream extends COSDictionary implements Closeable
      */
     public COSStream( )
     {
-        this(false, null);
+        this((ScratchFile)null);
     }
 
     /**
@@ -93,73 +83,42 @@ public class COSStream extends COSDictionary implements Closeable
      */
     public COSStream( COSDictionary dictionary )
     {
-        this(dictionary, false, null);
+        this(dictionary, null);
     }
 
     /**
      * Constructor.  Creates a new stream with an empty dictionary.
      *
-     * @param useScratchFiles enables the usage of a scratch file if set to true
-     * @param scratchDirectory directory to be used to create the scratch file. If null java.io.temp is used instead.
+     * @param scratchFile scratch file to use.
      *
      */
-    public COSStream( boolean useScratchFiles, File scratchDirectory )
+    public COSStream( ScratchFile scratchFile )
     {
         super();
-        scratchFiles= useScratchFiles;
-        scratchFileDirectory = scratchDirectory;
+        this.scratchFile = scratchFile;
     }
 
     /**
      * Constructor.
      *
      * @param dictionary The dictionary that is associated with this stream.
-     * @param useScratchFiles enables the usage of a scratch file if set to true
-     * @param scratchDirectory directory to be used to create the scratch file. If null java.io.temp is used instead.
+     * @param scratchFile The scratch file to use.
      *
      */
-    public COSStream( COSDictionary dictionary, boolean useScratchFiles, File scratchDirectory  )
+    public COSStream( COSDictionary dictionary, ScratchFile scratchFile )
     {
         super( dictionary );
-        scratchFiles= useScratchFiles;
-        scratchFileDirectory = scratchDirectory;
+        this.scratchFile = scratchFile;
     }
 
-    private RandomAccess createBuffer(boolean filtered) throws IOException
+    private RandomAccess createBuffer() throws IOException
     {
-        if (scratchFiles)
+        if (scratchFile != null)
         {
-            return createScratchFile(filtered);
+            return scratchFile.createBuffer();
         }
         else
         {
-            return new RandomAccessBuffer();
-        }
-    }
-
-    /**
-     * Create a scratch file to be used as buffer.
-     */
-    private RandomAccess createScratchFile(boolean filtered)
-    {
-        try
-        {
-            if (filtered)
-            {
-                deleteFile(scratchFileFiltered);
-                scratchFileFiltered = File.createTempFile("PDFBox_streamf_", null, scratchFileDirectory);
-                return new RandomAccessFile(scratchFileFiltered, "rw");
-            }
-            else
-            {
-                deleteFile(scratchFileUnfiltered);
-                scratchFileUnfiltered = File.createTempFile("PDFBox_streamu_", null, scratchFileDirectory);
-                return new RandomAccessFile(scratchFileUnfiltered, "rw");
-            }
-        }
-        catch (IOException exception)
-        {
-            LOG.error("Can't create temp file, using memory buffer instead", exception);
             return new RandomAccessBuffer();
         }
     }
@@ -169,21 +128,12 @@ public class COSStream extends COSDictionary implements Closeable
      *
      * @return the bytes of the physical (encoded) stream
      *
-     * @throws IOException when encoding/decoding causes an exception
+     * @throws IOException when encoding causes an exception
      */
     public InputStream getFilteredStream() throws IOException
     {
+        checkFilteredBuffer();
         InputStream retval;
-        if (getFilteredBuffer() != null && getFilteredBuffer().isClosed())
-        {
-            throw new IOException("COSStream has been closed and cannot be read. " +
-                                  "Perhaps its enclosing PDDocument has been closed?");
-        }
-
-        if( filteredStream == null )
-        {
-            doEncode();
-        }
         if (filteredStream != null)
         {
             long position = filteredStream.getPosition();
@@ -196,6 +146,44 @@ public class COSStream extends COSDictionary implements Closeable
             retval = new ByteArrayInputStream( new byte[0] );
         }
         return retval;
+    }
+
+    /**
+     * This will get the data with all of the filters applied.
+     *
+     * @return the data of the physical (encoded) stream
+     *
+     * @throws IOException when encoding causes an exception
+     */
+    public RandomAccessRead getFilteredRandomAccess() throws IOException
+    {
+        checkFilteredBuffer();
+        RandomAccessRead retval;
+        if (filteredStream != null)
+        {
+            long position = filteredStream.getPosition();
+            long length = filteredStream.getLengthWritten();
+            retval = new RandomAccessReadWrapper(getFilteredBuffer(), position, length );
+        }
+        else
+        {
+            retval = new RandomAccessBuffer();
+        }
+        return retval;
+    }
+    
+    private void checkFilteredBuffer() throws IOException
+    {
+        if (getFilteredBuffer() != null && getFilteredBuffer().isClosed())
+        {
+            throw new IOException("COSStream has been closed and cannot be read. " +
+                                  "Perhaps its enclosing PDDocument has been closed?");
+        }
+
+        if( filteredStream == null )
+        {
+            doEncode();
+        }
     }
 
     /**
@@ -219,22 +207,12 @@ public class COSStream extends COSDictionary implements Closeable
      *
      * @return the bytes of the logical (decoded) stream
      *
-     * @throws IOException when encoding/decoding causes an exception
+     * @throws IOException when decoding causes an exception
      */
     public InputStream getUnfilteredStream() throws IOException
     {
-        if (getUnfilteredBuffer() != null && getUnfilteredBuffer().isClosed())
-        {
-            throw new IOException("COSStream has been closed and cannot be read. " +
-                                "Perhaps its enclosing PDDocument has been closed?");
-        }
-
+        checkUnfilteredBuffer();
         InputStream retval;
-        if( unFilteredStream == null )
-        {
-            doDecode();
-        }
-
         if( unFilteredStream != null )
         {
             long position = unFilteredStream.getPosition();
@@ -249,6 +227,44 @@ public class COSStream extends COSDictionary implements Closeable
         return retval;
     }
 
+    /**
+     * This will get the logical content with none of the filters.
+     *
+     * @return the bytes of the logical (decoded) stream
+     *
+     * @throws IOException when decoding causes an exception
+     */
+    public RandomAccessRead getUnfilteredRandomAccess() throws IOException
+    {
+        checkUnfilteredBuffer();
+        RandomAccessRead retval;
+
+        if( unFilteredStream != null )
+        {
+            long position = unFilteredStream.getPosition();
+            long length = unFilteredStream.getLengthWritten();
+            retval = new RandomAccessReadWrapper( getUnfilteredBuffer(), position, length );
+        }
+        else
+        {
+            retval = new RandomAccessBuffer();
+        }
+        return retval;
+    }
+    
+    private void checkUnfilteredBuffer() throws IOException
+    {
+        if (getUnfilteredBuffer() != null && getUnfilteredBuffer().isClosed())
+        {
+            throw new IOException("COSStream has been closed and cannot be read. " +
+                                "Perhaps its enclosing PDDocument has been closed?");
+        }
+
+        if( unFilteredStream == null )
+        {
+            doDecode();
+        }
+    }
     /**
      * Returns the repaired stream parameters dictionary.
      *
@@ -374,7 +390,7 @@ public class COSStream extends COSDictionary implements Closeable
         {
             if (result == null)
             {
-                result = createBuffer(false);
+                result = createBuffer();
             }
         }
         else
@@ -396,7 +412,7 @@ public class COSStream extends COSDictionary implements Closeable
             IOUtils.closeQuietly(unFilteredStream);
             if (destBuffer == null)
             {
-                result = createBuffer(false);
+                result = createBuffer();
             }
             else
             {
@@ -468,7 +484,7 @@ public class COSStream extends COSDictionary implements Closeable
         IOUtils.closeQuietly(filteredStream);
         if (destBuffer == null)
         {
-            result = createBuffer(true);
+            result = createBuffer();
         }
         else
         {
@@ -599,7 +615,7 @@ public class COSStream extends COSDictionary implements Closeable
     {
         if (filteredBuffer == null)
         {
-            filteredBuffer = createBuffer(true);
+            filteredBuffer = createBuffer();
         }
         else if (clear)
         {
@@ -617,7 +633,7 @@ public class COSStream extends COSDictionary implements Closeable
     {
         if (unfilteredBuffer == null)
         {
-            unfilteredBuffer = createBuffer(false);
+            unfilteredBuffer = createBuffer();
         }
         else if (clear)
         {
@@ -646,19 +662,6 @@ public class COSStream extends COSDictionary implements Closeable
         if (filteredBuffer != null)
         {
             filteredBuffer.close();
-        }
-        deleteFile(scratchFileFiltered);
-        deleteFile(scratchFileUnfiltered);
-    }
-
-    private void deleteFile(File file) throws IOException
-    {
-        if (file != null && file.exists())
-        {
-            if (!file.delete())
-            {
-                throw new IOException("Can't delete the temporary scratch file "+file.getAbsolutePath());
-            }
         }
     }
 }

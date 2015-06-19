@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.pdfbox.io.ScratchFile;
 import org.apache.pdfbox.pdfparser.PDFObjectStreamParser;
 
 /**
@@ -74,10 +75,8 @@ public class COSDocument extends COSBase implements Closeable
     private boolean closed = false;
 
     private boolean isXRefStream;
-    
-    private final File scratchDirectory;
-    
-    private final boolean useScratchFile;
+
+    private ScratchFile scratchFile;
 
     /**
      * Constructor.
@@ -102,8 +101,17 @@ public class COSDocument extends COSBase implements Closeable
      */
     public COSDocument(File scratchDir, boolean useScratchFiles)
     {
-        scratchDirectory = scratchDir;
-        useScratchFile = useScratchFiles;
+        if (useScratchFiles)
+        {
+            try 
+            {
+                scratchFile = new ScratchFile(scratchDir);
+            }
+            catch (IOException e)
+            {
+                LOG.error("Can't create temp file, using memory buffer instead", e);
+            }
+        }
     }
 
     /**
@@ -121,7 +129,7 @@ public class COSDocument extends COSBase implements Closeable
      */
     public COSStream createCOSStream()
     {
-        return new COSStream( useScratchFile, scratchDirectory);
+        return new COSStream(scratchFile);
     }
 
     /**
@@ -133,7 +141,7 @@ public class COSDocument extends COSBase implements Closeable
      */
     public COSStream createCOSStream(COSDictionary dictionary)
     {
-        return new COSStream( dictionary, useScratchFile, scratchDirectory );
+        return new COSStream( dictionary, scratchFile );
     }
 
     /**
@@ -232,6 +240,25 @@ public class COSDocument extends COSBase implements Closeable
         return retval;
     }
 
+    /**
+     * Returns the COSObjectKey for a given COS object, or null if there is none.
+     * This lookup iterates over all objects in a PDF, which may be slow for large files.
+     * 
+     * @param object COS object
+     * @return key
+     */
+    public COSObjectKey getKey(COSBase object)
+    {
+        for (Map.Entry<COSObjectKey, COSObject> entry : objectPool.entrySet())
+        {
+            if (entry.getValue().getObject() == object)
+            {
+                return entry.getKey();
+            }
+        }
+        return null;
+    }
+    
     /**
      * This will print contents to stdout.
      */
@@ -424,6 +451,11 @@ public class COSDocument extends COSBase implements Closeable
                     }
                 }
             }
+
+            if (scratchFile != null)
+            {
+                scratchFile.close();
+            }
             closed = true;
         }
     }
@@ -479,25 +511,18 @@ public class COSDocument extends COSBase implements Closeable
         {
             COSStream stream = (COSStream)objStream.getObject();
             PDFObjectStreamParser parser = new PDFObjectStreamParser(stream, this);
-            try
+            parser.parse();
+            for (COSObject next : parser.getObjects())
             {
-                parser.parse();
-                for (COSObject next : parser.getObjects())
+                COSObjectKey key = new COSObjectKey(next);
+                if (objectPool.get(key) == null || objectPool.get(key).getObject() == null
+                        // xrefTable stores negated objNr of objStream for objects in objStreams
+                        || (xrefTable.containsKey(key)
+                            && xrefTable.get(key) == -objStream.getObjectNumber()))
                 {
-                    COSObjectKey key = new COSObjectKey(next);
-                    if (objectPool.get(key) == null || objectPool.get(key).getObject() == null
-                            // xrefTable stores negated objNr of objStream for objects in objStreams
-                            || (xrefTable.containsKey(key)
-                                && xrefTable.get(key) == -objStream.getObjectNumber()))
-                    {
-                        COSObject obj = getObjectFromPool(key);
-                        obj.setObject(next.getObject());
-                    }
+                    COSObject obj = getObjectFromPool(key);
+                    obj.setObject(next.getObject());
                 }
-            }
-            finally
-            {
-                parser.close();
             }
         }
     }

@@ -17,7 +17,6 @@
 package org.apache.pdfbox.io;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -78,43 +77,43 @@ extends InputStream implements RandomAccessRead
     private long fileOffset = 0;
     private boolean isClosed;
     
-    /** 
+    /**
      * Create a random access input stream instance for the file with the given name.
      *
-     * @param the filename of the file to be read
-     * @exception if the given file can't be found
+     * @param filename the filename of the file to be read.
+     * @throws IOException if something went wrong while accessing the given file.
      */
-    public RandomAccessBufferedFileInputStream( String filename ) throws FileNotFoundException 
+    public RandomAccessBufferedFileInputStream( String filename ) throws IOException 
     {
-        File file = new File(filename);
-        raFile = new RandomAccessFile(file, "r");
-        fileLength = file.length();
+        this(new File(filename));
     }
 
     /** 
      * Create a random access input stream instance for the given file.
      *
-     * @param the file to be read
-     * @exception if the given file can't be found
+     * @param file the file to be read.
+     * @throws IOException if something went wrong while accessing the given file.
      */
-    public RandomAccessBufferedFileInputStream( File file ) throws FileNotFoundException 
+    public RandomAccessBufferedFileInputStream( File file ) throws IOException 
     {
         raFile = new RandomAccessFile(file, "r");
         fileLength = file.length();
+        seek(0);
     }
 
-    /** 
-     * Create a random access input stream for the given input stream 
-     * by copying the data to a temporary file.
-     * 
-     * @param the input stream to be read
-     * @exception if something went wrong while creating the temporary file
+    /**
+     * Create a random access input stream for the given input stream by copying the data to a
+     * temporary file.
+     *
+     * @param input the input stream to be read.
+     * @throws IOException if something went wrong while creating the temporary file.
      */
     public RandomAccessBufferedFileInputStream( InputStream input ) throws IOException 
     {
         tempFile = createTmpFile(input);
         fileLength = tempFile.length();
         raFile = new RandomAccessFile(tempFile, "r");
+        seek(0);
     }
 
     private File createTmpFile(InputStream input) throws IOException
@@ -153,8 +152,11 @@ extends InputStream implements RandomAccessRead
     }
     
     /**
-     * Seeks to new position. If new position is outside of current page the new
-     * page is either taken from cache or read from file and added to cache.
+     * Seeks to new position. If new position is outside of current page the new page is either
+     * taken from cache or read from file and added to cache.
+     *
+     * @param newOffset the position to seek to.
+     * @throws java.io.IOException if something went wrong.
      */
     @Override
     public void seek( final long newOffset ) throws IOException
