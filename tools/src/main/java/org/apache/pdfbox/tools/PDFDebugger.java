@@ -320,7 +320,7 @@ public class PDFDebugger extends javax.swing.JFrame
     {
         selectedNode = getUnderneathObject(selectedNode);
 
-        if (selectedNode instanceof COSArray)
+        if (selectedNode instanceof COSArray && ((COSArray) selectedNode).size() > 0)
         {
             COSBase arrayEntry = ((COSArray)selectedNode).get(0);
             if (arrayEntry instanceof COSName)
@@ -458,7 +458,17 @@ public class PDFDebugger extends javax.swing.JFrame
         }
         else if( selectedNode instanceof COSString )
         {
-            data = "" + ((COSString)selectedNode).getString();
+            String text = ((COSString) selectedNode).getString();
+            // display unprintable strings as hex
+            for (char c : text.toCharArray())
+            {
+                if (Character.isISOControl(c))
+                {
+                    text = "<" + ((COSString) selectedNode).toHexString() + ">";
+                    break;
+                }
+            }
+            data = "" + text;
         }
         else if( selectedNode instanceof COSStream )
         {
@@ -538,6 +548,7 @@ public class PDFDebugger extends javax.swing.JFrame
     public static void main(String[] args) throws Exception
     {
         UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        System.setProperty("apple.laf.useScreenMenuBar", "true");
         PDFDebugger viewer = new PDFDebugger();
         String filename = null;
         String password = "";
