@@ -66,6 +66,7 @@ import org.apache.pdfbox.tools.pdfdebugger.colorpane.CSDeviceN;
 import org.apache.pdfbox.tools.pdfdebugger.colorpane.CSIndexed;
 import org.apache.pdfbox.tools.pdfdebugger.colorpane.CSArrayBased;
 import org.apache.pdfbox.tools.pdfdebugger.colorpane.CSSeparation;
+import org.apache.pdfbox.tools.pdfdebugger.flagbitspane.FlagBitsPane;
 import org.apache.pdfbox.tools.pdfdebugger.pagepane.PagePane;
 import org.apache.pdfbox.tools.util.FileOpenSaveDialog;
 import org.apache.pdfbox.tools.pdfdebugger.ui.Tree;
@@ -295,6 +296,12 @@ public class PDFDebugger extends javax.swing.JFrame
                     showPage(selectedNode);
                     return;
                 }
+                if (isFlagNode(selectedNode))
+                {
+                    selectedNode = path.getParentPath().getLastPathComponent();
+                    showFlagPane(selectedNode);
+                    return;
+                }
                 if (!jSplitPane1.getRightComponent().equals(jScrollPane2))
                 {
                     jSplitPane1.setRightComponent(jScrollPane2);
@@ -364,6 +371,16 @@ public class PDFDebugger extends javax.swing.JFrame
         return false;
     }
 
+    private boolean isFlagNode(Object selectedNode)
+    {
+        if (selectedNode instanceof MapEntry)
+        {
+            Object key = ((MapEntry)selectedNode).getKey();
+            return COSName.FLAGS.equals(key);
+        }
+        return false;
+    }
+
     /**
      * Show a Panel describing color spaces in more detail and interactive way.
      * @param csNode the special color space containing node.
@@ -412,6 +429,16 @@ public class PDFDebugger extends javax.swing.JFrame
                 PagePane pagePane = new PagePane(document, page);
                 jSplitPane1.setRightComponent(new JScrollPane(pagePane.getPanel()));
             }
+        }
+    }
+
+    private void showFlagPane(Object selectedNode)
+    {
+        selectedNode = getUnderneathObject(selectedNode);
+        if (selectedNode instanceof COSDictionary)
+        {
+            FlagBitsPane flagBitsPane = new FlagBitsPane((COSDictionary) selectedNode);
+            jSplitPane1.setRightComponent(flagBitsPane.getPanel());
         }
     }
 
