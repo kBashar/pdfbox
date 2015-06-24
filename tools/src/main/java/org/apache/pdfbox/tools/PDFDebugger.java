@@ -298,8 +298,8 @@ public class PDFDebugger extends javax.swing.JFrame
                 }
                 if (isFlagNode(selectedNode))
                 {
-                    selectedNode = path.getParentPath().getLastPathComponent();
-                    showFlagPane(selectedNode);
+                    Object parentNode = path.getParentPath().getLastPathComponent();
+                    showFlagPane(parentNode, selectedNode);
                     return;
                 }
                 if (!jSplitPane1.getRightComponent().equals(jScrollPane2))
@@ -376,7 +376,7 @@ public class PDFDebugger extends javax.swing.JFrame
         if (selectedNode instanceof MapEntry)
         {
             Object key = ((MapEntry)selectedNode).getKey();
-            return COSName.FLAGS.equals(key) || COSName.F.equals(key);
+            return COSName.FLAGS.equals(key) || COSName.F.equals(key) || COSName.FF.equals(key);
         }
         return false;
     }
@@ -432,12 +432,14 @@ public class PDFDebugger extends javax.swing.JFrame
         }
     }
 
-    private void showFlagPane(Object selectedNode)
+    private void showFlagPane(Object parentNode, Object selectedNode)
     {
-        selectedNode = getUnderneathObject(selectedNode);
-        if (selectedNode instanceof COSDictionary)
+        parentNode = getUnderneathObject(parentNode);
+        if (parentNode instanceof COSDictionary)
         {
-            FlagBitsPane flagBitsPane = new FlagBitsPane((COSDictionary) selectedNode);
+            selectedNode = ((MapEntry)selectedNode).getKey();
+            selectedNode = getUnderneathObject(selectedNode);
+            FlagBitsPane flagBitsPane = new FlagBitsPane((COSDictionary) parentNode, (COSName) selectedNode);
             jSplitPane1.setRightComponent(flagBitsPane.getPanel());
         }
     }
