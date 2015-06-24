@@ -34,6 +34,7 @@ import javax.swing.JTable;
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.pdmodel.font.PDFontDescriptor;
+import org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotation;
 
 /**
  * A class that displays flag bits found in many Flags entry in PDF document's dictionaries
@@ -102,6 +103,11 @@ public class FlagBitsPane
         {
             return "Font";
         }
+        //TODO Type key is not Required field in the dictionary. So we need a better way to Identify.
+        if (dictionary.getCOSName(COSName.TYPE).equals(COSName.ANNOT))
+        {
+            return "Annot:"+dictionary.getCOSName(COSName.SUBTYPE).getName();
+        }
         return null;
     }
 
@@ -111,7 +117,28 @@ public class FlagBitsPane
         {
             return getFontFlagBits(dictionary);
         }
+        if (dictionary.getCOSName(COSName.TYPE).equals(COSName.ANNOT))
+        {
+            return getAnnotFlagBits(dictionary);
+        }
         return null;
+    }
+
+    private Object[][] getAnnotFlagBits(COSDictionary dictionary)
+    {
+        PDAnnotation annotation = new PDAnnotation(dictionary){};
+        return new Object[][]{
+                new Object[] {1, "Invisible", annotation.isInvisible()},
+                new Object[] {2,"Hidden", annotation.isHidden()},
+                new Object[] {3, "Print", annotation.isPrinted()},
+                new Object[] {4, "NoZoom", annotation.isNoZoom()},
+                new Object[] {5, "NoRotate", annotation.isNoRotate()},
+                new Object[] {6, "NoView", annotation.isNoView()},
+                new Object[] {7, "ReadOnly", annotation.isReadOnly()},
+                new Object[] {8, "Locked", annotation.isLocked()},
+                new Object[] {9, "ToggleNoView", annotation.isToggleNoView()},
+                new Object[] {10, "LockedContents", annotation.isLocked()}
+        };
     }
 
     private Object[][] getFontFlagBits(final COSDictionary dictionary)

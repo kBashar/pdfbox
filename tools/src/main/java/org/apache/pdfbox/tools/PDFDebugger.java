@@ -376,7 +376,7 @@ public class PDFDebugger extends javax.swing.JFrame
         if (selectedNode instanceof MapEntry)
         {
             Object key = ((MapEntry)selectedNode).getKey();
-            return COSName.FLAGS.equals(key);
+            return COSName.FLAGS.equals(key) || COSName.F.equals(key);
         }
         return false;
     }
