@@ -45,6 +45,11 @@ public class FlagBitsPane
     private final static String[] columnNames = {"Bit\nPosition", "Name", "Status"};
     private JPanel panel;
 
+    /**
+     * Constructor
+     * @param dictionary COSDictionary instance that contains the flag
+     * @param flagKey the flag key in the dictionary
+     */
     public FlagBitsPane(COSDictionary dictionary, COSName flagKey)
     {
         initUI(dictionary, flagKey);
@@ -112,15 +117,15 @@ public class FlagBitsPane
         {
             if (dictionary.getCOSName(COSName.FT).equals(COSName.TX))
             {
-                return "Text Field";
+                return "Text field";
             }
             else if (dictionary.getCOSName(COSName.FT).equals(COSName.BTN))
             {
-                return "Button Field";
+                return "Button field";
             }
             else if (dictionary.getCOSName(COSName.FT).equals(COSName.CH))
             {
-                return "Choice Field";
+                return "Choice field";
             }
         }
         return null;
@@ -259,12 +264,21 @@ public class FlagBitsPane
         };
     }
 
+    /**
+     * Check the corresponding flag bit if set or not
+     * @param flagValue the flag integer
+     * @param bitPosition bit position to check
+     * @return if set return true else false
+     */
     private boolean isFlagBitSet(int flagValue, int bitPosition)
     {
         int binaryFormat = 1 << (bitPosition - 1);
         return (flagValue & binaryFormat) == binaryFormat;
     }
 
+    /**
+     * @return returns the JPanel instance
+     */
     public JPanel getPanel()
     {
         return panel;
