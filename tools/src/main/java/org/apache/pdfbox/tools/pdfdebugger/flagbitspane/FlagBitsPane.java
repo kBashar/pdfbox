@@ -99,17 +99,16 @@ public class FlagBitsPane
 
     private String getFlagTypeString(final COSDictionary dictionary, final COSName flagKey)
     {
-        if (flagKey.equals(COSName.FONT_DESC))
+        if (dictionary.getCOSName(COSName.TYPE).equals(COSName.FONT_DESC) && flagKey.equals(COSName.FLAGS))
         {
             return "Font";
         }
-        //TODO Type key is not Required field in the dictionary. So we need a better way to Identify.
         else if (dictionary.getCOSName(COSName.TYPE).equals(COSName.ANNOT) && flagKey.equals(COSName.F))
         {
             return "Annot:" + dictionary.getCOSName(COSName.SUBTYPE).getName();
         }
 
-        else if (flagKey.equals(COSName.FF))
+        else if (flagKey.equals(COSName.FF) && flagKey.equals(COSName.FF))
         {
             if (dictionary.getCOSName(COSName.FT).equals(COSName.TX))
             {
@@ -129,7 +128,7 @@ public class FlagBitsPane
 
     private int getFlagValue(final COSDictionary dictionary, final COSName flagKey)
     {
-        if (flagKey.equals(COSName.FONT_DESC))
+        if (dictionary.getCOSName(COSName.TYPE).equals(COSName.FONT_DESC) && flagKey.equals(COSName.FLAGS))
         {
             return dictionary.getInt(COSName.FLAGS);
         }
