@@ -126,7 +126,7 @@ public class FieldFlag extends Flag
      * @param bitPosition bit position to check
      * @return if set return true else false
      */
-    private boolean isFlagBitSet(int flagValue, int bitPosition)
+    private Boolean isFlagBitSet(int flagValue, int bitPosition)
     {
         int binaryFormat = 1 << (bitPosition - 1);
         return (flagValue & binaryFormat) == binaryFormat;

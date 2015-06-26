@@ -17,7 +17,6 @@
 
 package org.apache.pdfbox.tools.pdfdebugger.flagbitspane;
 
-import javax.swing.JTable;
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotation;
