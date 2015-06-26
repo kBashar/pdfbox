@@ -65,6 +65,7 @@ import org.apache.pdfbox.cos.COSObject;
 import org.apache.pdfbox.cos.COSStream;
 import org.apache.pdfbox.cos.COSString;
 import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.font.PDPanose;
 import org.apache.pdfbox.tools.gui.ArrayEntry;
 import org.apache.pdfbox.tools.gui.DocumentEntry;
 import org.apache.pdfbox.tools.gui.MapEntry;
@@ -77,6 +78,7 @@ import org.apache.pdfbox.tools.pdfdebugger.colorpane.CSDeviceN;
 import org.apache.pdfbox.tools.pdfdebugger.colorpane.CSIndexed;
 import org.apache.pdfbox.tools.pdfdebugger.colorpane.CSSeparation;
 import org.apache.pdfbox.tools.pdfdebugger.flagbitspane.FlagBitsPane;
+import org.apache.pdfbox.tools.pdfdebugger.flagbitspane.FlagBitsPaneController;
 import org.apache.pdfbox.tools.pdfdebugger.pagepane.PagePane;
 import org.apache.pdfbox.tools.pdfdebugger.treestatus.TreeStatus;
 import org.apache.pdfbox.tools.pdfdebugger.treestatus.TreeStatusPane;
@@ -463,6 +465,7 @@ public class PDFDebugger extends javax.swing.JFrame
             }
             catch (Exception e)
             {
+                e.printStackTrace();
                 throw new RuntimeException(e);
             }
         }
@@ -525,7 +528,18 @@ public class PDFDebugger extends javax.swing.JFrame
         if (selectedNode instanceof MapEntry)
         {
             Object key = ((MapEntry)selectedNode).getKey();
-            return COSName.FLAGS.equals(key) || COSName.F.equals(key) || COSName.FF.equals(key);
+            return COSName.FLAGS.equals(key) || COSName.F.equals(key) || COSName.FF.equals(key)
+                    || COSName.PANOSE.equals(key);
+        }
+        return false;
+    }
+
+    private boolean isPanoseNode(Object selectedNode)
+    {
+        if (selectedNode instanceof MapEntry)
+        {
+            Object key = ((MapEntry)selectedNode).getKey();
+            return key.equals(COSName.PANOSE);
         }
         return false;
     }
@@ -594,9 +608,16 @@ public class PDFDebugger extends javax.swing.JFrame
         {
             selectedNode = ((MapEntry)selectedNode).getKey();
             selectedNode = getUnderneathObject(selectedNode);
-            FlagBitsPane flagBitsPane = new FlagBitsPane((COSDictionary) parentNode, (COSName) selectedNode);
-            jSplitPane1.setRightComponent(flagBitsPane.getPanel());
+            FlagBitsPaneController flagBitsPane = new FlagBitsPaneController
+                    ((COSDictionary) parentNode, (COSName) selectedNode);
+            jSplitPane1.setRightComponent(flagBitsPane.getPane());
         }
+    }
+
+    private void showPanoseFlags(Object selectedNode)
+    {
+        COSString panose = (COSString)getUnderneathObject(selectedNode);
+        System.out.println(panose.getBytes());
     }
 
     private Object getUnderneathObject(Object selectedNode)
