@@ -149,7 +149,7 @@ public class PDFTreeCellRenderer extends DefaultTreeCellRenderer
         {
             result = ((COSName) nodeValue).getName();
         }
-        else if (nodeValue instanceof COSNull)
+        else if (nodeValue instanceof COSNull || nodeValue == null)
         {
             result = "";
         }
@@ -252,7 +252,7 @@ public class PDFTreeCellRenderer extends DefaultTreeCellRenderer
         {
             return ICON_NAME;
         }
-        else if (nodeValue instanceof COSNull)
+        else if (nodeValue instanceof COSNull || nodeValue == null)
         {
             return ICON_NULL;
         }
@@ -290,14 +290,14 @@ public class PDFTreeCellRenderer extends DefaultTreeCellRenderer
         private final ImageIcon base;
         private final List<ImageIcon> overlays;
 
-        public OverlayIcon(ImageIcon base)
+        OverlayIcon(ImageIcon base)
         {
             super(base.getImage());
             this.base = base;
             this.overlays = new ArrayList<ImageIcon>();
         }
 
-        public void add(ImageIcon overlay)
+        void add(ImageIcon overlay)
         {
             overlays.add(overlay);
         }

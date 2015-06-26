@@ -14,27 +14,41 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.fontbox.encoding;
 
-import java.util.Map;
+package org.apache.pdfbox.pdmodel.font;
+
+import java.util.Arrays;
 
 /**
- * A font-specific encoding.
+ * Represents the "Panose" entry of a FontDescriptor's Style dictionary. This is a sequence of 12
+ * bytes which contain both the TTF sFamilyClass and PANOSE classification bytes. 
  *
  * @author John Hewson
  */
-public class CustomEncoding extends Encoding
+public class PDPanose
 {
-    /**
-     * Constructor.
-     * 
-     * @param codeToName the given code to name mapping
-     */
-    public CustomEncoding(Map<Integer, String> codeToName)
+    private final byte[] bytes;
+
+    PDPanose(byte[] bytes)
     {
-        for (Map.Entry<Integer, String> entry : codeToName.entrySet())
-        {
-            addCharacterEncoding(entry.getKey(), entry.getValue());
-        }
+        this.bytes = bytes;
+    }
+
+    /**
+     * The font family class and subclass ID bytes, given in the sFamilyClass field of the
+     * “OS/2” table in a TrueType font.
+     */
+    public int getFamilyClass()
+    {
+        return bytes[0] << 8 | bytes[1]; 
+    }
+
+    /**
+     * Ten bytes for the PANOSE classification number for the font.
+     */
+    public PDPanoseClassification getPanose()
+    {
+        byte[] panose = Arrays.copyOfRange(bytes, 2, 12);
+        return new PDPanoseClassification(panose);
     }
 }
