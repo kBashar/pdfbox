@@ -17,8 +17,6 @@
 
 package org.apache.pdfbox.tools.pdfdebugger.flagbitspane;
 
-import javax.swing.JTable;
-
 /**
  * @author Khyrul Bashar
  *

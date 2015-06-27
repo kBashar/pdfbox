@@ -31,7 +31,7 @@ public class PanoseFlag extends Flag
 {
 
     final private byte[] bytes;
-    private COSString byteValue;
+    private final COSString byteValue;
 
     /**
      * Constructor.
@@ -255,7 +255,7 @@ public class PanoseFlag extends Flag
         }[index];
     }
 
-    public byte[] getPanoseBytes(COSDictionary style)
+    final public byte[] getPanoseBytes(COSDictionary style)
     {
         if (style != null)
         {

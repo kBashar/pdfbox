@@ -18,6 +18,7 @@
 package org.apache.pdfbox.io;
 
 import java.io.IOException;
+import java.nio.Buffer;
 import java.util.Vector;
 
 import junit.framework.TestCase;
@@ -287,15 +288,20 @@ public class TestRandomAccessBuffer extends TestCase
     public void testSequenceRandomAccessRead() throws IOException
     {
         RandomAccessBuffer buffer1 = new RandomAccessBuffer();
-        buffer1.write(new byte[] {1,2,3});
+        buffer1.write(new byte[] {0,1,2,3});
         RandomAccessBuffer buffer2 = new RandomAccessBuffer();
-        buffer2.write(new byte[] {4,5,6,7});
+        buffer2.write(new byte[] {4});
         RandomAccessBuffer buffer3 = new RandomAccessBuffer();
-        buffer3.write(new byte[] {8,9,10,11,12});
+        buffer3.write(new byte[] {5,6,7});
+        RandomAccessBuffer buffer4 = new RandomAccessBuffer();
+        buffer4.write(new byte[] {8,9,10,11,12});
+        RandomAccessBuffer bufferEmpty = new RandomAccessBuffer();
         Vector<RandomAccessRead> buffers = new Vector<RandomAccessRead>();
         buffers.add(buffer1);
+        buffers.add(bufferEmpty);
         buffers.add(buffer2);
         buffers.add(buffer3);
+        buffers.add(buffer4);
         // read the whole buffer
         SequenceRandomAccessRead sequenceBuffer = new SequenceRandomAccessRead(buffers);
         int byteRead = -1;
@@ -308,8 +314,10 @@ public class TestRandomAccessBuffer extends TestCase
         sequenceBuffer.close();
         buffers = new Vector<RandomAccessRead>();
         buffers.add(buffer1);
+        buffers.add(bufferEmpty);
         buffers.add(buffer2);
         buffers.add(buffer3);
+        buffers.add(buffer4);
         // read parts of the buffer
         sequenceBuffer = new SequenceRandomAccessRead(buffers);
         sequenceBuffer.seek(2);
@@ -320,17 +328,31 @@ public class TestRandomAccessBuffer extends TestCase
         {
             sum += element;
         }
-        assertEquals(18, sum);
+        assertEquals(14, sum);
         // seek beyond EOF
         sequenceBuffer.seek(sequenceBuffer.length()+1);
         // check isEOF
         assertTrue(sequenceBuffer.isEOF());
         // check read
         assertEquals(-1, sequenceBuffer.read());
+
+        // test some read/rewind stuff
+        sequenceBuffer.seek(3);
+        assertEquals(3, sequenceBuffer.read());
+        assertEquals(4, sequenceBuffer.read());
+        sequenceBuffer.rewind(1);
+        assertEquals(4, sequenceBuffer.read());
+        assertEquals(5, sequenceBuffer.read());
+        sequenceBuffer.rewind(1);
+        assertEquals(5, sequenceBuffer.read());
+        
+        // close
         sequenceBuffer.close();
         buffer1.close();
         buffer2.close();
         buffer3.close();
+        buffer4.close();
+        bufferEmpty.close();
     }
     
     public void testPDFBOX1490() throws Exception
