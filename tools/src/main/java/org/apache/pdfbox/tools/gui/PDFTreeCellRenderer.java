@@ -54,6 +54,8 @@ public class PDFTreeCellRenderer extends DefaultTreeCellRenderer
     private static final ImageIcon ICON_REAL = new ImageIcon(getImageUrl("real"));
     private static final ImageIcon ICON_STREAM_DICT = new ImageIcon(getImageUrl("stream-dict"));
     private static final ImageIcon ICON_STRING = new ImageIcon(getImageUrl("string"));
+    private static final ImageIcon ICON_PDF = new ImageIcon(getImageUrl("pdf"));
+    private static final ImageIcon ICON_PAGE = new ImageIcon(getImageUrl("page"));
 
     private static URL getImageUrl(String name)
     {
@@ -147,7 +149,7 @@ public class PDFTreeCellRenderer extends DefaultTreeCellRenderer
         {
             result = ((COSName) nodeValue).getName();
         }
-        else if (nodeValue instanceof COSNull)
+        else if (nodeValue instanceof COSNull || nodeValue == null)
         {
             result = "";
         }
@@ -167,6 +169,10 @@ public class PDFTreeCellRenderer extends DefaultTreeCellRenderer
         {
             COSArray array = (COSArray) nodeValue;
             result = "(" + array.size() + ")";
+        }
+        else if (nodeValue instanceof DocumentEntry)
+        {
+            result = nodeValue.toString();
         }
         return result;
     }
@@ -246,7 +252,7 @@ public class PDFTreeCellRenderer extends DefaultTreeCellRenderer
         {
             return ICON_NAME;
         }
-        else if (nodeValue instanceof COSNull)
+        else if (nodeValue instanceof COSNull || nodeValue == null)
         {
             return ICON_NULL;
         }
@@ -262,6 +268,14 @@ public class PDFTreeCellRenderer extends DefaultTreeCellRenderer
         {
             return ICON_ARRAY;
         }
+        else if (nodeValue instanceof DocumentEntry)
+        {
+            return ICON_PDF;
+        }
+        else if (nodeValue instanceof PageEntry)
+        {
+            return ICON_PAGE;
+        }
         else
         {
             return null;
@@ -276,14 +290,14 @@ public class PDFTreeCellRenderer extends DefaultTreeCellRenderer
         private final ImageIcon base;
         private final List<ImageIcon> overlays;
 
-        public OverlayIcon(ImageIcon base)
+        OverlayIcon(ImageIcon base)
         {
             super(base.getImage());
             this.base = base;
             this.overlays = new ArrayList<ImageIcon>();
         }
 
-        public void add(ImageIcon overlay)
+        void add(ImageIcon overlay)
         {
             overlays.add(overlay);
         }
