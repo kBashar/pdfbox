@@ -23,11 +23,17 @@ import org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotation;
 
 /**
  * @author Khyrul Bashar
+ *
+ * A class that provides Annotation flag bits.
  */
-public class AnnotFlag extends Flag
+class AnnotFlag extends Flag
 {
     private final COSDictionary annotDictionary;
 
+    /**
+     * Constructor
+     * @param annotDictionary COSDictionary instance
+     */
     AnnotFlag(COSDictionary annotDictionary)
     {
         this.annotDictionary = annotDictionary;

@@ -23,13 +23,20 @@ import org.apache.pdfbox.cos.COSName;
 
 /**
  * @author Khyrul Bashar
+ *
+ * A class that displays flag bits in a table in detail.
  */
-public class FlagBitsPaneController
+public class FlagBitsPane
 {
     private Flag flag;
     private FlagBitsPaneView view;
 
-    public FlagBitsPaneController(final COSDictionary dictionary, COSName flagType)
+    /**
+     * Constructor.
+     * @param dictionary COSDictionary instance.
+     * @param flagType COSName instance.
+     */
+    public FlagBitsPane(final COSDictionary dictionary, COSName flagType)
     {
         createPane(dictionary, flagType);
     }
@@ -69,6 +76,10 @@ public class FlagBitsPaneController
         }
     }
 
+    /**
+     * Returns the Pane itself
+     * @return JPanel instance
+     */
     public JPanel getPane()
     {
         return view.getPanel();

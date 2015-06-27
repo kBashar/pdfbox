@@ -25,6 +25,7 @@ import org.apache.pdfbox.pdmodel.font.PDPanoseClassification;
 
 /**
  * @author Khyrul Bashar
+ * A class that provide Panose classification data
  */
 public class PanoseFlag extends Flag
 {
@@ -32,6 +33,10 @@ public class PanoseFlag extends Flag
     final private byte[] bytes;
     private COSString byteValue;
 
+    /**
+     * Constructor.
+     * @param dictionary COSDictionary instance. style dictionary that contains panose object.
+     */
     public PanoseFlag(COSDictionary dictionary)
     {
         byteValue = (COSString)dictionary.getDictionaryObject(COSName.PANOSE);

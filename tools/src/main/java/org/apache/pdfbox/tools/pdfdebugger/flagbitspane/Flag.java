@@ -21,6 +21,8 @@ import javax.swing.JTable;
 
 /**
  * @author Khyrul Bashar
+ *
+ * An abstract class that provides Flag bits.
  */
 abstract class Flag
 {

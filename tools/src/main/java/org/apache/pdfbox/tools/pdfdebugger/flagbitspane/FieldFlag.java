@@ -22,12 +22,17 @@ import org.apache.pdfbox.cos.COSName;
 
 /**
  * @author Khyrul Bashar
+ * A class that provides field flag bits.
  */
-public class FieldFlag extends Flag
+class FieldFlag extends Flag
 {
     final COSDictionary dictionary;
 
-    public FieldFlag(COSDictionary dictionary)
+    /**
+     * Constructor
+     * @param dictionary COSDictionary instance
+     */
+    FieldFlag(COSDictionary dictionary)
     {
         this.dictionary = dictionary;
     }

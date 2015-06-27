@@ -23,11 +23,17 @@ import org.apache.pdfbox.pdmodel.font.PDFontDescriptor;
 
 /**
  * @author Khyrul Bashar
+ *
+ * A class that provides Font flag bits.
  */
 public class FontFlag extends Flag
 {
     private final COSDictionary fontDescriptor;
 
+    /**
+     * Constructor
+     * @param fontDescDictionary COSDictionary instance.
+     */
     FontFlag(COSDictionary fontDescDictionary)
     {
         fontDescriptor = fontDescDictionary;

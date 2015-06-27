@@ -30,6 +30,8 @@ import javax.swing.JTable;
 
 /**
  * @author Khyrul Bashar
+ *
+ * A class that create the necessary UI for showing Flag bits.
  */
 class FlagBitsPaneView
 {
@@ -39,6 +41,13 @@ class FlagBitsPaneView
     private Object[][] tableData;
     private String[] columnNames;
 
+    /**
+     * Constructor
+     * @param flagHeader String instance. Flag type.
+     * @param flagValue String instance. Flag integer value.
+     * @param tableRowData Object 2d array for table row data.
+     * @param columnNames String array for column names.
+     */
     FlagBitsPaneView(String flagHeader, String flagValue, Object[][] tableRowData, String[] columnNames)
     {
         this.flagHeader = flagHeader;
@@ -94,7 +103,11 @@ class FlagBitsPaneView
         panel.add(box, gbc);
     }
 
-    public JPanel getPanel()
+    /**
+     * Returns the view.
+     * @return JPanel instance.
+     */
+    JPanel getPanel()
     {
         return panel;
     }

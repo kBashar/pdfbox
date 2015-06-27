@@ -76,7 +76,7 @@ import org.apache.pdfbox.tools.pdfdebugger.colorpane.CSArrayBased;
 import org.apache.pdfbox.tools.pdfdebugger.colorpane.CSDeviceN;
 import org.apache.pdfbox.tools.pdfdebugger.colorpane.CSIndexed;
 import org.apache.pdfbox.tools.pdfdebugger.colorpane.CSSeparation;
-import org.apache.pdfbox.tools.pdfdebugger.flagbitspane.FlagBitsPaneController;
+import org.apache.pdfbox.tools.pdfdebugger.flagbitspane.FlagBitsPane;
 import org.apache.pdfbox.tools.pdfdebugger.pagepane.PagePane;
 import org.apache.pdfbox.tools.pdfdebugger.treestatus.TreeStatus;
 import org.apache.pdfbox.tools.pdfdebugger.treestatus.TreeStatusPane;
@@ -606,8 +606,7 @@ public class PDFDebugger extends javax.swing.JFrame
         {
             selectedNode = ((MapEntry)selectedNode).getKey();
             selectedNode = getUnderneathObject(selectedNode);
-            FlagBitsPaneController flagBitsPane = new FlagBitsPaneController
-                    ((COSDictionary) parentNode, (COSName) selectedNode);
+            FlagBitsPane flagBitsPane = new FlagBitsPane((COSDictionary) parentNode, (COSName) selectedNode);
             jSplitPane1.setRightComponent(flagBitsPane.getPane());
         }
     }
