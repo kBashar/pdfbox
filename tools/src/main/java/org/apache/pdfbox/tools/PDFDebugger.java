@@ -78,6 +78,7 @@ import org.apache.pdfbox.tools.pdfdebugger.colorpane.CSIndexed;
 import org.apache.pdfbox.tools.pdfdebugger.colorpane.CSSeparation;
 import org.apache.pdfbox.tools.pdfdebugger.flagbitspane.FlagBitsPane;
 import org.apache.pdfbox.tools.pdfdebugger.pagepane.PagePane;
+import org.apache.pdfbox.tools.pdfdebugger.streampane.StreamPane;
 import org.apache.pdfbox.tools.pdfdebugger.treestatus.TreeStatus;
 import org.apache.pdfbox.tools.pdfdebugger.treestatus.TreeStatusPane;
 import org.apache.pdfbox.tools.pdfdebugger.ui.Tree;
@@ -447,6 +448,11 @@ public class PDFDebugger extends javax.swing.JFrame
                     showFlagPane(parentNode, selectedNode);
                     return;
                 }
+                if (isStream(selectedNode))
+                {
+                    showStream(selectedNode, path);
+                    return;
+                }
                 if (!jSplitPane1.getRightComponent().equals(jScrollPane2))
                 {
                     jSplitPane1.setRightComponent(jScrollPane2);
@@ -468,6 +474,16 @@ public class PDFDebugger extends javax.swing.JFrame
             }
         }
     }//GEN-LAST:event_jTree1ValueChanged
+
+    private boolean isStream(Object selectedNode)
+    {
+        selectedNode = getUnderneathObject(selectedNode);
+        if (selectedNode instanceof COSStream)
+        {
+            return true;
+        }
+        return false;
+    }
 
     private boolean isSpecialColorSpace(Object selectedNode)
     {
@@ -599,6 +615,35 @@ public class PDFDebugger extends javax.swing.JFrame
             FlagBitsPane flagBitsPane = new FlagBitsPane((COSDictionary) parentNode, (COSName) selectedNode);
             jSplitPane1.setRightComponent(flagBitsPane.getPane());
         }
+    }
+
+    private void showStream(Object selectedNode, TreePath path)
+    {
+        selectedNode = getUnderneathObject(selectedNode);
+        if (selectedNode instanceof COSStream)
+        {
+            StreamPane streamPane = new StreamPane((COSStream)selectedNode, getPageForObject(path));
+            jSplitPane1.setRightComponent(streamPane.getPanel());
+        }
+    }
+
+    private COSDictionary getPageForObject(TreePath path)
+    {
+        while (path.getParentPath() != null)
+        {
+            Object node = path.getLastPathComponent();
+            if (node instanceof ArrayEntry)
+            {
+                node = getUnderneathObject(node);
+                if (node instanceof COSDictionary)
+                {
+                    ((COSDictionary)node).getCOSName(COSName.TYPE).equals(COSName.PAGE);
+                    return (COSDictionary)node;
+                }
+            }
+            path = path.getParentPath();
+        }
+        return null;
     }
 
     private Object getUnderneathObject(Object selectedNode)
@@ -738,7 +783,7 @@ public class PDFDebugger extends javax.swing.JFrame
         System.setProperty("apple.laf.useScreenMenuBar", "true");
 
         // handle uncaught exceptions
-        Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler()
+        /*Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler()
         {
             @Override
             public void uncaughtException(Thread thread, Throwable throwable)
@@ -753,7 +798,7 @@ public class PDFDebugger extends javax.swing.JFrame
                 JOptionPane.showMessageDialog(null, "Error: " + sb.toString(),"Error",
                         JOptionPane.ERROR_MESSAGE);
             }
-        });
+        });*/
         
         final PDFDebugger viewer = new PDFDebugger();
 
