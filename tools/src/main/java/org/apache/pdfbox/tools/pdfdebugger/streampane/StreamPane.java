@@ -63,17 +63,20 @@ public class StreamPane implements ActionListener
     private PDResources resources;
     private boolean isContentStream = false;
 
-    public StreamPane(COSStream cosStream, COSName streamKey)
+    public StreamPane(COSStream cosStream, COSName streamKey, COSDictionary resourcesDic)
     {
         if (COSName.CONTENTS.equals(streamKey))
         {
             isContentStream = true;
         }
         this.stream = new Stream(cosStream);
+        if (resourcesDic != null)
+        {
+            resources = new PDResources(resourcesDic);
+        }
 
         currentFilter = Stream.UNFILTERED;
         view = new StreamPaneView(stream.isImage(), stream.getFilterList(), currentFilter, this);
-
         requestStreamText(currentFilter);
     }
 
