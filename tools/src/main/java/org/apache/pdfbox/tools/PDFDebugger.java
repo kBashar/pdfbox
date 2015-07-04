@@ -450,7 +450,7 @@ public class PDFDebugger extends javax.swing.JFrame
                 }
                 if (isStream(selectedNode))
                 {
-                    showStream(selectedNode);
+                    showStream(selectedNode, path);
                     return;
                 }
                 if (!jSplitPane1.getRightComponent().equals(jScrollPane2))
@@ -617,15 +617,25 @@ public class PDFDebugger extends javax.swing.JFrame
         }
     }
 
-    private void showStream(Object selectedNode)
+    private void showStream(Object selectedNode, TreePath path)
     {
         COSName key = getNodeKey(selectedNode);
         selectedNode = getUnderneathObject(selectedNode);
-        if (selectedNode instanceof COSStream)
+        COSDictionary resourcesDic = null;
+        if (selectedNode instanceof COSStream && COSName.CONTENTS.equals(key))
         {
-            StreamPane streamPane = new StreamPane((COSStream)selectedNode, key);
-            jSplitPane1.setRightComponent(streamPane.getPanel());
+            Object pageObj = path.getParentPath().getLastPathComponent();
+            COSDictionary page = (COSDictionary) getUnderneathObject(pageObj);
+            resourcesDic = (COSDictionary) page.getDictionaryObject(COSName.RESOURCES);
         }
+        else if (selectedNode instanceof COSStream &&
+                COSName.IMAGE.equals(((COSStream) selectedNode).getCOSName(COSName.SUBTYPE)))
+        {
+            Object resourcesObj = path.getParentPath().getParentPath().getLastPathComponent();
+            resourcesDic = (COSDictionary) getUnderneathObject(resourcesObj);
+        }
+        StreamPane streamPane = new StreamPane((COSStream)selectedNode, key, resourcesDic);
+        jSplitPane1.setRightComponent(streamPane.getPanel());
     }
 
     private COSName getNodeKey(Object selectedNode)
