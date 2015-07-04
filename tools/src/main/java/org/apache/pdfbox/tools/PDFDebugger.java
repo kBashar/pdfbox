@@ -450,7 +450,7 @@ public class PDFDebugger extends javax.swing.JFrame
                 }
                 if (isStream(selectedNode))
                 {
-                    showStream(selectedNode, path);
+                    showStream(selectedNode);
                     return;
                 }
                 if (!jSplitPane1.getRightComponent().equals(jScrollPane2))
@@ -617,14 +617,24 @@ public class PDFDebugger extends javax.swing.JFrame
         }
     }
 
-    private void showStream(Object selectedNode, TreePath path)
+    private void showStream(Object selectedNode)
     {
+        COSName key = getNodeKey(selectedNode);
         selectedNode = getUnderneathObject(selectedNode);
         if (selectedNode instanceof COSStream)
         {
-            StreamPane streamPane = new StreamPane((COSStream)selectedNode, getPageForObject(path));
+            StreamPane streamPane = new StreamPane((COSStream)selectedNode, key);
             jSplitPane1.setRightComponent(streamPane.getPanel());
         }
+    }
+
+    private COSName getNodeKey(Object selectedNode)
+    {
+        if (selectedNode instanceof MapEntry)
+        {
+            return ((MapEntry) selectedNode).getKey();
+        }
+        return null;
     }
 
     private COSDictionary getPageForObject(TreePath path)

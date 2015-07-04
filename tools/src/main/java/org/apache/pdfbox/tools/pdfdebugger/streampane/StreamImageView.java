@@ -31,7 +31,7 @@ import javax.swing.JTextPane;
 public class StreamImageView
 {
     private final BufferedImage image;
-    private JLabel imageLabel;
+    private JScrollPane scrollPane;
 
     public StreamImageView(BufferedImage image)
     {
@@ -41,11 +41,14 @@ public class StreamImageView
 
     private void initUI()
     {
-        imageLabel = new JLabel(new ImageIcon(image));
+        scrollPane = new JScrollPane();
+        JLabel imageLabel = new JLabel(new ImageIcon(image));
+        scrollPane.setViewportView(imageLabel);
+        scrollPane.setPreferredSize(new Dimension(300, 400));
     }
 
     JComponent getView()
     {
-        return imageLabel;
+        return scrollPane;
     }
 }

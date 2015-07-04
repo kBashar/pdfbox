@@ -80,12 +80,11 @@ public class Stream
     {
         try
         {
-            if (key.equals(UNFILTERED))
+            if (UNFILTERED.equals(key))
             {
-
                 return stream.getUnfilteredStream();
             }
-            else if (key.equals(FILTERED))
+            else if (FILTERED.equals(key))
             {
                 return stream.getFilteredStream();
             }

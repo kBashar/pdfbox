@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.StringTokenizer;
 import java.util.concurrent.ExecutionException;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
@@ -37,10 +38,16 @@ import javax.swing.SwingWorker;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.StyledDocument;
+import org.apache.pdfbox.contentstream.operator.Operator;
+import org.apache.pdfbox.cos.COSArray;
+import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.COSStream;
+import org.apache.pdfbox.cos.COSString;
 import org.apache.pdfbox.io.IOUtils;
+import org.apache.pdfbox.io.RandomAccessBuffer;
+import org.apache.pdfbox.pdfparser.PDFStreamParser;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDResources;
 import org.apache.pdfbox.tools.util.FileOpenSaveDialog;
@@ -54,11 +61,15 @@ public class StreamPane implements ActionListener
     private Stream stream;
     private String currentFilter;
     private PDResources resources;
+    private boolean isContentStream = false;
 
-    public StreamPane(COSStream cosStream, COSDictionary pageForObject)
+    public StreamPane(COSStream cosStream, COSName streamKey)
     {
+        if (COSName.CONTENTS.equals(streamKey))
+        {
+            isContentStream = true;
+        }
         this.stream = new Stream(cosStream);
-        this.resources = new PDPage(pageForObject).getResources();
 
         currentFilter = Stream.UNFILTERED;
         view = new StreamPaneView(stream.isImage(), stream.getFilterList(), currentFilter, this);
@@ -76,11 +87,7 @@ public class StreamPane implements ActionListener
     {
         String actionCommand = actionEvent.getActionCommand();
 
-        if (actionCommand.equals("Save"))
-        {
-            saveRequested();
-        }
-        else if (actionCommand.equals("Image"))
+        if (actionCommand.equals("Image"))
         {
             requestImageShowing();
         }
@@ -92,25 +99,11 @@ public class StreamPane implements ActionListener
         }
     }
 
-    private void saveRequested()
-    {
-        FileOpenSaveDialog saveDialog = new FileOpenSaveDialog(view, null);
-            try
-            {
-                InputStream currentInputStream = stream.getStream(currentFilter);
-                saveDialog.saveFile(IOUtils.toByteArray(currentInputStream));
-            }
-            catch (IOException e)
-            {
-                e.printStackTrace();
-            }
-    }
-
     private void requestImageShowing()
     {
         if (stream.isImage() && resources != null)
         {
-           view.showStreamImage(stream.getImage(resources));
+            view.showStreamImage(stream.getImage(resources));
         }
     }
 
@@ -122,18 +115,25 @@ public class StreamPane implements ActionListener
     private class DocumentCreator extends SwingWorker<StyledDocument, Integer>
     {
 
-        private final InputStream inputStream;
+        private InputStream inputStream;
+        private final String filterKey;
 
         private DocumentCreator(String filterKey)
         {
-            this.inputStream = stream.getStream(filterKey);;
+            this.filterKey = filterKey;
+            this.inputStream = stream.getStream(filterKey);
+            ;
         }
 
         @Override
         protected StyledDocument doInBackground() throws Exception
         {
-            String data = getStringOfStream(inputStream);
-            return getDocument(data);
+            if (isContentStream && Stream.UNFILTERED.equals(filterKey))
+            {
+                return getContentStreamDocument(inputStream);
+            }
+
+            return getDocument(inputStream);
         }
 
         @Override
@@ -160,9 +160,9 @@ public class StreamPane implements ActionListener
             int amountRead;
             try
             {
-                while( (amountRead = ioStream.read( buffer, 0, buffer.length ) ) != -1 )
+                while ((amountRead = ioStream.read(buffer, 0, buffer.length)) != -1)
                 {
-                    byteArray.write( buffer, 0, amountRead );
+                    byteArray.write(buffer, 0, amountRead);
                 }
             }
             catch (IOException e)
@@ -173,19 +173,87 @@ public class StreamPane implements ActionListener
         }
 
 
-        private StyledDocument getDocument(String data)
+        private StyledDocument getDocument(InputStream inputStream)
         {
+            String data = getStringOfStream(inputStream);
             StyledDocument document = new DefaultStyledDocument();
             try
             {
                 document.insertString(0, data, null);
-                return document;
             }
             catch (BadLocationException e)
             {
                 e.printStackTrace();
             }
-            return null;
+            return document;
+        }
+
+        private StyledDocument getContentStreamDocument(InputStream inputStream)
+        {
+            StyledDocument docu = new DefaultStyledDocument();
+
+            PDFStreamParser parser = null;
+            try
+            {
+                parser = new PDFStreamParser(new RandomAccessBuffer(inputStream));
+                parser.parse();
+                for (Object obj : parser.getTokens())
+                {
+                    if (obj instanceof Operator)
+                    {
+                        docu.insertString(docu.getLength(), ((Operator) obj).getName() + "\n", null);
+                    }
+                    else
+                    {
+                        String str = "";
+                        if (obj instanceof COSName)
+                        {
+                            str = "/" + ((COSName) obj).getName();
+                        }
+                        else if (obj instanceof COSArray)
+                        {
+                            StringBuilder builder = new StringBuilder("[ ");
+                            for (COSBase base : (COSArray) obj)
+                            {
+                                builder.append(getCOSVlaue(base));
+                                builder.append(", ");
+                            }
+                            if (((COSArray) obj).size() > 0)
+                            {
+                                builder.delete(builder.lastIndexOf(","), builder.length());
+                            }
+                            builder.append("]");
+                            str = builder.toString();
+                        }
+                        else
+                        {
+                            str = getCOSVlaue(obj);
+                        }
+                        docu.insertString(docu.getLength(), str+"  ", null);
+                    }
+                }
+            }
+            catch (IOException e)
+            {
+                e.printStackTrace();
+            }
+            catch (BadLocationException e1)
+            {
+                e1.printStackTrace();
+            }
+            return docu;
+        }
+
+        private String getCOSVlaue(Object obj)
+        {
+            String str = obj.toString();
+            str = str.substring(str.indexOf("{")+1, str.length()-1);
+            if (obj instanceof COSString)
+            {
+                str = "("+str+")";
+            }
+            return str;
+        }
+
         }
     }
-}
