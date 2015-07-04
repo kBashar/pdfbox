@@ -28,12 +28,18 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
+import javax.print.Doc;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 import javax.swing.border.BevelBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Document;
 import javax.swing.text.StyledDocument;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 
@@ -44,10 +50,13 @@ class StreamPaneView extends JPanel
 {
     private JPanel headerPanel;
     private JPanel contentPanel;
+    private StreamTextView textView;
 
     StreamPaneView(boolean isImage, String[] filterTypes, String i, ActionListener listener)
     {
-        headerPanel = createHeaderPanel(isImage, filterTypes, i, listener);
+        textView = new StreamTextView();
+
+        headerPanel = createHeaderPanel(filterTypes, i, listener);
         contentPanel = new JPanel(new BorderLayout());
         initUI();
     }
@@ -55,7 +64,9 @@ class StreamPaneView extends JPanel
     void showStreamText(StyledDocument document)
     {
         contentPanel.removeAll();
-        contentPanel.add(new StreamTextView(document).getView(), BorderLayout.CENTER);
+
+        textView.setDocument(document);
+        contentPanel.add(textView.getView(), BorderLayout.CENTER);
 
         this.validate();
     }
@@ -68,27 +79,55 @@ class StreamPaneView extends JPanel
         this.validate();
     }
 
-    private JPanel createHeaderPanel(boolean isImage, String[] availableFilters, String i, ActionListener listener)
+    private JPanel createHeaderPanel(String[] availableFilters, String i, ActionListener actionListener)
     {
-        JButton save = new JButton("Save");
         JComboBox filters = new JComboBox<String>(availableFilters);
         filters.setSelectedItem(i);
 
-        save.addActionListener(listener);
-        filters.addActionListener(listener);
+        filters.addActionListener(actionListener);
 
-        JPanel headerPanel = new JPanel(new FlowLayout());
-        headerPanel.add(save);
-        headerPanel.add(filters);
+        JTextField searchField = new JTextField("Search");
+        searchField.setPreferredSize(new Dimension(200, 30));
+        searchField.addActionListener(textView);
 
-        if (isImage)
+        searchField.getDocument().addDocumentListener(new DocumentListener()
         {
-            JButton image = new JButton("Image");
-            image.addActionListener(listener);
-            headerPanel.add(image);
-        }
+            @Override
+            public void insertUpdate(DocumentEvent documentEvent)
+            {
+                search(documentEvent);
+            }
 
-        return headerPanel;
+            @Override
+            public void removeUpdate(DocumentEvent documentEvent)
+            {
+                search(documentEvent);
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent documentEvent)
+            {
+                search(documentEvent);
+            }
+            private void search(DocumentEvent documentEvent)
+            {
+                try
+                {
+                    String searchKey = documentEvent.getDocument().getText(0, documentEvent.getDocument().getLength());
+                    textView.searchInText(searchKey);
+                }
+                catch (BadLocationException e)
+                {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        JPanel panel = new JPanel(new FlowLayout());
+        panel.add(searchField);
+        panel.add(filters);
+
+        return panel;
     }
 
     public JPanel getStreamPanel()

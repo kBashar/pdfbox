@@ -17,33 +17,15 @@
 
 package org.apache.pdfbox.tools.pdfdebugger.streampane;
 
-import java.awt.FlowLayout;
-import java.awt.event.ActionListener;
-import java.util.EventListener;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JPanel;
-import javax.swing.JToggleButton;
-
 /**
  * @author Khyrul Bashar
  */
-class HeaderPanel extends JPanel
+public class Test
 {
-    private JButton save;
-    private JButton image;
-    private JButton unfiltered;
-    private JComboBox<String> filters;
-
-    HeaderPanel(boolean isImage, String[] availableFilters,ActionListener listener)
+    public static void main(String[] args)
     {
-        //initUI(isImage, availableFilters, listener);
-    }
+        String str = "lots of faltu code";
 
-
-
-    public JPanel getPanel()
-    {
-        return this;
+        System.out.println(str.indexOf("lots"));
     }
 }

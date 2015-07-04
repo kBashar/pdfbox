@@ -17,35 +17,63 @@
 
 package org.apache.pdfbox.tools.pdfdebugger.streampane;
 
+import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import javax.swing.Action;
 import javax.swing.JComponent;
 import javax.swing.JScrollPane;
+import javax.swing.JTextField;
 import javax.swing.JTextPane;
+import javax.swing.text.DefaultHighlighter;
+import javax.swing.text.Highlighter;
+import javax.swing.text.JTextComponent;
 import javax.swing.text.StyledDocument;
 
 /**
  * @author Khyrul Bashar
  */
-class StreamTextView
+class StreamTextView implements ActionListener
 {
-    private final StyledDocument document;
     private JScrollPane scrollPane;
+    private StreamTextSearcher searcher;
+    JTextComponent textComponent;
 
-    StreamTextView(StyledDocument document)
+    StreamTextView()
     {
-        this.document = document;
         initUI();
     }
 
     private void initUI()
     {
-        JTextPane textPane = new JTextPane(document);
-        scrollPane = new JScrollPane(textPane);
+        textComponent = new JTextPane();
+        searcher = new StreamTextSearcher(textComponent);
+        scrollPane = new JScrollPane(textComponent);
         scrollPane.setPreferredSize(new Dimension(300, 400));
+    }
+
+    public void setDocument(StyledDocument document)
+    {
+        textComponent.setDocument(document);
     }
 
     JComponent getView()
     {
         return scrollPane ;
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent actionEvent)
+    {
+        if (actionEvent.getSource() instanceof JTextField)
+        {
+            searchInText(((JTextField) actionEvent.getSource()).getText());
+        }
+    }
+
+    public void searchInText(String searchWord)
+    {
+        searcher.search(searchWord);
     }
 }
