@@ -42,6 +42,7 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.StyledDocument;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
+import org.apache.pdfbox.tools.pdfdebugger.ui.textsearcher.Searcher;
 
 /**
  * @author Khyrul Bashar
@@ -51,10 +52,12 @@ class StreamPaneView extends JPanel
     private JPanel headerPanel;
     private JPanel contentPanel;
     private StreamTextView textView;
+    private Searcher searcher;
 
     StreamPaneView(boolean isImage, String[] filterTypes, String i, ActionListener listener)
     {
         textView = new StreamTextView();
+        searcher = new Searcher();
 
         headerPanel = createHeaderPanel(filterTypes, i, listener);
         contentPanel = new JPanel(new BorderLayout());
@@ -66,6 +69,7 @@ class StreamPaneView extends JPanel
         contentPanel.removeAll();
 
         textView.setDocument(document);
+        searcher.setTextComponent(textView.textComponent);
         contentPanel.add(textView.getView(), BorderLayout.CENTER);
 
         this.validate();
@@ -83,48 +87,10 @@ class StreamPaneView extends JPanel
     {
         JComboBox filters = new JComboBox<String>(availableFilters);
         filters.setSelectedItem(i);
-
         filters.addActionListener(actionListener);
 
-        JTextField searchField = new JTextField("Search");
-        searchField.setPreferredSize(new Dimension(200, 30));
-        searchField.addActionListener(textView);
-
-        searchField.getDocument().addDocumentListener(new DocumentListener()
-        {
-            @Override
-            public void insertUpdate(DocumentEvent documentEvent)
-            {
-                search(documentEvent);
-            }
-
-            @Override
-            public void removeUpdate(DocumentEvent documentEvent)
-            {
-                search(documentEvent);
-            }
-
-            @Override
-            public void changedUpdate(DocumentEvent documentEvent)
-            {
-                search(documentEvent);
-            }
-            private void search(DocumentEvent documentEvent)
-            {
-                try
-                {
-                    String searchKey = documentEvent.getDocument().getText(0, documentEvent.getDocument().getLength());
-                    textView.searchInText(searchKey);
-                }
-                catch (BadLocationException e)
-                {
-                    e.printStackTrace();
-                }
-            }
-        });
-
         JPanel panel = new JPanel(new FlowLayout());
-        panel.add(searchField);
+        panel.add(searcher.getSearchPanel());
         panel.add(filters);
 
         return panel;

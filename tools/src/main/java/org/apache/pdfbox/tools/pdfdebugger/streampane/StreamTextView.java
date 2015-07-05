@@ -34,10 +34,9 @@ import javax.swing.text.StyledDocument;
 /**
  * @author Khyrul Bashar
  */
-class StreamTextView implements ActionListener
+class StreamTextView
 {
     private JScrollPane scrollPane;
-    private StreamTextSearcher searcher;
     JTextComponent textComponent;
 
     StreamTextView()
@@ -48,7 +47,6 @@ class StreamTextView implements ActionListener
     private void initUI()
     {
         textComponent = new JTextPane();
-        searcher = new StreamTextSearcher(textComponent);
         scrollPane = new JScrollPane(textComponent);
         scrollPane.setPreferredSize(new Dimension(300, 400));
     }
@@ -58,22 +56,13 @@ class StreamTextView implements ActionListener
         textComponent.setDocument(document);
     }
 
+    JTextComponent getTextComponent()
+    {
+        return textComponent;
+    }
+
     JComponent getView()
     {
         return scrollPane ;
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent actionEvent)
-    {
-        if (actionEvent.getSource() instanceof JTextField)
-        {
-            searchInText(((JTextField) actionEvent.getSource()).getText());
-        }
-    }
-
-    public void searchInText(String searchWord)
-    {
-        searcher.search(searchWord);
     }
 }

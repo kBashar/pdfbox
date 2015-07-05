@@ -47,7 +47,7 @@ class SearchEngine
         {
             highlighter.removeAllHighlights();
 
-            if (searchKey.equals(""))
+            if ("".equals(searchKey))
             {
                 return -1;
             }
@@ -65,6 +65,7 @@ class SearchEngine
             }
             searchKey = searchKey.toLowerCase();
 
+            int firstOffset = -1;
             int searchKeyLength = searchKey.length();
             int startAt = 0;
             int resultantOffset = -1;
@@ -74,13 +75,18 @@ class SearchEngine
                 try
                 {
                     highlighter.addHighlight(resultantOffset, resultantOffset + searchKeyLength, painter);
-                    startAt += resultantOffset;
+                    startAt = resultantOffset + searchKeyLength;
+                    if (firstOffset == -1)
+                    {
+                        firstOffset = resultantOffset;
+                    }
                 }
                 catch (BadLocationException e)
                 {
                     e.printStackTrace();
                 }
             }
+            return firstOffset;
         }
         return -1;
     }

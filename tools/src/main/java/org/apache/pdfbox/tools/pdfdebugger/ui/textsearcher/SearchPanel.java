@@ -17,6 +17,7 @@
 
 package org.apache.pdfbox.tools.pdfdebugger.ui.textsearcher;
 
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionListener;
 import javax.swing.JButton;
@@ -55,6 +56,7 @@ class SearchPanel
         previousButton.addActionListener(buttonListener);
 
         searchField = new JTextField();
+        searchField.setPreferredSize(new Dimension(200, 30));
         searchField.getDocument().addDocumentListener(documentListener);
 
         panel = new JPanel(new FlowLayout());

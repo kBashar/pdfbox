@@ -37,14 +37,17 @@ public class Searcher implements DocumentListener, ActionListener
     private SearchPanel searchPanel;
     private JTextComponent textComponent;
 
+    public Searcher()
+    {
+        searchPanel = new SearchPanel(this, this);
+    }
 
-    Searcher(JTextComponent textComponent)
+    public void setTextComponent(JTextComponent textComponent)
     {
         if (textComponent != null)
         {
             this.textComponent = textComponent;
             searchEngine = new SearchEngine(textComponent.getDocument(), textComponent.getHighlighter());
-            searchPanel = new SearchPanel(this, this);
         }
         else
         {
@@ -60,7 +63,7 @@ public class Searcher implements DocumentListener, ActionListener
     @Override
     public void insertUpdate(DocumentEvent documentEvent)
     {
-       search(documentEvent);
+        search(documentEvent);
     }
 
     @Override
@@ -79,7 +82,7 @@ public class Searcher implements DocumentListener, ActionListener
     {
         try
         {
-            String word = documentEvent.getDocument().getText(0, documentEvent.getLength());
+            String word = documentEvent.getDocument().getText(0, documentEvent.getDocument().getLength());
             search(word);
         }
         catch (BadLocationException e)
@@ -97,23 +100,12 @@ public class Searcher implements DocumentListener, ActionListener
         }
     }
 
-    private void enableTraverse(int firstFound)
+    private void enableTraverse(int offset)
     {
-        try
-        {
-            totalMatch = textComponent.getHighlighter().getHighlights().length;
-            textComponent.scrollRectToVisible(textComponent.modelToView(firstFound));
-            currentMatch = 1;
-
-            if (totalMatch > 1)
-            {
-                searchPanel.nextEnabled(true);
-            }
-        }
-        catch (BadLocationException e)
-        {
-            e.printStackTrace();
-        }
+        totalMatch = textComponent.getHighlighter().getHighlights().length;
+        scrollToWord(offset);
+        currentMatch = 1;
+        searchPanel.nextEnabled(totalMatch > 1);
     }
 
     @Override
@@ -124,47 +116,45 @@ public class Searcher implements DocumentListener, ActionListener
         if (actionCommand.equals(SearchPanel.NEXT))
         {
             currentMatch = currentMatch + 1;
-            int offset = textComponent.getHighlighter().getHighlights()[currentMatch-1].getStartOffset();
-            try
+            int offset = textComponent.getHighlighter().getHighlights()[currentMatch - 1].getStartOffset();
+            scrollToWord(offset);
+
+            if (currentMatch == totalMatch)
             {
-                textComponent.scrollRectToVisible(textComponent.modelToView(offset));
-
-                if (currentMatch == totalMatch)
-                {
-                    searchPanel.nextEnabled(false);
-                }
-
-                if (currentMatch >= 2)
-                {
-                    searchPanel.previousEnabled(true);
-                }
+                searchPanel.nextEnabled(false);
             }
-            catch (BadLocationException e)
+
+            if (currentMatch >= 2)
             {
-                e.printStackTrace();
+                searchPanel.previousEnabled(true);
             }
         }
         else if (actionCommand.equals(SearchPanel.PREVIOUS))
         {
-            currentMatch = currentMatch -1;
-            int offset = textComponent.getHighlighter().getHighlights()[currentMatch-1].getStartOffset();
-            try
-            {
-                textComponent.scrollRectToVisible(textComponent.modelToView(offset));
+            currentMatch = currentMatch - 1;
+            int offset = textComponent.getHighlighter().getHighlights()[currentMatch - 1].getStartOffset();
+            scrollToWord(offset);
 
-                if (currentMatch == 1)
-                {
-                    searchPanel.previousEnabled(false);
-                }
-                if (currentMatch < totalMatch)
-                {
-                    searchPanel.nextEnabled(true);
-                }
-            }
-            catch (BadLocationException e)
+            if (currentMatch == 1)
             {
-                e.printStackTrace();
+                searchPanel.previousEnabled(false);
             }
+            if (currentMatch < totalMatch)
+            {
+                searchPanel.nextEnabled(true);
+            }
+        }
+    }
+
+    private void scrollToWord(int offset)
+    {
+        try
+        {
+            textComponent.scrollRectToVisible(textComponent.modelToView(offset + 5));
+        }
+        catch (BadLocationException e)
+        {
+            e.printStackTrace();
         }
     }
 }
