@@ -50,6 +50,7 @@ import org.apache.pdfbox.io.RandomAccessBuffer;
 import org.apache.pdfbox.pdfparser.PDFStreamParser;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDResources;
+import org.apache.pdfbox.tools.pdfdebugger.streampane.tooltip.ToolTipController;
 import org.apache.pdfbox.tools.util.FileOpenSaveDialog;
 
 /**
@@ -57,6 +58,8 @@ import org.apache.pdfbox.tools.util.FileOpenSaveDialog;
  */
 public class StreamPane implements ActionListener
 {
+    private ToolTipController tTController;
+
     private StreamPaneView view;
     private Stream stream;
     private String currentFilter;
@@ -73,6 +76,7 @@ public class StreamPane implements ActionListener
         if (resourcesDic != null)
         {
             resources = new PDResources(resourcesDic);
+            tTController = new ToolTipController(resources);
         }
 
         currentFilter = Stream.UNFILTERED;
@@ -144,7 +148,7 @@ public class StreamPane implements ActionListener
         {
             try
             {
-                view.showStreamText(get());
+                view.showStreamText(get(), tTController);
             }
             catch (InterruptedException e)
             {
@@ -232,7 +236,7 @@ public class StreamPane implements ActionListener
                         {
                             str = getCOSVlaue(obj);
                         }
-                        docu.insertString(docu.getLength(), str+"  ", null);
+                        docu.insertString(docu.getLength(), str+" ", null);
                     }
                 }
             }

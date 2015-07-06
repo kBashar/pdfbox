@@ -37,7 +37,6 @@ class SearchPanel
 
     private JButton nextButton;
     private JButton previousButton;
-    private JTextField searchField;
     private JPanel panel;
 
     SearchPanel(ActionListener buttonListener, DocumentListener documentListener)
@@ -55,7 +54,7 @@ class SearchPanel
         previousEnabled(false);
         previousButton.addActionListener(buttonListener);
 
-        searchField = new JTextField();
+        JTextField searchField = new JTextField();
         searchField.setPreferredSize(new Dimension(200, 30));
         searchField.getDocument().addDocumentListener(documentListener);
 

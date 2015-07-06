@@ -42,6 +42,7 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.StyledDocument;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
+import org.apache.pdfbox.tools.pdfdebugger.streampane.tooltip.ToolTipController;
 import org.apache.pdfbox.tools.pdfdebugger.ui.textsearcher.Searcher;
 
 /**
@@ -51,12 +52,10 @@ class StreamPaneView extends JPanel
 {
     private JPanel headerPanel;
     private JPanel contentPanel;
-    private StreamTextView textView;
     private Searcher searcher;
 
     StreamPaneView(boolean isImage, String[] filterTypes, String i, ActionListener listener)
-    {
-        textView = new StreamTextView();
+    {;
         searcher = new Searcher();
 
         headerPanel = createHeaderPanel(filterTypes, i, listener);
@@ -64,10 +63,12 @@ class StreamPaneView extends JPanel
         initUI();
     }
 
-    void showStreamText(StyledDocument document)
+    void showStreamText(StyledDocument document, ToolTipController toolTipController)
     {
         contentPanel.removeAll();
 
+        //TODO change StreamTextView Constructor implementation
+        StreamTextView textView = new StreamTextView(toolTipController);
         textView.setDocument(document);
         searcher.setTextComponent(textView.textComponent);
         contentPanel.add(textView.getView(), BorderLayout.CENTER);

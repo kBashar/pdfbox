@@ -17,36 +17,44 @@
 
 package org.apache.pdfbox.tools.pdfdebugger.streampane;
 
-import java.awt.Color;
+import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import javax.swing.Action;
+import java.awt.Point;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionListener;
 import javax.swing.JComponent;
+import javax.swing.JLabel;
 import javax.swing.JScrollPane;
-import javax.swing.JTextField;
 import javax.swing.JTextPane;
-import javax.swing.text.DefaultHighlighter;
-import javax.swing.text.Highlighter;
+import javax.swing.JToolTip;
+import javax.swing.text.BadLocationException;
 import javax.swing.text.JTextComponent;
 import javax.swing.text.StyledDocument;
+import javax.swing.text.Utilities;
+import org.apache.pdfbox.tools.pdfdebugger.streampane.tooltip.ToolTipController;
 
 /**
  * @author Khyrul Bashar
  */
-class StreamTextView
+class StreamTextView implements MouseMotionListener
 {
+    private JComponent toolTipContent;
+    private ToolTipController tTController;
+
     private JScrollPane scrollPane;
     JTextComponent textComponent;
 
-    StreamTextView()
+    StreamTextView(ToolTipController controller)
     {
+        tTController = controller;
         initUI();
     }
 
     private void initUI()
     {
         textComponent = new JTextPane();
+        textComponent.addMouseMotionListener(this);
         scrollPane = new JScrollPane(textComponent);
         scrollPane.setPreferredSize(new Dimension(300, 400));
     }
@@ -63,6 +71,22 @@ class StreamTextView
 
     JComponent getView()
     {
-        return scrollPane ;
+        return scrollPane;
+    }
+
+    @Override
+    public void mouseDragged(MouseEvent mouseEvent)
+    {
+
+    }
+
+    @Override
+    public void mouseMoved(MouseEvent mouseEvent)
+    {
+        if (tTController != null)
+        {
+            int offset = textComponent.viewToModel(mouseEvent.getPoint());
+            textComponent.setToolTipText(tTController.getToolTip(offset, textComponent));
+        }
     }
 }

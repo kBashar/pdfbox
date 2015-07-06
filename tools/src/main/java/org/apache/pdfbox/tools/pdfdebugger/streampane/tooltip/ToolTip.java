@@ -15,17 +15,25 @@
  * limitations under the License.
  */
 
-package org.apache.pdfbox.tools.pdfdebugger.streampane;
+package org.apache.pdfbox.tools.pdfdebugger.streampane.tooltip;
+
+import org.apache.pdfbox.pdmodel.PDResources;
 
 /**
  * @author Khyrul Bashar
  */
-public class Test
+abstract class ToolTip
 {
-    public static void main(String[] args)
-    {
-        String str = "lots of faltu code";
+    PDResources resources;
+    String markup;
 
-        System.out.println(str.indexOf("lots"));
+    ToolTip(PDResources resources)
+    {
+        this.resources = resources;
+    }
+
+    String getToolTipText()
+    {
+        return markup;
     }
 }
