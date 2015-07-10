@@ -19,10 +19,18 @@ package org.apache.pdfbox.tools.pdfdebugger.ui.textsearcher;
 
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.KeyStroke;
+import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.BadLocationException;
@@ -37,14 +45,16 @@ class SearchPanel
 
     private JButton nextButton;
     private JButton previousButton;
+    private JCheckBox caseSensitive;
+    private JTextField searchField;
     private JPanel panel;
 
-    SearchPanel(ActionListener buttonListener, DocumentListener documentListener)
+    SearchPanel(ActionListener buttonListener, DocumentListener documentListener, ChangeListener changeListener)
     {
-        initUI(buttonListener, documentListener);
+        initUI(buttonListener, documentListener, changeListener);
     }
 
-    private void initUI(ActionListener buttonListener, DocumentListener documentListener)
+    private void initUI(ActionListener buttonListener, DocumentListener documentListener, ChangeListener changeListener)
     {
         nextButton = new JButton(NEXT);
         nextEnabled(false);
@@ -54,15 +64,39 @@ class SearchPanel
         previousEnabled(false);
         previousButton.addActionListener(buttonListener);
 
-        JTextField searchField = new JTextField();
+        searchField = new JTextField();
+        Action action = new AbstractAction()
+        {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent)
+            {
+               searchField.requestFocus();
+            }
+        };
+        String key = "requestedFocus";
+        searchField.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("F3"), key);
+        searchField.getActionMap().put(key, action);
+
         searchField.setPreferredSize(new Dimension(200, 30));
         searchField.getDocument().addDocumentListener(documentListener);
 
-        panel = new JPanel(new FlowLayout());
-        panel.setLayout(new FlowLayout());
-        panel.add(searchField);
-        panel.add(nextButton);
-        panel.add(previousButton);
+        caseSensitive = new JCheckBox("Case sens");
+        caseSensitive.setSelected(false);
+        caseSensitive.addChangeListener(changeListener);
+
+        JPanel upperPanel = new JPanel(new FlowLayout());
+        upperPanel.setLayout(new FlowLayout());
+        upperPanel.add(searchField);
+        upperPanel.add(nextButton);
+        upperPanel.add(previousButton);
+
+        JPanel lowerPanel = new JPanel();
+        lowerPanel.add(caseSensitive);
+
+        panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.add(upperPanel);
+        panel.add(lowerPanel);
     }
 
     void nextEnabled(boolean value)
@@ -73,6 +107,16 @@ class SearchPanel
     void previousEnabled(boolean value)
     {
         previousButton.setEnabled(value);
+    }
+
+    boolean isCaseSensitive()
+    {
+        return caseSensitive.isSelected();
+    }
+
+    String getSearchWord()
+    {
+        return searchField.getText();
     }
 
     JPanel getPanel()

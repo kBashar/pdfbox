@@ -18,6 +18,7 @@
 package org.apache.pdfbox.tools.pdfdebugger.ui.textsearcher;
 
 import java.awt.Color;
+import java.util.ArrayList;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultHighlighter;
 import javax.swing.text.Document;
@@ -32,62 +33,64 @@ class SearchEngine
     private Document document;
     private Highlighter highlighter;
 
-    private final static Highlighter.HighlightPainter painter =
-            new DefaultHighlighter.DefaultHighlightPainter(Color.yellow);
+    private Highlighter.HighlightPainter painter;
 
-    public SearchEngine(Document document, Highlighter highlighter)
+    public SearchEngine(Document document, Highlighter highlighter, Highlighter.HighlightPainter painter)
     {
         this.document = document;
         this.highlighter = highlighter;
+        this.painter = painter;
     }
 
-    public int search(String searchKey)
+    public ArrayList<Highlighter.Highlight> search(String searchKey, boolean isCaseSensitive)
     {
+        ArrayList<Highlighter.Highlight> highlights = new ArrayList<Highlighter.Highlight>();
+
         if (searchKey != null)
         {
             highlighter.removeAllHighlights();
 
             if ("".equals(searchKey))
             {
-                return -1;
+                return highlights;
             }
 
             String textContent = null;
 
             try
             {
-                textContent = document.getText(0, document.getLength()).toLowerCase();
+                textContent = document.getText(0, document.getLength());
             }
             catch (BadLocationException e)
             {
                 e.printStackTrace();
-                return -1;
+                return highlights;
             }
-            searchKey = searchKey.toLowerCase();
+            if (!isCaseSensitive)
+            {
+                textContent = textContent.toLowerCase();
+                searchKey = searchKey.toLowerCase();
+            }
 
-            int firstOffset = -1;
             int searchKeyLength = searchKey.length();
             int startAt = 0;
             int resultantOffset = -1;
+            int indexOfHighLight = 0;
 
             while ((resultantOffset = textContent.indexOf(searchKey, startAt)) != -1)
             {
                 try
                 {
                     highlighter.addHighlight(resultantOffset, resultantOffset + searchKeyLength, painter);
+                    highlights.add(highlighter.getHighlights()[indexOfHighLight++]);
                     startAt = resultantOffset + searchKeyLength;
-                    if (firstOffset == -1)
-                    {
-                        firstOffset = resultantOffset;
-                    }
                 }
                 catch (BadLocationException e)
                 {
                     e.printStackTrace();
                 }
             }
-            return firstOffset;
         }
-        return -1;
+        return highlights;
     }
 }

@@ -17,29 +17,44 @@
 
 package org.apache.pdfbox.tools.pdfdebugger.ui.textsearcher;
 
+import java.awt.Color;
+import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.image.AreaAveragingScaleFilter;
+import java.util.ArrayList;
+import javax.swing.JCheckBox;
 import javax.swing.JPanel;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.BadLocationException;
+import javax.swing.text.DefaultHighlighter;
+import javax.swing.text.Highlighter;
 import javax.swing.text.JTextComponent;
 
 /**
  * @author Khyrul Bashar
  */
-public class Searcher implements DocumentListener, ActionListener
+public class Searcher implements DocumentListener, ActionListener, ChangeListener
 {
     private int totalMatch = 0;
-    private int currentMatch = 0;
+    private int currentMatch = -1;
+    private ArrayList<Highlighter.Highlight> highlights;
 
     private SearchEngine searchEngine;
     private SearchPanel searchPanel;
     private JTextComponent textComponent;
 
+    private final static Highlighter.HighlightPainter painter =
+            new DefaultHighlighter.DefaultHighlightPainter(Color.yellow);
+    private final Highlighter.HighlightPainter selectionPainter =
+            new DefaultHighlighter.DefaultHighlightPainter(new Color(109, 216, 26));
+
     public Searcher()
     {
-        searchPanel = new SearchPanel(this, this);
+        searchPanel = new SearchPanel(this, this, this);
     }
 
     public void setTextComponent(JTextComponent textComponent)
@@ -47,7 +62,7 @@ public class Searcher implements DocumentListener, ActionListener
         if (textComponent != null)
         {
             this.textComponent = textComponent;
-            searchEngine = new SearchEngine(textComponent.getDocument(), textComponent.getHighlighter());
+            searchEngine = new SearchEngine(textComponent.getDocument(), textComponent.getHighlighter(), painter);
         }
         else
         {
@@ -93,19 +108,17 @@ public class Searcher implements DocumentListener, ActionListener
 
     private void search(String word)
     {
-        int offset = searchEngine.search(word);
-        if (offset != -1)
+        highlights = searchEngine.search(word, searchPanel.isCaseSensitive());
+        if (highlights.size() != 0)
         {
-            enableTraverse(offset);
-        }
-    }
+            totalMatch = highlights.size();
+            currentMatch = 0;
 
-    private void enableTraverse(int offset)
-    {
-        totalMatch = textComponent.getHighlighter().getHighlights().length;
-        scrollToWord(offset);
-        currentMatch = 1;
-        searchPanel.nextEnabled(totalMatch > 1);
+            scrollToWord(highlights.get(0).getStartOffset());
+
+            updateHighLighter(currentMatch, currentMatch - 1);
+            updateNavigationButtons();
+        }
     }
 
     @Override
@@ -116,33 +129,40 @@ public class Searcher implements DocumentListener, ActionListener
         if (actionCommand.equals(SearchPanel.NEXT))
         {
             currentMatch = currentMatch + 1;
-            int offset = textComponent.getHighlighter().getHighlights()[currentMatch - 1].getStartOffset();
+            int offset = highlights.get(currentMatch).getStartOffset();
             scrollToWord(offset);
 
-            if (currentMatch == totalMatch)
-            {
-                searchPanel.nextEnabled(false);
-            }
-
-            if (currentMatch >= 2)
-            {
-                searchPanel.previousEnabled(true);
-            }
+            updateHighLighter(currentMatch, currentMatch - 1);
+            updateNavigationButtons();
         }
         else if (actionCommand.equals(SearchPanel.PREVIOUS))
         {
             currentMatch = currentMatch - 1;
-            int offset = textComponent.getHighlighter().getHighlights()[currentMatch - 1].getStartOffset();
+            int offset = highlights.get(currentMatch).getStartOffset();
             scrollToWord(offset);
 
-            if (currentMatch == 1)
-            {
-                searchPanel.previousEnabled(false);
-            }
-            if (currentMatch < totalMatch)
-            {
-                searchPanel.nextEnabled(true);
-            }
+            updateHighLighter(currentMatch, currentMatch + 1);
+            updateNavigationButtons();
+        }
+    }
+
+    private void updateNavigationButtons()
+    {
+        if (currentMatch == 0)
+        {
+            searchPanel.previousEnabled(false);
+        }
+        else if (currentMatch >= 1 && currentMatch <= (totalMatch - 1 ))
+        {
+            searchPanel.previousEnabled(true);
+        }
+        if (currentMatch == (totalMatch - 1))
+        {
+            searchPanel.nextEnabled(false);
+        }
+        else if (currentMatch < (totalMatch - 1))
+        {
+            searchPanel.nextEnabled(true);
         }
     }
 
@@ -150,11 +170,46 @@ public class Searcher implements DocumentListener, ActionListener
     {
         try
         {
-            textComponent.scrollRectToVisible(textComponent.modelToView(offset + 5));
+            textComponent.scrollRectToVisible(textComponent.modelToView(offset));
         }
         catch (BadLocationException e)
         {
             e.printStackTrace();
+        }
+    }
+
+    private void updateHighLighter(final int presentIndex,final int previousIndex)
+    {
+        if (previousIndex != -1)
+        {
+            changeHighlighter(previousIndex, painter);
+        }
+        changeHighlighter(presentIndex, selectionPainter);
+    }
+
+    private void changeHighlighter(int index, Highlighter.HighlightPainter newPainter)
+    {
+        Highlighter highlighter = textComponent.getHighlighter();
+
+        Highlighter.Highlight highLight = highlights.get(index);
+        highlighter.removeHighlight(highLight);
+        try
+        {
+            highlighter.addHighlight(highLight.getStartOffset(), highLight.getEndOffset(), newPainter);
+            highlights.set(index, highlighter.getHighlights()[highlighter.getHighlights().length-1]);
+        }
+        catch (BadLocationException e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void stateChanged(ChangeEvent changeEvent)
+    {
+        if (changeEvent.getSource() instanceof JCheckBox)
+        {
+            search(searchPanel.getSearchWord());
         }
     }
 }
