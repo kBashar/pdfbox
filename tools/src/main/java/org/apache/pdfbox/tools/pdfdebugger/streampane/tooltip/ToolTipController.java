@@ -33,6 +33,12 @@ public class ToolTipController
     private final static String STROKING_COLOR_SPACE = "CS";
     private final static String NON_STROKING_COLOR_SPACE = "cs";
     private final static String NON_STROKING_COLOR = "scn";
+    private final static String RGB_STROKING_COLOR = "RG";
+    private final static String RGB_NON_STROKING_COLOR = "rg";
+    private final static String CMYK_STROKING_COLOR = "K";
+    private final static String CMYK_NON_STROKING_COLOR = "k";
+    private final static String GRAY_STROKING_COLOR = "G";
+    private final static String GRAY_NON_STROKING_COLOR = "g";
 
     private final PDResources resources;
     private JTextComponent textComponent;
@@ -61,7 +67,7 @@ public class ToolTipController
             String colorSpaceName = findColorSapce(offset, STROKING_COLOR_SPACE);
             if (colorSpaceName != null)
             {
-                toolTip = new ColorToolTip(resources, colorSpaceName, rowText);
+                toolTip = new SCNToolTip(resources, colorSpaceName, rowText);
                 return toolTip.getToolTipText();
             }
         }
@@ -70,9 +76,24 @@ public class ToolTipController
             String colorSpaceName = findColorSapce(offset, NON_STROKING_COLOR_SPACE);
             if (colorSpaceName != null)
             {
-                toolTip = new ColorToolTip(resources, colorSpaceName, rowText);
+                toolTip = new SCNToolTip(resources, colorSpaceName, rowText);
                 return toolTip.getToolTipText();
             }
+        }
+        else if (word.equals(RGB_STROKING_COLOR) || word.equals(RGB_NON_STROKING_COLOR))
+        {
+            toolTip = new RGToolTip(rowText);
+            return toolTip.getToolTipText();
+        }
+        else if (word.equals(CMYK_STROKING_COLOR) || word.equals(CMYK_NON_STROKING_COLOR))
+        {
+            toolTip = new KToolTip(rowText);
+            return toolTip.getToolTipText();
+        }
+        else if (word.equals(GRAY_STROKING_COLOR) || word.equals(GRAY_NON_STROKING_COLOR))
+        {
+            toolTip = new GToolTip(rowText);
+            return toolTip.getToolTipText();
         }
         return null;
     }

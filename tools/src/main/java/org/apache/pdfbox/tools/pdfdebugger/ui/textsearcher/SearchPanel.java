@@ -116,7 +116,6 @@ class SearchPanel
 
     void reset()
     {
-        //searchField.setText("");
         searchField.requestFocus();
         String searchKey = searchField.getText();
         searchField.setText(searchKey);

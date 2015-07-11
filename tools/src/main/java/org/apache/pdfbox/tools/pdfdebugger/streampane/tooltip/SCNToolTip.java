@@ -27,35 +27,43 @@ import org.apache.pdfbox.pdmodel.graphics.color.PDColorSpace;
 /**
  * @author Khyrul Bashar
  */
-abstract class ColorToolTip extends ToolTip
+class SCNToolTip extends ColorToolTip
 {
-    float[] extractColorValues(String rowtext)
+    SCNToolTip(PDResources resources, String colorSpaceName, String rowText)
     {
-        ArrayList<String> words = ToolTipController.getWords(rowtext);
-        words.remove(words.size()-1);
-        float[] values = new float[words.size()];
-        int index = 0;
-        for (String word : words)
+        createMarkUp(colorSpaceName, rowText);
+    }
+
+    private void createMarkUp(String colorSpaceName, String rowText)
+    {
+        colorSpaceName = colorSpaceName.substring(1).trim();
+        PDColorSpace colorSpace = null;
+        for (COSName name : resources.getColorSpaceNames())
         {
-            values[index++] = Float.parseFloat(word);
+            if (name.getName().equals(colorSpaceName))
+            {
+                try
+                {
+                    colorSpace = resources.getColorSpace(name);
+                }
+                catch (IOException e)
+                {
+                    e.printStackTrace();
+                }
+            }
         }
-        return values;
-    }
-
-    static String colorHexValue(Color color)
-    {
-        StringBuilder builder = new StringBuilder();
-        builder.append(String.format("%02x", color.getRed()));
-        builder.append(String.format("%02x", color.getGreen()));
-        builder.append(String.format("%02x", color.getBlue()));
-        return builder.toString();
-    }
-
-    String getMarkUp(String hexValue)
-    {
-         return  "<html>\n" +
-                "<body bgcolor=#ffffff>\n" +
-                "<div style=\"width:50px;height:20px;border:1px; background-color:#"+hexValue+";\"></div></body>\n" +
-                "</html>";
+        if (colorSpace != null)
+        {
+            try
+            {
+                float[] rgbValues = colorSpace.toRGB(extractColorValues(rowText));
+                Color color = new Color(rgbValues[0], rgbValues[1], rgbValues[2]);
+                markup = getMarkUp(colorHexValue(color));
+            }
+            catch (IOException e)
+            {
+                e.printStackTrace();
+            }
+        }
     }
 }

@@ -27,11 +27,6 @@ abstract class ToolTip
     PDResources resources;
     String markup;
 
-    ToolTip(PDResources resources)
-    {
-        this.resources = resources;
-    }
-
     String getToolTipText()
     {
         return markup;

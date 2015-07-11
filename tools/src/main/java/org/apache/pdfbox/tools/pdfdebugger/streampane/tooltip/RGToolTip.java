@@ -17,46 +17,25 @@
 
 package org.apache.pdfbox.tools.pdfdebugger.streampane.tooltip;
 
+import java.awt.Color;
 import java.io.IOException;
-import org.apache.pdfbox.cos.COSName;
+import java.util.ArrayList;
 import org.apache.pdfbox.pdmodel.PDResources;
-import org.apache.pdfbox.pdmodel.font.PDFont;
 
 /**
  * @author Khyrul Bashar
  */
-public class FontToolTip extends ToolTip
+class RGToolTip extends ColorToolTip
 {
-    private String fontReferenceName;
-
-    FontToolTip(PDResources resources, String rowText)
+    public RGToolTip(String rowText)
     {
-        fontReferenceName = extractFontReference(rowText);
-        initUI();
+        createMarkUp(rowText);
     }
 
-    private void initUI()
+    private void createMarkUp(String rowText)
     {
-        PDFont font = null;
-        for (COSName name: resources.getFontNames())
-        {
-            if (name.getName().equals(fontReferenceName))
-            {
-                try
-                {
-                    font = resources.getFont(name);
-                }
-                catch (IOException e)
-                {
-                    e.printStackTrace();
-                }
-            }
-        }
-        markup = "<html>"+font.getName()+"</html>";
-    }
-
-    private String extractFontReference(String rowText)
-    {
-        return rowText.split(" ")[0].substring(1);
+            float[] rgbValues = extractColorValues(rowText);
+            Color color = new Color(rgbValues[0], rgbValues[1], rgbValues[2]);
+            markup = getMarkUp(colorHexValue(color));
     }
 }
