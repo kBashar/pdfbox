@@ -20,58 +20,88 @@ package org.apache.pdfbox.tools.pdfdebugger.streampane;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.Point;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.BoxLayout;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
 import javax.swing.JToolTip;
+import javax.swing.KeyStroke;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.JTextComponent;
 import javax.swing.text.StyledDocument;
 import javax.swing.text.Utilities;
 import org.apache.pdfbox.tools.pdfdebugger.streampane.tooltip.ToolTipController;
+import org.apache.pdfbox.tools.pdfdebugger.ui.textsearcher.Searcher;
 
 /**
  * @author Khyrul Bashar
  */
 class StreamTextView implements MouseMotionListener
 {
-    private JComponent toolTipContent;
     private ToolTipController tTController;
 
-    private JScrollPane scrollPane;
-    JTextComponent textComponent;
+    private JPanel mainPanel;
+    private JTextComponent textComponent;
+    private Searcher searcher;
 
     StreamTextView(ToolTipController controller)
     {
         tTController = controller;
+        searcher = new Searcher();
         initUI();
     }
 
     private void initUI()
     {
+        mainPanel = new JPanel();
+
         textComponent = new JTextPane();
         textComponent.addMouseMotionListener(this);
-        scrollPane = new JScrollPane(textComponent);
-        scrollPane.setPreferredSize(new Dimension(300, 400));
+
+        JScrollPane scrollPane = new JScrollPane(textComponent);
+
+        BoxLayout boxLayout = new BoxLayout(mainPanel, BoxLayout.Y_AXIS);
+
+        mainPanel.setLayout(boxLayout);
+
+        mainPanel.add(searcher.getSearchPanel());
+        mainPanel.add(scrollPane);
+
+        searcher.getSearchPanel().setVisible(false);
+
+        final String SHOW_PANEL= "showPanel";
+        KeyStroke showStroke = KeyStroke.getKeyStroke(KeyEvent.VK_F, KeyEvent.CTRL_DOWN_MASK);
+        mainPanel.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(showStroke, SHOW_PANEL);
+        mainPanel.getActionMap().put(SHOW_PANEL, showAction);
+
+        final String CLOSE_PANEL= "closePanel";
+        KeyStroke closeStroke = KeyStroke.getKeyStroke(KeyEvent.VK_F, KeyEvent.CTRL_DOWN_MASK | KeyEvent.SHIFT_DOWN_MASK);
+        mainPanel.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(closeStroke, CLOSE_PANEL);
+        mainPanel.getActionMap().put(CLOSE_PANEL, closeAction);
+
     }
 
     public void setDocument(StyledDocument document)
     {
         textComponent.setDocument(document);
-    }
-
-    JTextComponent getTextComponent()
-    {
-        return textComponent;
+        searcher.setTextComponent(textComponent);
     }
 
     JComponent getView()
     {
-        return scrollPane;
+        return mainPanel;
     }
 
     @Override
@@ -89,4 +119,23 @@ class StreamTextView implements MouseMotionListener
             textComponent.setToolTipText(tTController.getToolTip(offset, textComponent));
         }
     }
+
+    Action showAction = new AbstractAction()
+    {
+        @Override
+        public void actionPerformed(ActionEvent actionEvent)
+        {
+            searcher.getSearchPanel().setVisible(true);
+            mainPanel.validate();
+        }
+    };
+
+    Action closeAction = new AbstractAction()
+    {
+        @Override
+        public void actionPerformed(ActionEvent actionEvent)
+        {
+            searcher.getSearchPanel().setVisible(false);
+        }
+    };
 }

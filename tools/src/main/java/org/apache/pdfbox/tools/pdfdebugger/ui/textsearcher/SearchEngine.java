@@ -17,13 +17,10 @@
 
 package org.apache.pdfbox.tools.pdfdebugger.ui.textsearcher;
 
-import java.awt.Color;
 import java.util.ArrayList;
 import javax.swing.text.BadLocationException;
-import javax.swing.text.DefaultHighlighter;
 import javax.swing.text.Document;
 import javax.swing.text.Highlighter;
-import javax.swing.text.JTextComponent;
 
 /**
  * @author Khyrul Bashar
@@ -55,7 +52,7 @@ class SearchEngine
                 return highlights;
             }
 
-            String textContent = null;
+            String textContent;
 
             try
             {
@@ -74,7 +71,7 @@ class SearchEngine
 
             int searchKeyLength = searchKey.length();
             int startAt = 0;
-            int resultantOffset = -1;
+            int resultantOffset;
             int indexOfHighLight = 0;
 
             while ((resultantOffset = textContent.indexOf(searchKey, startAt)) != -1)

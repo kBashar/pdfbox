@@ -18,7 +18,6 @@
 package org.apache.pdfbox.tools.pdfdebugger.streampane;
 
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -29,11 +28,9 @@ import java.util.Set;
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.COSStream;
-import org.apache.pdfbox.io.IOUtils;
 import org.apache.pdfbox.pdmodel.PDResources;
 import org.apache.pdfbox.pdmodel.common.PDStream;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
-import org.apache.pdfbox.tools.util.FileOpenSaveDialog;
 
 /**
  * @author Khyrul Bashar
@@ -42,6 +39,7 @@ public class Stream
 {
     public static final String UNFILTERED = "unfiltered";
     public static final String FILTERED = "Filtered";
+    public static final String IMAGE = "Image";
 
     private final COSStream stream;
     private boolean isImage;
@@ -56,6 +54,10 @@ public class Stream
         filters.put(UNFILTERED, null);
         filters.putAll(getPartiallyFilteredStreamList());
         filters.put(FILTERED, null);
+        if (isImage)
+        {
+            filters.put(IMAGE, null);
+        }
     }
 
     public boolean isImage()

@@ -19,8 +19,11 @@ package org.apache.pdfbox.tools.pdfdebugger.ui.textsearcher;
 
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentListener;
+import java.awt.event.KeyEvent;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.BoxLayout;
@@ -40,74 +43,61 @@ import javax.swing.text.BadLocationException;
  */
 class SearchPanel
 {
-    final static String NEXT = "Next";
-    final static String PREVIOUS = "Previous";
-
     private JButton nextButton;
     private JButton previousButton;
     private JCheckBox caseSensitive;
     private JTextField searchField;
     private JPanel panel;
 
-    SearchPanel(ActionListener buttonListener, DocumentListener documentListener, ChangeListener changeListener)
+    SearchPanel(DocumentListener documentListener, ChangeListener changeListener,
+                ComponentListener compListener, Action nextButtonAction, Action previousButtonAction)
     {
-        initUI(buttonListener, documentListener, changeListener);
+        initUI(documentListener, changeListener, compListener, nextButtonAction, previousButtonAction);
     }
 
-    private void initUI(ActionListener buttonListener, DocumentListener documentListener, ChangeListener changeListener)
+    private void initUI(DocumentListener documentListener, ChangeListener changeListener,
+                        ComponentListener compListener, Action nextButtonAction, Action previousButtonAction)
     {
-        nextButton = new JButton(NEXT);
-        nextEnabled(false);
-        nextButton.addActionListener(buttonListener);
-
-        previousButton = new JButton(PREVIOUS);
-        previousEnabled(false);
-        previousButton.addActionListener(buttonListener);
-
         searchField = new JTextField();
-        Action action = new AbstractAction()
-        {
-            @Override
-            public void actionPerformed(ActionEvent actionEvent)
-            {
-               searchField.requestFocus();
-            }
-        };
-        String key = "requestedFocus";
-        searchField.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("F3"), key);
-        searchField.getActionMap().put(key, action);
-
-        searchField.setPreferredSize(new Dimension(200, 30));
         searchField.getDocument().addDocumentListener(documentListener);
 
-        caseSensitive = new JCheckBox("Case sens");
+        nextButton = new JButton();
+        nextButton.setAction(nextButtonAction);
+
+        previousButton = new JButton();
+        previousButton.setAction(previousButtonAction);
+
+        caseSensitive = new JCheckBox("Match case");
         caseSensitive.setSelected(false);
         caseSensitive.addChangeListener(changeListener);
 
-        JPanel upperPanel = new JPanel(new FlowLayout());
-        upperPanel.setLayout(new FlowLayout());
-        upperPanel.add(searchField);
-        upperPanel.add(nextButton);
-        upperPanel.add(previousButton);
-
-        JPanel lowerPanel = new JPanel();
-        lowerPanel.add(caseSensitive);
+        JButton cross = new JButton();
+        cross.setAction(crossAction);
 
         panel = new JPanel();
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-        panel.add(upperPanel);
-        panel.add(lowerPanel);
+        panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
+
+        panel.add(searchField);
+        panel.add(nextButton);
+        panel.add(previousButton);
+        panel.add(caseSensitive);
+        panel.add(cross);
+
+        final String SEARCH_NEXT = "showNext";
+        panel.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("F3"), SEARCH_NEXT);
+        panel.getActionMap().put(SEARCH_NEXT, nextButtonAction);
+
+        panel.addComponentListener(compListener);
     }
 
-    void nextEnabled(boolean value)
+    Action crossAction = new AbstractAction("X")
     {
-        nextButton.setEnabled(value);
-    }
-
-    void previousEnabled(boolean value)
-    {
-        previousButton.setEnabled(value);
-    }
+        @Override
+        public void actionPerformed(ActionEvent actionEvent)
+        {
+            panel.setVisible(false);
+        }
+    };
 
     boolean isCaseSensitive()
     {
@@ -122,5 +112,10 @@ class SearchPanel
     JPanel getPanel()
     {
         return panel;
+    }
+
+    void reset()
+    {
+        searchField.setText("");
     }
 }

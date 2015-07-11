@@ -92,16 +92,16 @@ public class StreamPane implements ActionListener
     @Override
     public void actionPerformed(ActionEvent actionEvent)
     {
-        String actionCommand = actionEvent.getActionCommand();
-
-        if (actionCommand.equals("Image"))
-        {
-            requestImageShowing();
-        }
-        else if (actionCommand.equals("comboBoxChanged"))
+        if (actionEvent.getActionCommand().equals("comboBoxChanged"))
         {
             JComboBox<String> comboBox = (JComboBox<String>) actionEvent.getSource();
             currentFilter = (String) comboBox.getSelectedItem();
+
+            if (currentFilter.equals(Stream.IMAGE))
+            {
+                requestImageShowing();
+                return;
+            }
             requestStreamText(currentFilter);
         }
     }

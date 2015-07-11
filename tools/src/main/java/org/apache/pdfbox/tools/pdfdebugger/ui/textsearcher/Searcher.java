@@ -18,11 +18,12 @@
 package org.apache.pdfbox.tools.pdfdebugger.ui.textsearcher;
 
 import java.awt.Color;
-import java.awt.Graphics;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.image.AreaAveragingScaleFilter;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.util.ArrayList;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.JCheckBox;
 import javax.swing.JPanel;
 import javax.swing.event.ChangeEvent;
@@ -37,7 +38,7 @@ import javax.swing.text.JTextComponent;
 /**
  * @author Khyrul Bashar
  */
-public class Searcher implements DocumentListener, ActionListener, ChangeListener
+public class Searcher implements DocumentListener, ChangeListener, ComponentListener
 {
     private int totalMatch = 0;
     private int currentMatch = -1;
@@ -46,6 +47,38 @@ public class Searcher implements DocumentListener, ActionListener, ChangeListene
     private SearchEngine searchEngine;
     private SearchPanel searchPanel;
     private JTextComponent textComponent;
+    private Action nextAction = new AbstractAction("Next")
+    {
+        @Override
+        public void actionPerformed(ActionEvent actionEvent)
+        {
+            if (totalMatch != 0)
+            {
+                currentMatch = currentMatch + 1;
+                int offset = highlights.get(currentMatch).getStartOffset();
+                scrollToWord(offset);
+
+                updateHighLighter(currentMatch, currentMatch - 1);
+                updateNavigationButtons();
+            }
+        }
+    };
+    private Action previousAction = new AbstractAction("Previous")
+    {
+        @Override
+        public void actionPerformed(ActionEvent actionEvent)
+        {
+            if (totalMatch != 0)
+            {
+                currentMatch = currentMatch - 1;
+                int offset = highlights.get(currentMatch).getStartOffset();
+                scrollToWord(offset);
+
+                updateHighLighter(currentMatch, currentMatch + 1);
+                updateNavigationButtons();
+            }
+        }
+    };
 
     private final static Highlighter.HighlightPainter painter =
             new DefaultHighlighter.DefaultHighlightPainter(Color.yellow);
@@ -54,7 +87,9 @@ public class Searcher implements DocumentListener, ActionListener, ChangeListene
 
     public Searcher()
     {
-        searchPanel = new SearchPanel(this, this, this);
+        nextAction.setEnabled(false);
+        previousAction.setEnabled(false);
+        searchPanel = new SearchPanel(this,this, this, nextAction, previousAction);
     }
 
     public void setTextComponent(JTextComponent textComponent)
@@ -98,6 +133,13 @@ public class Searcher implements DocumentListener, ActionListener, ChangeListene
         try
         {
             String word = documentEvent.getDocument().getText(0, documentEvent.getDocument().getLength());
+            if (word.isEmpty())
+            {
+                nextAction.setEnabled(false);
+                previousAction.setEnabled(false);
+                textComponent.getHighlighter().removeAllHighlights();
+                return;
+            }
             search(word);
         }
         catch (BadLocationException e)
@@ -121,48 +163,23 @@ public class Searcher implements DocumentListener, ActionListener, ChangeListene
         }
     }
 
-    @Override
-    public void actionPerformed(ActionEvent actionEvent)
-    {
-        String actionCommand = actionEvent.getActionCommand();
-
-        if (actionCommand.equals(SearchPanel.NEXT))
-        {
-            currentMatch = currentMatch + 1;
-            int offset = highlights.get(currentMatch).getStartOffset();
-            scrollToWord(offset);
-
-            updateHighLighter(currentMatch, currentMatch - 1);
-            updateNavigationButtons();
-        }
-        else if (actionCommand.equals(SearchPanel.PREVIOUS))
-        {
-            currentMatch = currentMatch - 1;
-            int offset = highlights.get(currentMatch).getStartOffset();
-            scrollToWord(offset);
-
-            updateHighLighter(currentMatch, currentMatch + 1);
-            updateNavigationButtons();
-        }
-    }
-
     private void updateNavigationButtons()
     {
         if (currentMatch == 0)
         {
-            searchPanel.previousEnabled(false);
+            previousAction.setEnabled(false);
         }
         else if (currentMatch >= 1 && currentMatch <= (totalMatch - 1 ))
         {
-            searchPanel.previousEnabled(true);
+            previousAction.setEnabled(true);
         }
         if (currentMatch == (totalMatch - 1))
         {
-            searchPanel.nextEnabled(false);
+            nextAction.setEnabled(false);
         }
         else if (currentMatch < (totalMatch - 1))
         {
-            searchPanel.nextEnabled(true);
+            nextAction.setEnabled(true);
         }
     }
 
@@ -211,5 +228,29 @@ public class Searcher implements DocumentListener, ActionListener, ChangeListene
         {
             search(searchPanel.getSearchWord());
         }
+    }
+
+    @Override
+    public void componentResized(ComponentEvent componentEvent)
+    {
+
+    }
+
+    @Override
+    public void componentMoved(ComponentEvent componentEvent)
+    {
+
+    }
+
+    @Override
+    public void componentShown(ComponentEvent componentEvent)
+    {
+        searchPanel.reset();
+    }
+
+    @Override
+    public void componentHidden(ComponentEvent componentEvent)
+    {
+        textComponent.getHighlighter().removeAllHighlights();
     }
 }

@@ -52,12 +52,9 @@ class StreamPaneView extends JPanel
 {
     private JPanel headerPanel;
     private JPanel contentPanel;
-    private Searcher searcher;
 
     StreamPaneView(boolean isImage, String[] filterTypes, String i, ActionListener listener)
-    {;
-        searcher = new Searcher();
-
+    {
         headerPanel = createHeaderPanel(filterTypes, i, listener);
         contentPanel = new JPanel(new BorderLayout());
         initUI();
@@ -70,9 +67,7 @@ class StreamPaneView extends JPanel
         //TODO change StreamTextView Constructor implementation
         StreamTextView textView = new StreamTextView(toolTipController);
         textView.setDocument(document);
-        searcher.setTextComponent(textView.textComponent);
         contentPanel.add(textView.getView(), BorderLayout.CENTER);
-
         this.validate();
     }
 
@@ -80,7 +75,6 @@ class StreamPaneView extends JPanel
     {
         contentPanel.removeAll();
         contentPanel.add(new StreamImageView(image).getView(), BorderLayout.CENTER);
-
         this.validate();
     }
 
@@ -91,7 +85,6 @@ class StreamPaneView extends JPanel
         filters.addActionListener(actionListener);
 
         JPanel panel = new JPanel(new FlowLayout());
-        panel.add(searcher.getSearchPanel());
         panel.add(filters);
 
         return panel;
