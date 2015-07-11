@@ -162,6 +162,10 @@ public class Searcher implements DocumentListener, ChangeListener, ComponentList
             updateHighLighter(currentMatch, currentMatch - 1);
             updateNavigationButtons();
         }
+        else
+        {
+            searchPanel.updateCounterLabel(0 , 0);
+        }
     }
 
     private void updateNavigationButtons()
