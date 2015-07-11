@@ -17,12 +17,15 @@
 
 package org.apache.pdfbox.tools.pdfdebugger.ui.textsearcher;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentListener;
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -30,9 +33,11 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
+import javax.swing.border.BevelBorder;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -43,10 +48,9 @@ import javax.swing.text.BadLocationException;
  */
 class SearchPanel
 {
-    private JButton nextButton;
-    private JButton previousButton;
     private JCheckBox caseSensitive;
     private JTextField searchField;
+    private JLabel counterLabel;
     private JPanel panel;
 
     SearchPanel(DocumentListener documentListener, ChangeListener changeListener,
@@ -61,10 +65,14 @@ class SearchPanel
         searchField = new JTextField();
         searchField.getDocument().addDocumentListener(documentListener);
 
-        nextButton = new JButton();
+        counterLabel = new JLabel();
+        counterLabel.setVisible(false);
+        counterLabel.setFont(new Font(Font.MONOSPACED, Font.BOLD, 13));
+
+        JButton nextButton = new JButton();
         nextButton.setAction(nextButtonAction);
 
-        previousButton = new JButton();
+        JButton previousButton = new JButton();
         previousButton.setAction(previousButtonAction);
 
         caseSensitive = new JCheckBox("Match case");
@@ -78,6 +86,7 @@ class SearchPanel
         panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
 
         panel.add(searchField);
+        panel.add(counterLabel);
         panel.add(nextButton);
         panel.add(previousButton);
         panel.add(caseSensitive);
@@ -86,6 +95,11 @@ class SearchPanel
         final String SEARCH_NEXT = "showNext";
         panel.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("F3"), SEARCH_NEXT);
         panel.getActionMap().put(SEARCH_NEXT, nextButtonAction);
+
+        final String SEARCH_PREVIOUS = "showPrevious";
+        panel.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(
+                KeyStroke.getKeyStroke(KeyEvent.VK_F3, InputEvent.SHIFT_DOWN_MASK), SEARCH_PREVIOUS);
+        panel.getActionMap().put(SEARCH_PREVIOUS, previousButtonAction);
 
         panel.addComponentListener(compListener);
     }
@@ -109,12 +123,26 @@ class SearchPanel
         return searchField.getText();
     }
 
+    void reset()
+    {
+        counterLabel.setVisible(false);
+    }
+
+    void updateCounterLabel(int now, int total)
+    {
+        if (!counterLabel.isVisible())
+        {
+            counterLabel.setVisible(true);
+        }
+        counterLabel.setText(now + " of " + total);
+    }
+
     JPanel getPanel()
     {
         return panel;
     }
 
-    void reset()
+    public void reOpen()
     {
         searchField.requestFocus();
         String searchKey = searchField.getText();

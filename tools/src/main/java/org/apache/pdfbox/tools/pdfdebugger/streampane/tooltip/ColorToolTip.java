@@ -27,8 +27,10 @@ import org.apache.pdfbox.pdmodel.graphics.color.PDColorSpace;
 /**
  * @author Khyrul Bashar
  */
-abstract class ColorToolTip extends ToolTip
+abstract class ColorToolTip implements ToolTip
 {
+    String markup;
+
     float[] extractColorValues(String rowtext)
     {
         ArrayList<String> words = ToolTipController.getWords(rowtext);
@@ -57,5 +59,11 @@ abstract class ColorToolTip extends ToolTip
                 "<body bgcolor=#ffffff>\n" +
                 "<div style=\"width:50px;height:20px;border:1px; background-color:#"+hexValue+";\"></div></body>\n" +
                 "</html>";
+    }
+
+    @Override
+    public String getToolTipText()
+    {
+        return markup;
     }
 }

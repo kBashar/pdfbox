@@ -22,13 +22,7 @@ import org.apache.pdfbox.pdmodel.PDResources;
 /**
  * @author Khyrul Bashar
  */
-abstract class ToolTip
+interface ToolTip
 {
-    PDResources resources;
-    String markup;
-
-    String getToolTipText()
-    {
-        return markup;
-    }
+    String getToolTipText();
 }

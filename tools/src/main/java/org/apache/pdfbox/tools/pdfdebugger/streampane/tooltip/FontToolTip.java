@@ -25,17 +25,18 @@ import org.apache.pdfbox.pdmodel.font.PDFont;
 /**
  * @author Khyrul Bashar
  */
-public class FontToolTip extends ToolTip
+public class FontToolTip implements ToolTip
 {
     private String fontReferenceName;
+    private String markup;
 
     FontToolTip(PDResources resources, String rowText)
     {
         fontReferenceName = extractFontReference(rowText);
-        initUI();
+        initUI(resources);
     }
 
-    private void initUI()
+    private void initUI(PDResources resources)
     {
         PDFont font = null;
         for (COSName name: resources.getFontNames())
@@ -58,5 +59,11 @@ public class FontToolTip extends ToolTip
     private String extractFontReference(String rowText)
     {
         return rowText.split(" ")[0].substring(1);
+    }
+
+    @Override
+    public String getToolTipText()
+    {
+        return markup;
     }
 }

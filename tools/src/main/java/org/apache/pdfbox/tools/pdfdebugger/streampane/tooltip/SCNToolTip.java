@@ -19,7 +19,6 @@ package org.apache.pdfbox.tools.pdfdebugger.streampane.tooltip;
 
 import java.awt.Color;
 import java.io.IOException;
-import java.util.ArrayList;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.pdmodel.PDResources;
 import org.apache.pdfbox.pdmodel.graphics.color.PDColorSpace;
@@ -31,10 +30,10 @@ class SCNToolTip extends ColorToolTip
 {
     SCNToolTip(PDResources resources, String colorSpaceName, String rowText)
     {
-        createMarkUp(colorSpaceName, rowText);
+        createMarkUp(resources, colorSpaceName, rowText);
     }
 
-    private void createMarkUp(String colorSpaceName, String rowText)
+    private void createMarkUp(PDResources resources, String colorSpaceName, String rowText)
     {
         colorSpaceName = colorSpaceName.substring(1).trim();
         PDColorSpace colorSpace = null;

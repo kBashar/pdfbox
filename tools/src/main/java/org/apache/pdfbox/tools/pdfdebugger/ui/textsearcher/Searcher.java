@@ -137,6 +137,7 @@ public class Searcher implements DocumentListener, ChangeListener, ComponentList
             {
                 nextAction.setEnabled(false);
                 previousAction.setEnabled(false);
+                searchPanel.reset();
                 textComponent.getHighlighter().removeAllHighlights();
                 return;
             }
@@ -181,6 +182,8 @@ public class Searcher implements DocumentListener, ChangeListener, ComponentList
         {
             nextAction.setEnabled(true);
         }
+
+        searchPanel.updateCounterLabel(currentMatch + 1, totalMatch);
     }
 
     private void scrollToWord(int offset)
@@ -245,7 +248,7 @@ public class Searcher implements DocumentListener, ChangeListener, ComponentList
     @Override
     public void componentShown(ComponentEvent componentEvent)
     {
-        searchPanel.reset();
+        searchPanel.reOpen();
     }
 
     @Override
