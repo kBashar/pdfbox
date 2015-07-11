@@ -125,8 +125,13 @@ class StreamTextView implements MouseMotionListener
         @Override
         public void actionPerformed(ActionEvent actionEvent)
         {
-            searcher.getSearchPanel().setVisible(true);
-            mainPanel.validate();
+            if (!searcher.getSearchPanel().isVisible())
+            {
+                searcher.getSearchPanel().setVisible(true);
+                mainPanel.validate();
+                return;
+            }
+            searcher.takeFocus();
         }
     };
 

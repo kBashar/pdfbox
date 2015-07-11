@@ -252,12 +252,17 @@ public class Searcher implements DocumentListener, ChangeListener, ComponentList
     @Override
     public void componentShown(ComponentEvent componentEvent)
     {
-        searchPanel.reOpen();
+        searchPanel.reFocus();
     }
 
     @Override
     public void componentHidden(ComponentEvent componentEvent)
     {
         textComponent.getHighlighter().removeAllHighlights();
+    }
+
+    public void takeFocus()
+    {
+        searchPanel.reFocus();
     }
 }

@@ -139,7 +139,7 @@ class SearchPanel
             counterLabel.setText("No match found");
             return;
         }
-        counterLabel.setText(now + " of " + total);
+        counterLabel.setText(" " + now + " of " + total + " ");
     }
 
     JPanel getPanel()
@@ -147,10 +147,12 @@ class SearchPanel
         return panel;
     }
 
-    public void reOpen()
+    public void reFocus()
     {
         searchField.requestFocus();
         String searchKey = searchField.getText();
         searchField.setText(searchKey);
+        searchField.setSelectionStart(0);
+        searchField.setSelectionEnd(searchField.getText().length());
     }
 }
