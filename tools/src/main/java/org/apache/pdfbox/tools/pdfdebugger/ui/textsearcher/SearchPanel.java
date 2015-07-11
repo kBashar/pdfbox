@@ -134,6 +134,11 @@ class SearchPanel
         {
             counterLabel.setVisible(true);
         }
+        if (total == 0)
+        {
+            counterLabel.setText("No match found");
+            return;
+        }
         counterLabel.setText(now + " of " + total);
     }
 
