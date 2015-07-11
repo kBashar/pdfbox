@@ -35,7 +35,7 @@ import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 /**
  * @author Khyrul Bashar
  */
-public class Stream
+class Stream
 {
     public static final String UNFILTERED = "unfiltered";
     public static final String FILTERED = "Filtered";

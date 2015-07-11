@@ -25,7 +25,7 @@ import org.apache.pdfbox.pdmodel.font.PDFont;
 /**
  * @author Khyrul Bashar
  */
-public class FontToolTip implements ToolTip
+class FontToolTip implements ToolTip
 {
     private String fontReferenceName;
     private String markup;

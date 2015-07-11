@@ -28,7 +28,7 @@ import javax.swing.JTextPane;
 /**
  * @author Khyrul Bashar
  */
-public class StreamImageView
+class StreamImageView
 {
     private final BufferedImage image;
     private JScrollPane scrollPane;
