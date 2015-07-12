@@ -193,7 +193,7 @@ class SearchPanel
 
         JMenuItem closeMenuItem = new JMenuItem();
         closeMenuItem.setAction(closeAction);
-        closeMenuItem.setText("Exit");
+        closeMenuItem.setText("Close");
         closeMenuItem.setAccelerator(closeStroke);
 
         JMenuItem nextFindMenuItem = new JMenuItem();

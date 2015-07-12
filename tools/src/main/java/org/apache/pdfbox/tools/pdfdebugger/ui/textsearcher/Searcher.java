@@ -53,22 +53,6 @@ public class Searcher implements DocumentListener, ChangeListener, ComponentList
     private SearchEngine searchEngine;
     private SearchPanel searchPanel;
     private JTextComponent textComponent;
-    private Action previousAction = new AbstractAction()
-    {
-        @Override
-        public void actionPerformed(ActionEvent actionEvent)
-        {
-            if (totalMatch != 0)
-            {
-                currentMatch = currentMatch - 1;
-                int offset = highlights.get(currentMatch).getStartOffset();
-                scrollToWord(offset);
-
-                updateHighLighter(currentMatch, currentMatch + 1);
-                updateNavigationButtons();
-            }
-        }
-    };
     private Action nextAction = new AbstractAction()
     {
         @Override
@@ -85,25 +69,31 @@ public class Searcher implements DocumentListener, ChangeListener, ComponentList
             }
         }
     };
-
-    public Searcher()
+    private Action previousAction = new AbstractAction()
     {
+        @Override
+        public void actionPerformed(ActionEvent actionEvent)
+        {
+            if (totalMatch != 0)
+            {
+                currentMatch = currentMatch - 1;
+                int offset = highlights.get(currentMatch).getStartOffset();
+                scrollToWord(offset);
+
+                updateHighLighter(currentMatch, currentMatch + 1);
+                updateNavigationButtons();
+            }
+        }
+    };
+
+    public Searcher(JTextComponent textComponent)
+    {
+        this.textComponent = textComponent;
+        searchPanel = new SearchPanel(this, this, this, nextAction, previousAction);
+        searchEngine = new SearchEngine(textComponent.getDocument(), textComponent.getHighlighter(), painter);
+
         nextAction.setEnabled(false);
         previousAction.setEnabled(false);
-        searchPanel = new SearchPanel(this,this, this, nextAction, previousAction);
-    }
-
-    public void setTextComponent(JTextComponent textComponent)
-    {
-        if (textComponent != null)
-        {
-            this.textComponent = textComponent;
-            searchEngine = new SearchEngine(textComponent.getDocument(), textComponent.getHighlighter(), painter);
-        }
-        else
-        {
-            throw new IllegalArgumentException("Null is not acceptable");
-        }
     }
 
     public JPanel getSearchPanel()
@@ -165,7 +155,7 @@ public class Searcher implements DocumentListener, ChangeListener, ComponentList
         }
         else
         {
-            searchPanel.updateCounterLabel(0 , 0);
+            searchPanel.updateCounterLabel(0, 0);
         }
     }
 
@@ -175,7 +165,7 @@ public class Searcher implements DocumentListener, ChangeListener, ComponentList
         {
             previousAction.setEnabled(false);
         }
-        else if (currentMatch >= 1 && currentMatch <= (totalMatch - 1 ))
+        else if (currentMatch >= 1 && currentMatch <= (totalMatch - 1))
         {
             previousAction.setEnabled(true);
         }
@@ -203,7 +193,7 @@ public class Searcher implements DocumentListener, ChangeListener, ComponentList
         }
     }
 
-    private void updateHighLighter(final int presentIndex,final int previousIndex)
+    private void updateHighLighter(final int presentIndex, final int previousIndex)
     {
         if (previousIndex != -1)
         {
@@ -221,7 +211,7 @@ public class Searcher implements DocumentListener, ChangeListener, ComponentList
         try
         {
             highlighter.addHighlight(highLight.getStartOffset(), highLight.getEndOffset(), newPainter);
-            highlights.set(index, highlighter.getHighlights()[highlighter.getHighlights().length-1]);
+            highlights.set(index, highlighter.getHighlights()[highlighter.getHighlights().length - 1]);
         }
         catch (BadLocationException e)
         {
@@ -262,11 +252,6 @@ public class Searcher implements DocumentListener, ChangeListener, ComponentList
         textComponent.getHighlighter().removeAllHighlights();
     }
 
-    public void takeFocus()
-    {
-        searchPanel.reFocus();
-    }
-
     public JMenu getMenu()
     {
         return searchPanel.getSearchMenu();
@@ -280,15 +265,5 @@ public class Searcher implements DocumentListener, ChangeListener, ComponentList
     public void setCloseStroke(JComponent parent, KeyStroke keyStroke)
     {
         searchPanel.setCloseStroke(parent, keyStroke);
-    }
-
-    public void setNextFindStroke(KeyStroke keyStroke)
-    {
-        searchPanel.setNextFindStroke(keyStroke);
-    }
-
-    public void setPreviousStroke(KeyStroke keyStroke)
-    {
-        searchPanel.setPreviousStroke(keyStroke);
     }
 }
