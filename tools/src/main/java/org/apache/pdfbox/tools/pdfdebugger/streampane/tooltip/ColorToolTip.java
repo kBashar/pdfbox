@@ -18,11 +18,7 @@
 package org.apache.pdfbox.tools.pdfdebugger.streampane.tooltip;
 
 import java.awt.Color;
-import java.io.IOException;
 import java.util.ArrayList;
-import org.apache.pdfbox.cos.COSName;
-import org.apache.pdfbox.pdmodel.PDResources;
-import org.apache.pdfbox.pdmodel.graphics.color.PDColorSpace;
 
 /**
  * @author Khyrul Bashar
@@ -30,6 +26,12 @@ import org.apache.pdfbox.pdmodel.graphics.color.PDColorSpace;
 abstract class ColorToolTip implements ToolTip
 {
     String markup;
+
+    static String colorHexValue(Color color)
+    {
+        return String.format("%02x", color.getRed()) + String.format("%02x", color.getGreen()) +
+                String.format("%02x", color.getBlue());
+    }
 
     float[] extractColorValues(String rowtext)
     {
@@ -49,15 +51,6 @@ abstract class ColorToolTip implements ToolTip
             return null;
         }
         return values;
-    }
-
-    static String colorHexValue(Color color)
-    {
-        StringBuilder builder = new StringBuilder();
-        builder.append(String.format("%02x", color.getRed()));
-        builder.append(String.format("%02x", color.getGreen()));
-        builder.append(String.format("%02x", color.getBlue()));
-        return builder.toString();
     }
 
     String getMarkUp(String hexValue)

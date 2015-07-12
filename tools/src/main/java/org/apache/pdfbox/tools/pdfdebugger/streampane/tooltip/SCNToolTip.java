@@ -26,7 +26,7 @@ import org.apache.pdfbox.pdmodel.graphics.color.PDColorSpace;
 /**
  * @author Khyrul Bashar
  */
-class SCNToolTip extends ColorToolTip
+final class SCNToolTip extends ColorToolTip
 {
     SCNToolTip(PDResources resources, String colorSpaceName, String rowText)
     {

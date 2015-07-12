@@ -25,7 +25,7 @@ import org.apache.pdfbox.pdmodel.font.PDFont;
 /**
  * @author Khyrul Bashar
  */
-class FontToolTip implements ToolTip
+final class FontToolTip implements ToolTip
 {
     private String fontReferenceName;
     private String markup;
@@ -53,7 +53,10 @@ class FontToolTip implements ToolTip
                 }
             }
         }
-        markup = "<html>"+font.getName()+"</html>";
+        if (font != null)
+        {
+            markup = "<html>" + font.getName() + "</html>";
+        }
     }
 
     private String extractFontReference(String rowText)

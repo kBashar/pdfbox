@@ -18,14 +18,11 @@
 package org.apache.pdfbox.tools.pdfdebugger.streampane.tooltip;
 
 import java.awt.Color;
-import java.io.IOException;
-import java.util.ArrayList;
-import org.apache.pdfbox.pdmodel.PDResources;
 
 /**
  * @author Khyrul Bashar
  */
-class RGToolTip extends ColorToolTip
+final class RGToolTip extends ColorToolTip
 {
     public RGToolTip(String rowText)
     {

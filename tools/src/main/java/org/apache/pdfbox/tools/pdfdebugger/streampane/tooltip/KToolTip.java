@@ -23,13 +23,12 @@ import java.awt.color.ICC_Profile;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import org.apache.pdfbox.pdmodel.PDResources;
 import org.apache.pdfbox.pdmodel.graphics.color.PDDeviceCMYK;
 
 /**
  * @author Khyrul Bashar
  */
-class KToolTip extends ColorToolTip
+final class KToolTip extends ColorToolTip
 {
     KToolTip(String rowText)
     {
