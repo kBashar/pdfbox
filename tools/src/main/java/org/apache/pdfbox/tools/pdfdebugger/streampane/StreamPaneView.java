@@ -48,8 +48,7 @@ class StreamPaneView extends JPanel
     {
         contentPanel.removeAll();
 
-        StreamTextView textView = new StreamTextView(toolTipController);
-        textView.setDocument(document);
+        StreamTextView textView = new StreamTextView(document, toolTipController);
         contentPanel.add(textView.getView(), BorderLayout.CENTER);
         this.validate();
     }
