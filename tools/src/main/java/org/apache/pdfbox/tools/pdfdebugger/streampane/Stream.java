@@ -148,9 +148,8 @@ class Stream
             nameListBuilder.append(filters.get(i).getName()).append(" & ");
         }
         nameListBuilder.delete(nameListBuilder.lastIndexOf("&"), nameListBuilder.length());
-        String itemCommand = "Keep " + nameListBuilder.toString() + "...";
 
-        return itemCommand;
+        return "Keep " + nameListBuilder.toString() + "...";
     }
 
     private List<String> getStopFilterList(final int stopFilterIndex)
@@ -165,10 +164,6 @@ class Stream
 
     private boolean isImageStream(COSDictionary dic)
     {
-        if (dic.containsKey(COSName.SUBTYPE) && dic.getCOSName(COSName.SUBTYPE).equals(COSName.IMAGE))
-        {
-            return true;
-        }
-        return false;
+        return dic.containsKey(COSName.SUBTYPE) && dic.getCOSName(COSName.SUBTYPE).equals(COSName.IMAGE);
     }
 }

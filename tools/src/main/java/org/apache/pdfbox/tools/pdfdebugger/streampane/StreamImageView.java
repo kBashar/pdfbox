@@ -17,13 +17,11 @@
 package org.apache.pdfbox.tools.pdfdebugger.streampane;
 
 import java.awt.Dimension;
-import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JScrollPane;
-import javax.swing.JTextPane;
 
 /**
  * @author Khyrul Bashar
@@ -33,7 +31,7 @@ class StreamImageView
     private final BufferedImage image;
     private JScrollPane scrollPane;
 
-    public StreamImageView(BufferedImage image)
+    StreamImageView(BufferedImage image)
     {
         this.image = image;
         initUI();
