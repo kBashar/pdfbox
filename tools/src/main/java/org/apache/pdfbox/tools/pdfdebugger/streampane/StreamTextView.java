@@ -108,6 +108,7 @@ class StreamTextView implements MouseMotionListener, AncestorListener
     {
         if (ancestorEvent.getAncestor().equals(mainPanel))
         {
+            System.out.println("In the ancestor listener");
             JFrame frame = (JFrame) SwingUtilities.getRoot(mainPanel);
             frame.getJMenuBar().add(searcher.getMenu());
         }
