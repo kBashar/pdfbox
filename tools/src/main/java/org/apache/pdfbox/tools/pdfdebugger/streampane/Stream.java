@@ -126,11 +126,14 @@ class Stream
 
         PDStream pdStream = new PDStream(stream);
 
-        int filtersSize = pdStream.getFilters().size();
-
-        for (int i = filtersSize - 1; i >= 1; i--)
+        if (pdStream.getFilters() != null)
         {
-            partialFilters.put(getPartialStreamCommand(i), getStopFilterList(i));
+            int filtersSize = pdStream.getFilters().size();
+
+            for (int i = filtersSize - 1; i >= 1; i--)
+            {
+                partialFilters.put(getPartialStreamCommand(i), getStopFilterList(i));
+            }
         }
         return partialFilters;
     }
