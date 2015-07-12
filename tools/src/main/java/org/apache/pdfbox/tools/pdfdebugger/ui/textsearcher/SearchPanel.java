@@ -119,7 +119,7 @@ class SearchPanel
         closeAction.setEnabled(false);
         crossButton.setHideActionText(true);
         crossButton.setText("X");
-        crossButton.setToolTipText("Exit");
+        crossButton.setToolTipText("Close");
 
 
         panel = new JPanel();
@@ -161,7 +161,7 @@ class SearchPanel
         }
         if (total == 0)
         {
-            counterLabel.setText("No match found");
+            counterLabel.setText(" No match found ");
             nextAction.setEnabled(false);
             return;
         }
