@@ -56,8 +56,11 @@ class SCNToolTip extends ColorToolTip
             try
             {
                 float[] rgbValues = colorSpace.toRGB(extractColorValues(rowText));
-                Color color = new Color(rgbValues[0], rgbValues[1], rgbValues[2]);
-                markup = getMarkUp(colorHexValue(color));
+                if (rgbValues != null)
+                {
+                    Color color = new Color(rgbValues[0], rgbValues[1], rgbValues[2]);
+                    markup = getMarkUp(colorHexValue(color));
+                }
             }
             catch (IOException e)
             {

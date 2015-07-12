@@ -35,7 +35,10 @@ class RGToolTip extends ColorToolTip
     private void createMarkUp(String rowText)
     {
             float[] rgbValues = extractColorValues(rowText);
-            Color color = new Color(rgbValues[0], rgbValues[1], rgbValues[2]);
-            markup = getMarkUp(colorHexValue(color));
+            if (rgbValues != null)
+            {
+                Color color = new Color(rgbValues[0], rgbValues[1], rgbValues[2]);
+                markup = getMarkUp(colorHexValue(color));
+            }
     }
 }

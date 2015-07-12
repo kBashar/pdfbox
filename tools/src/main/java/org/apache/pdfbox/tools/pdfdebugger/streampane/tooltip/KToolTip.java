@@ -39,14 +39,17 @@ class KToolTip extends ColorToolTip
     private void createMarkUp(String rowText)
     {
         float[] colorValues = extractColorValues(rowText);
-        try
+        if (colorValues != null)
         {
-            float[] rgbValues = getICCColorSpace().toRGB(colorValues);
-            markup = getMarkUp(colorHexValue(new Color(rgbValues[0], rgbValues[1], rgbValues[2])));
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
+            try
+            {
+                float[] rgbValues = getICCColorSpace().toRGB(colorValues);
+                markup = getMarkUp(colorHexValue(new Color(rgbValues[0], rgbValues[1], rgbValues[2])));
+            }
+            catch (IOException e)
+            {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -58,9 +61,8 @@ class KToolTip extends ColorToolTip
         {
             throw new IOException("Default CMYK color profile could not be loaded");
         }
-        ICC_ColorSpace awtColorSpace = new ICC_ColorSpace(iccProfile);
 
-        return awtColorSpace;
+        return new ICC_ColorSpace(iccProfile);
     }
 
     protected ICC_Profile getICCProfile() throws IOException

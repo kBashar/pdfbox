@@ -33,7 +33,10 @@ class GToolTip extends ColorToolTip
     private void createMarkUp(String rowText)
     {
         float[] colorValues = extractColorValues(rowText);
-        Color color = new Color(colorValues[0], colorValues[0], colorValues[0]);
-        markup = getMarkUp(colorHexValue(color));
+        if (colorValues != null)
+        {
+            Color color = new Color(colorValues[0], colorValues[0], colorValues[0]);
+            markup = getMarkUp(colorHexValue(color));
+        }
     }
 }

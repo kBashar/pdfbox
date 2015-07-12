@@ -37,9 +37,16 @@ abstract class ColorToolTip implements ToolTip
         words.remove(words.size()-1);
         float[] values = new float[words.size()];
         int index = 0;
-        for (String word : words)
+        try
         {
-            values[index++] = Float.parseFloat(word);
+            for (String word : words)
+            {
+                values[index++] = Float.parseFloat(word);
+            }
+        }
+        catch (NumberFormatException e)
+        {
+            return null;
         }
         return values;
     }
