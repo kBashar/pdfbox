@@ -25,7 +25,10 @@ import java.util.ArrayList;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JCheckBox;
+import javax.swing.JComponent;
+import javax.swing.JMenu;
 import javax.swing.JPanel;
+import javax.swing.KeyStroke;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
@@ -40,30 +43,17 @@ import javax.swing.text.JTextComponent;
  */
 public class Searcher implements DocumentListener, ChangeListener, ComponentListener
 {
+    private final static Highlighter.HighlightPainter painter =
+            new DefaultHighlighter.DefaultHighlightPainter(Color.yellow);
+    private final Highlighter.HighlightPainter selectionPainter =
+            new DefaultHighlighter.DefaultHighlightPainter(new Color(109, 216, 26));
     private int totalMatch = 0;
     private int currentMatch = -1;
     private ArrayList<Highlighter.Highlight> highlights;
-
     private SearchEngine searchEngine;
     private SearchPanel searchPanel;
     private JTextComponent textComponent;
-    private Action nextAction = new AbstractAction("Next")
-    {
-        @Override
-        public void actionPerformed(ActionEvent actionEvent)
-        {
-            if (totalMatch != 0)
-            {
-                currentMatch = currentMatch + 1;
-                int offset = highlights.get(currentMatch).getStartOffset();
-                scrollToWord(offset);
-
-                updateHighLighter(currentMatch, currentMatch - 1);
-                updateNavigationButtons();
-            }
-        }
-    };
-    private Action previousAction = new AbstractAction("Previous")
+    private Action previousAction = new AbstractAction()
     {
         @Override
         public void actionPerformed(ActionEvent actionEvent)
@@ -79,11 +69,22 @@ public class Searcher implements DocumentListener, ChangeListener, ComponentList
             }
         }
     };
+    private Action nextAction = new AbstractAction()
+    {
+        @Override
+        public void actionPerformed(ActionEvent actionEvent)
+        {
+            if (totalMatch != 0)
+            {
+                currentMatch = currentMatch + 1;
+                int offset = highlights.get(currentMatch).getStartOffset();
+                scrollToWord(offset);
 
-    private final static Highlighter.HighlightPainter painter =
-            new DefaultHighlighter.DefaultHighlightPainter(Color.yellow);
-    private final Highlighter.HighlightPainter selectionPainter =
-            new DefaultHighlighter.DefaultHighlightPainter(new Color(109, 216, 26));
+                updateHighLighter(currentMatch, currentMatch - 1);
+                updateNavigationButtons();
+            }
+        }
+    };
 
     public Searcher()
     {
@@ -264,5 +265,30 @@ public class Searcher implements DocumentListener, ChangeListener, ComponentList
     public void takeFocus()
     {
         searchPanel.reFocus();
+    }
+
+    public JMenu getMenu()
+    {
+        return searchPanel.getSearchMenu();
+    }
+
+    public void setFindStroke(JComponent parent, KeyStroke keyStroke)
+    {
+        searchPanel.setFindStroke(parent, keyStroke);
+    }
+
+    public void setCloseStroke(JComponent parent, KeyStroke keyStroke)
+    {
+        searchPanel.setCloseStroke(parent, keyStroke);
+    }
+
+    public void setNextFindStroke(KeyStroke keyStroke)
+    {
+        searchPanel.setNextFindStroke(keyStroke);
+    }
+
+    public void setPreviousStroke(KeyStroke keyStroke)
+    {
+        searchPanel.setPreviousStroke(keyStroke);
     }
 }

@@ -17,38 +17,28 @@
 
 package org.apache.pdfbox.tools.pdfdebugger.streampane;
 
-import java.awt.BorderLayout;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Point;
-import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
-import javax.swing.AbstractAction;
-import javax.swing.Action;
 import javax.swing.BoxLayout;
 import javax.swing.JComponent;
-import javax.swing.JLabel;
+import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
-import javax.swing.JToolTip;
 import javax.swing.KeyStroke;
-import javax.swing.text.BadLocationException;
+import javax.swing.SwingUtilities;
+import javax.swing.event.AncestorEvent;
+import javax.swing.event.AncestorListener;
 import javax.swing.text.JTextComponent;
 import javax.swing.text.StyledDocument;
-import javax.swing.text.Utilities;
 import org.apache.pdfbox.tools.pdfdebugger.streampane.tooltip.ToolTipController;
 import org.apache.pdfbox.tools.pdfdebugger.ui.textsearcher.Searcher;
 
 /**
  * @author Khyrul Bashar
  */
-class StreamTextView implements MouseMotionListener
+class StreamTextView implements MouseMotionListener, AncestorListener
 {
     private ToolTipController tTController;
 
@@ -80,16 +70,10 @@ class StreamTextView implements MouseMotionListener
         mainPanel.add(scrollPane);
 
         searcher.getSearchPanel().setVisible(false);
+        searcher.setFindStroke(mainPanel, KeyStroke.getKeyStroke(KeyEvent.VK_F, KeyEvent.CTRL_DOWN_MASK));
+        searcher.setCloseStroke(mainPanel, KeyStroke.getKeyStroke(KeyEvent.VK_F, KeyEvent.CTRL_DOWN_MASK | KeyEvent.SHIFT_DOWN_MASK));
 
-        final String SHOW_PANEL= "showPanel";
-        KeyStroke showStroke = KeyStroke.getKeyStroke(KeyEvent.VK_F, KeyEvent.CTRL_DOWN_MASK);
-        mainPanel.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(showStroke, SHOW_PANEL);
-        mainPanel.getActionMap().put(SHOW_PANEL, showAction);
-
-        final String CLOSE_PANEL= "closePanel";
-        KeyStroke closeStroke = KeyStroke.getKeyStroke(KeyEvent.VK_F, KeyEvent.CTRL_DOWN_MASK | KeyEvent.SHIFT_DOWN_MASK);
-        mainPanel.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(closeStroke, CLOSE_PANEL);
-        mainPanel.getActionMap().put(CLOSE_PANEL, closeAction);
+        mainPanel.addAncestorListener(this);
 
     }
 
@@ -107,7 +91,6 @@ class StreamTextView implements MouseMotionListener
     @Override
     public void mouseDragged(MouseEvent mouseEvent)
     {
-
     }
 
     @Override
@@ -120,27 +103,30 @@ class StreamTextView implements MouseMotionListener
         }
     }
 
-    Action showAction = new AbstractAction()
+    @Override
+    public void ancestorAdded(AncestorEvent ancestorEvent)
     {
-        @Override
-        public void actionPerformed(ActionEvent actionEvent)
+        if (ancestorEvent.getAncestor().equals(mainPanel))
         {
-            if (!searcher.getSearchPanel().isVisible())
-            {
-                searcher.getSearchPanel().setVisible(true);
-                mainPanel.validate();
-                return;
-            }
-            searcher.takeFocus();
+            JFrame frame = (JFrame) SwingUtilities.getRoot(mainPanel);
+            frame.getJMenuBar().add(searcher.getMenu());
         }
-    };
+    }
 
-    Action closeAction = new AbstractAction()
+    @Override
+    public void ancestorRemoved(AncestorEvent ancestorEvent)
     {
-        @Override
-        public void actionPerformed(ActionEvent actionEvent)
+        if (ancestorEvent.getAncestor().equals(mainPanel))
         {
-            searcher.getSearchPanel().setVisible(false);
+            JFrame frame = (JFrame) SwingUtilities.getRoot(mainPanel);
+            frame.getJMenuBar().remove(searcher.getMenu());
+            SwingUtilities.updateComponentTreeUI(frame.getJMenuBar());
         }
-    };
+    }
+
+    @Override
+    public void ancestorMoved(AncestorEvent ancestorEvent)
+    {
+
+    }
 }
