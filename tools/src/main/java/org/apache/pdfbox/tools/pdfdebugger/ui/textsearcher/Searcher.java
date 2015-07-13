@@ -47,29 +47,13 @@ public class Searcher implements DocumentListener, ChangeListener, ComponentList
             new DefaultHighlighter.DefaultHighlightPainter(Color.yellow);
     private final Highlighter.HighlightPainter selectionPainter =
             new DefaultHighlighter.DefaultHighlightPainter(new Color(109, 216, 26));
+    private final SearchEngine searchEngine;
+    private final SearchPanel searchPanel;
+    private final JTextComponent textComponent;
     private int totalMatch = 0;
     private int currentMatch = -1;
     private ArrayList<Highlighter.Highlight> highlights;
-    private SearchEngine searchEngine;
-    private SearchPanel searchPanel;
-    private JTextComponent textComponent;
-    private Action nextAction = new AbstractAction()
-    {
-        @Override
-        public void actionPerformed(ActionEvent actionEvent)
-        {
-            if (totalMatch != 0)
-            {
-                currentMatch = currentMatch + 1;
-                int offset = highlights.get(currentMatch).getStartOffset();
-                scrollToWord(offset);
-
-                updateHighLighter(currentMatch, currentMatch - 1);
-                updateNavigationButtons();
-            }
-        }
-    };
-    private Action previousAction = new AbstractAction()
+    private final Action previousAction = new AbstractAction()
     {
         @Override
         public void actionPerformed(ActionEvent actionEvent)
@@ -81,6 +65,22 @@ public class Searcher implements DocumentListener, ChangeListener, ComponentList
                 scrollToWord(offset);
 
                 updateHighLighter(currentMatch, currentMatch + 1);
+                updateNavigationButtons();
+            }
+        }
+    };
+    private final Action nextAction = new AbstractAction()
+    {
+        @Override
+        public void actionPerformed(ActionEvent actionEvent)
+        {
+            if (totalMatch != 0)
+            {
+                currentMatch = currentMatch + 1;
+                int offset = highlights.get(currentMatch).getStartOffset();
+                scrollToWord(offset);
+
+                updateHighLighter(currentMatch, currentMatch - 1);
                 updateNavigationButtons();
             }
         }
@@ -143,7 +143,7 @@ public class Searcher implements DocumentListener, ChangeListener, ComponentList
     private void search(String word)
     {
         highlights = searchEngine.search(word, searchPanel.isCaseSensitive());
-        if (highlights.size() != 0)
+        if (!highlights.isEmpty())
         {
             totalMatch = highlights.size();
             currentMatch = 0;

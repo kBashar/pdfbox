@@ -27,16 +27,14 @@ import org.apache.pdfbox.pdmodel.font.PDFont;
  */
 final class FontToolTip implements ToolTip
 {
-    private String fontReferenceName;
     private String markup;
 
     FontToolTip(PDResources resources, String rowText)
     {
-        fontReferenceName = extractFontReference(rowText);
-        initUI(resources);
+        initUI(extractFontReference(rowText), resources);
     }
 
-    private void initUI(PDResources resources)
+    private void initUI(String fontReferenceName, PDResources resources)
     {
         PDFont font = null;
         for (COSName name: resources.getFontNames())

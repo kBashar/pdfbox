@@ -46,10 +46,9 @@ import org.apache.pdfbox.tools.pdfdebugger.streampane.tooltip.ToolTipController;
  */
 public class StreamPane implements ActionListener
 {
+    private final StreamPaneView view;
+    private final Stream stream;
     private ToolTipController tTController;
-
-    private StreamPaneView view;
-    private Stream stream;
     private String currentFilter;
     private PDResources resources;
     private boolean isContentStream = false;
@@ -111,7 +110,7 @@ public class StreamPane implements ActionListener
     {
 
         private final String filterKey;
-        private InputStream inputStream;
+        private final InputStream inputStream;
 
         private DocumentCreator(String filterKey)
         {

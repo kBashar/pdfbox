@@ -27,10 +27,10 @@ import javax.swing.text.Highlighter;
  */
 class SearchEngine
 {
-    private Document document;
-    private Highlighter highlighter;
+    private final Document document;
+    private final Highlighter highlighter;
 
-    private Highlighter.HighlightPainter painter;
+    private final Highlighter.HighlightPainter painter;
 
     public SearchEngine(Document document, Highlighter highlighter, Highlighter.HighlightPainter painter)
     {

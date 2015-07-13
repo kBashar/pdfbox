@@ -34,8 +34,8 @@ import org.apache.pdfbox.tools.pdfdebugger.streampane.tooltip.ToolTipController;
  */
 class StreamPaneView extends JPanel
 {
-    private JPanel headerPanel;
-    private JPanel contentPanel;
+    private final JPanel headerPanel;
+    private final JPanel contentPanel;
 
     StreamPaneView(boolean isImage, String[] filterTypes, String i, ActionListener listener)
     {

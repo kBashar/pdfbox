@@ -40,7 +40,7 @@ import org.apache.pdfbox.tools.pdfdebugger.ui.textsearcher.Searcher;
  */
 class StreamTextView implements MouseMotionListener, AncestorListener
 {
-    private ToolTipController tTController;
+    private final ToolTipController tTController;
 
     private JPanel mainPanel;
     private JTextComponent textComponent;

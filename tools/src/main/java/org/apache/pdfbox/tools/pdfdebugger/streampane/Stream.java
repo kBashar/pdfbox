@@ -42,8 +42,8 @@ class Stream
     public static final String IMAGE = "Image";
 
     private final COSStream stream;
-    private boolean isImage;
-    private Map<String, List<String>> filters;
+    private final boolean isImage;
+    private final Map<String, List<String>> filters;
 
     public Stream(COSStream cosStream)
     {
@@ -140,12 +140,12 @@ class Stream
 
     private String getPartialStreamCommand(final int indexOfStopFilter)
     {
-        List<COSName> filters = new PDStream(stream).getFilters();
+        List<COSName> avaiablrFilters = new PDStream(stream).getFilters();
 
         StringBuilder nameListBuilder = new StringBuilder();
-        for (int i = indexOfStopFilter; i < filters.size(); i++)
+        for (int i = indexOfStopFilter; i < avaiablrFilters.size(); i++)
         {
-            nameListBuilder.append(filters.get(i).getName()).append(" & ");
+            nameListBuilder.append(avaiablrFilters.get(i).getName()).append(" & ");
         }
         nameListBuilder.delete(nameListBuilder.lastIndexOf("&"), nameListBuilder.length());
 
@@ -154,10 +154,10 @@ class Stream
 
     private List<String> getStopFilterList(final int stopFilterIndex)
     {
-        List<COSName> filters = new PDStream(stream).getFilters();
+        List<COSName> avaiablrFilters = new PDStream(stream).getFilters();
 
         final List<String> stopFilters = new ArrayList<String>(1);
-        stopFilters.add(filters.get(stopFilterIndex).getName());
+        stopFilters.add(avaiablrFilters.get(stopFilterIndex).getName());
 
         return stopFilters;
     }
