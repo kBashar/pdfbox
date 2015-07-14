@@ -13,7 +13,6 @@ import org.apache.pdfbox.pdmodel.font.PDSimpleFont;
  */
 public class FontEncodingPane
 {
-    private JPanel panel;
     private SimpleFont fontPane;
 
     public FontEncodingPane(COSName fontName, COSDictionary dictionary)
@@ -25,10 +24,6 @@ public class FontEncodingPane
             if (font instanceof PDSimpleFont)
             {
                 fontPane = new SimpleFont((PDSimpleFont)font);
-            }
-            else
-            {
-                System.out.println("not");
             }
         }
         catch (IOException e)
