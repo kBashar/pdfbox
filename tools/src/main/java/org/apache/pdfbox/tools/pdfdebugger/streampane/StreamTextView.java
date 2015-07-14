@@ -37,28 +37,34 @@ import org.apache.pdfbox.tools.pdfdebugger.ui.textsearcher.Searcher;
 
 /**
  * @author Khyrul Bashar
+ * A class that provides the container for the texts when stream is shown in stream pane.
  */
 class StreamTextView implements MouseMotionListener, AncestorListener
 {
-    private ToolTipController tTController;
+    private final ToolTipController tTController;
 
     private JPanel mainPanel;
     private JTextComponent textComponent;
     private Searcher searcher;
 
-    StreamTextView(ToolTipController controller)
+    /**
+     * Constructor.
+     * @param document StyledDocument instance which is supposed to be shown in the pane.
+     * @param controller ToolTipController instance.
+     */
+    StreamTextView(StyledDocument document, ToolTipController controller)
     {
         tTController = controller;
-        searcher = new Searcher();
-        initUI();
+        initUI(document);
     }
 
-    private void initUI()
+    private void initUI(StyledDocument document)
     {
         mainPanel = new JPanel();
 
-        textComponent = new JTextPane();
+        textComponent = new JTextPane(document);
         textComponent.addMouseMotionListener(this);
+        searcher = new Searcher(textComponent);
 
         JScrollPane scrollPane = new JScrollPane(textComponent);
 
@@ -75,12 +81,6 @@ class StreamTextView implements MouseMotionListener, AncestorListener
 
         mainPanel.addAncestorListener(this);
 
-    }
-
-    public void setDocument(StyledDocument document)
-    {
-        textComponent.setDocument(document);
-        searcher.setTextComponent(textComponent);
     }
 
     JComponent getView()
@@ -108,9 +108,9 @@ class StreamTextView implements MouseMotionListener, AncestorListener
     {
         if (ancestorEvent.getAncestor().equals(mainPanel))
         {
-            System.out.println("In the ancestor listener");
             JFrame frame = (JFrame) SwingUtilities.getRoot(mainPanel);
             frame.getJMenuBar().add(searcher.getMenu());
+            SwingUtilities.updateComponentTreeUI(frame.getJMenuBar());
         }
     }
 

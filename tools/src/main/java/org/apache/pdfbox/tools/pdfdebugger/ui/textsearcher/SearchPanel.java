@@ -39,23 +39,21 @@ import javax.swing.event.DocumentListener;
 
 /**
  * @author Khyrul Bashar
+ * A class that provides the search pane.
  */
 class SearchPanel
 {
+    private final Action nextAction;
+    private final Action previousAction;
     private JCheckBox caseSensitive;
     private JTextField searchField;
     private JLabel counterLabel;
     private JPanel panel;
     private JMenu searchMenu;
-
     private KeyStroke findStroke;
     private KeyStroke closeStroke;
     private KeyStroke nextStroke;
     private KeyStroke previousStroke;
-
-
-    private Action nextAction;
-    private Action previousAction;
     private Action closeAction = new AbstractAction()
     {
         @Override
@@ -65,7 +63,7 @@ class SearchPanel
             closeAction.setEnabled(false);
         }
     };
-    private Action findAction = new AbstractAction()
+    private final Action findAction = new AbstractAction()
     {
         @Override
         public void actionPerformed(ActionEvent actionEvent)
@@ -81,6 +79,14 @@ class SearchPanel
     };
 
 
+    /**
+     * Constructor.
+     * @param documentListener DocumentListener instance.
+     * @param changeListener ChangeListener instance.
+     * @param compListener ComponentListener instance.
+     * @param nextAction Action instance for next find.
+     * @param previousAction Action instance for previous find.
+     */
     SearchPanel(DocumentListener documentListener, ChangeListener changeListener,
                 ComponentListener compListener, Action nextAction, Action previousAction)
     {
@@ -193,7 +199,7 @@ class SearchPanel
 
         JMenuItem closeMenuItem = new JMenuItem();
         closeMenuItem.setAction(closeAction);
-        closeMenuItem.setText("Exit");
+        closeMenuItem.setText("Close");
         closeMenuItem.setAccelerator(closeStroke);
 
         JMenuItem nextFindMenuItem = new JMenuItem();
@@ -206,16 +212,16 @@ class SearchPanel
         previousMenuItem.setText("Find previous");
         previousMenuItem.setAccelerator(previousStroke);
 
-        JMenu searchMenu = new JMenu("Search");
+        JMenu menu = new JMenu("Search");
 
-        searchMenu.add(findMenuItem);
-        searchMenu.addSeparator();
-        searchMenu.add(nextFindMenuItem);
-        searchMenu.add(previousMenuItem);
-        searchMenu.addSeparator();
-        searchMenu.add(closeMenuItem);
+        menu.add(findMenuItem);
+        menu.addSeparator();
+        menu.add(nextFindMenuItem);
+        menu.add(previousMenuItem);
+        menu.addSeparator();
+        menu.add(closeMenuItem);
 
-        return searchMenu;
+        return menu;
     }
 
     JMenu getSearchMenu()

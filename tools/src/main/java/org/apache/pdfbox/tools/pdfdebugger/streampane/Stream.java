@@ -34,6 +34,8 @@ import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 
 /**
  * @author Khyrul Bashar
+ *
+ * A class that provides the COSStream in different version and related informations.
  */
 class Stream
 {
@@ -42,29 +44,35 @@ class Stream
     public static final String IMAGE = "Image";
 
     private final COSStream stream;
-    private boolean isImage;
-    private Map<String, List<String>> filters;
+    private final boolean isImage;
+    private final Map<String, List<String>> filters;
 
-    public Stream(COSStream cosStream)
+    /**
+     * Constructor.
+     * @param cosStream COSStream instance.
+     */
+    Stream(COSStream cosStream)
     {
         this.stream = cosStream;
         this.isImage = isImageStream(cosStream);
 
-        filters = new HashMap<String, List<String>>();
-        filters.put(UNFILTERED, null);
-        filters.putAll(getPartiallyFilteredStreamList());
-        filters.put(FILTERED, null);
-        if (isImage)
-        {
-            filters.put(IMAGE, null);
-        }
+        filters = createFilterList(cosStream);
     }
 
+    /**
+     * Return if this is stream is an Image XObject.
+     * @return true if this an image and false otherwise.
+     */
     public boolean isImage()
     {
         return isImage;
     }
 
+    /**
+     * Return the available filter list. Only "Unfiltered" is returned if there is no filter and in case of
+     * XObject image type stream "Image" is also included in the list.
+     * @return An array of String.
+     */
     public String[] getFilterList ()
     {
         Set<String> set = filters.keySet();
@@ -75,8 +83,8 @@ class Stream
     /**
      * Returns a InputStream of a partially filtered stream.
      *
-     * @param
-     * @return a byte array.
+     * @param key is an instance of String which tells which version of stream should be returned.
+     * @return an InputStream.
      */
     public InputStream getStream(String key)
     {
@@ -102,6 +110,11 @@ class Stream
         return null;
     }
 
+    /**
+     * Provide the image for stream. The stream must be image XObject.
+     * @param resources PDResources for the XObject.
+     * @return A BufferedImage.
+     */
     public BufferedImage getImage(PDResources resources)
     {
         try
@@ -116,56 +129,56 @@ class Stream
         return null;
     }
 
-    /**
-     * @param
-     * @return
-     */
-    private Map<String, List<String>> getPartiallyFilteredStreamList()
+    private HashMap<String, List<String>> createFilterList(COSStream stream)
     {
-        Map<String, List<String>> partialFilters = new HashMap<String, List<String>>();
+        HashMap<String, List<String>> filterList = new HashMap<String, List<String>>();
 
+        filterList.put(UNFILTERED, null);
         PDStream pdStream = new PDStream(stream);
 
-        int filtersSize = pdStream.getFilters().size();
-
-        for (int i = filtersSize - 1; i >= 1; i--)
+        if (pdStream.getFilters() != null)
         {
-            partialFilters.put(getPartialStreamCommand(i), getStopFilterList(i));
+            int filtersSize = pdStream.getFilters().size();
+
+            for (int i = filtersSize - 1; i >= 1; i--)
+            {
+                filterList.put(getPartialStreamCommand(i), getStopFilterList(i));
+            }
+            filterList.put(FILTERED, null);
         }
-        return partialFilters;
+        if (isImage)
+        {
+            filterList.put(IMAGE, null);
+        }
+        return filterList;
     }
 
     private String getPartialStreamCommand(final int indexOfStopFilter)
     {
-        List<COSName> filters = new PDStream(stream).getFilters();
+        List<COSName> avaiablrFilters = new PDStream(stream).getFilters();
 
         StringBuilder nameListBuilder = new StringBuilder();
-        for (int i = indexOfStopFilter; i < filters.size(); i++)
+        for (int i = indexOfStopFilter; i < avaiablrFilters.size(); i++)
         {
-            nameListBuilder.append(filters.get(i).getName()).append(" & ");
+            nameListBuilder.append(avaiablrFilters.get(i).getName()).append(" & ");
         }
         nameListBuilder.delete(nameListBuilder.lastIndexOf("&"), nameListBuilder.length());
-        String itemCommand = "Keep " + nameListBuilder.toString() + "...";
 
-        return itemCommand;
+        return "Keep " + nameListBuilder.toString() + "...";
     }
 
     private List<String> getStopFilterList(final int stopFilterIndex)
     {
-        List<COSName> filters = new PDStream(stream).getFilters();
+        List<COSName> avaiablrFilters = new PDStream(stream).getFilters();
 
         final List<String> stopFilters = new ArrayList<String>(1);
-        stopFilters.add(filters.get(stopFilterIndex).getName());
+        stopFilters.add(avaiablrFilters.get(stopFilterIndex).getName());
 
         return stopFilters;
     }
 
     private boolean isImageStream(COSDictionary dic)
     {
-        if (dic.containsKey(COSName.SUBTYPE) && dic.getCOSName(COSName.SUBTYPE).equals(COSName.IMAGE))
-        {
-            return true;
-        }
-        return false;
+        return dic.containsKey(COSName.SUBTYPE) && dic.getCOSName(COSName.SUBTYPE).equals(COSName.IMAGE);
     }
 }

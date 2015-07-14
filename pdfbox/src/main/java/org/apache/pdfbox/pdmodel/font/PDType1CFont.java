@@ -114,7 +114,7 @@ public class PDType1CFont extends PDSimpleFont
         }
         else
         {
-            FontMapping<FontBoxFont> mapping = FontMapper.getFontBoxFont(fd);
+            FontMapping<FontBoxFont> mapping = FontMapper.getFontBoxFont(getBaseFont(), fd);
             genericFont = mapping.getFont();
             
             if (mapping.isFallback())
@@ -137,7 +137,7 @@ public class PDType1CFont extends PDSimpleFont
     /**
      * Returns the PostScript name of the font.
      */
-    public String getBaseFont()
+    public final String getBaseFont()
     {
         return dict.getNameAsString(COSName.BASE_FONT);
     }
@@ -157,7 +157,13 @@ public class PDType1CFont extends PDSimpleFont
     }
 
     @Override
-    public String getName()
+    public boolean hasGlyph(String name) throws IOException
+    {
+        return genericFont.hasGlyph(name);
+    }
+
+    @Override
+    public final String getName()
     {
         return getBaseFont();
     }
@@ -187,6 +193,7 @@ public class PDType1CFont extends PDSimpleFont
             // extract from Type1 font/substitute
             if (genericFont instanceof EncodedFont)
             {
+                //FIXME dead instanceof
                 return Type1Encoding.fromFontBox(((EncodedFont) genericFont).getEncoding());
             }
             else
@@ -204,22 +211,31 @@ public class PDType1CFont extends PDSimpleFont
     }
 
     @Override
-    public Matrix getFontMatrix()
+    public final Matrix getFontMatrix()
     {
         if (fontMatrix == null)
         {
-            if (cffFont != null)
+            List<Number> numbers = null;
+            try
             {
-                List<Number> numbers = cffFont.getFontMatrix();
-                if (numbers != null && numbers.size() == 6)
-                {
-                    fontMatrix = new Matrix(numbers.get(0).floatValue(), numbers.get(1).floatValue(),
-                            numbers.get(2).floatValue(), numbers.get(3).floatValue(),
-                            numbers.get(4).floatValue(), numbers.get(5).floatValue());
-                    return fontMatrix;
-                }
+                numbers = genericFont.getFontMatrix();
             }
-            fontMatrix = super.getFontMatrix();
+            catch (IOException e)
+            {
+                fontMatrix = DEFAULT_FONT_MATRIX;
+            }
+
+            if (numbers != null && numbers.size() == 6)
+            {
+                fontMatrix = new Matrix(
+                        numbers.get(0).floatValue(), numbers.get(1).floatValue(),
+                        numbers.get(2).floatValue(), numbers.get(3).floatValue(),
+                        numbers.get(4).floatValue(), numbers.get(5).floatValue());
+            }
+            else
+            {
+                return super.getFontMatrix();
+            }
         }
         return fontMatrix;
     }

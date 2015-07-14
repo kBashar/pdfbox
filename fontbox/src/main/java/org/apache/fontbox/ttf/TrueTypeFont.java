@@ -16,7 +16,6 @@
  */
 package org.apache.fontbox.ttf;
 
-import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
 import java.io.Closeable;
 import java.io.IOException;
@@ -108,6 +107,8 @@ public class TrueTypeFont implements FontBoxFont, Closeable
 
     /**
      * Returns the war bytes of the given table.
+     * @param table the table to read.
+     * @throws IOException if there was an error accessing the table.
      */
     public synchronized byte[] getTableBytes(TTFTable table) throws IOException
     {
@@ -127,6 +128,7 @@ public class TrueTypeFont implements FontBoxFont, Closeable
      * This will get the naming table for the true type font.
      * 
      * @return The naming table.
+     * @throws IOException if there was an error reading the table.
      */
     public synchronized NamingTable getNaming() throws IOException
     {
@@ -142,6 +144,7 @@ public class TrueTypeFont implements FontBoxFont, Closeable
      * Get the postscript table for this TTF.
      * 
      * @return The postscript table.
+     * @throws IOException if there was an error reading the table.
      */
     public synchronized PostScriptTable getPostScript() throws IOException
     {
@@ -157,6 +160,7 @@ public class TrueTypeFont implements FontBoxFont, Closeable
      * Get the OS/2 table for this TTF.
      * 
      * @return The OS/2 table.
+     * @throws IOException if there was an error reading the table.
      */
     public synchronized OS2WindowsMetricsTable getOS2Windows() throws IOException
     {
@@ -172,6 +176,7 @@ public class TrueTypeFont implements FontBoxFont, Closeable
      * Get the maxp table for this TTF.
      * 
      * @return The maxp table.
+     * @throws IOException if there was an error reading the table.
      */
     public synchronized MaximumProfileTable getMaximumProfile() throws IOException
     {
@@ -187,6 +192,7 @@ public class TrueTypeFont implements FontBoxFont, Closeable
      * Get the head table for this TTF.
      * 
      * @return The head table.
+     * @throws IOException if there was an error reading the table.
      */
     public synchronized HeaderTable getHeader() throws IOException
     {
@@ -202,6 +208,7 @@ public class TrueTypeFont implements FontBoxFont, Closeable
      * Get the hhea table for this TTF.
      * 
      * @return The hhea table.
+     * @throws IOException if there was an error reading the table.
      */
     public synchronized HorizontalHeaderTable getHorizontalHeader() throws IOException
     {
@@ -217,6 +224,7 @@ public class TrueTypeFont implements FontBoxFont, Closeable
      * Get the hmtx table for this TTF.
      * 
      * @return The hmtx table.
+     * @throws IOException if there was an error reading the table.
      */
     public synchronized HorizontalMetricsTable getHorizontalMetrics() throws IOException
     {
@@ -232,6 +240,7 @@ public class TrueTypeFont implements FontBoxFont, Closeable
      * Get the loca table for this TTF.
      * 
      * @return The loca table.
+     * @throws IOException if there was an error reading the table.
      */
     public synchronized IndexToLocationTable getIndexToLocation() throws IOException
     {
@@ -247,6 +256,7 @@ public class TrueTypeFont implements FontBoxFont, Closeable
      * Get the glyf table for this TTF.
      * 
      * @return The glyf table.
+     * @throws IOException if there was an error reading the table.
      */
     public synchronized GlyphTable getGlyph() throws IOException
     {
@@ -262,7 +272,8 @@ public class TrueTypeFont implements FontBoxFont, Closeable
      * Get the "cmap" table for this TTF.
      * 
      * @return The "cmap" table.
-     */
+    * @throws IOException if there was an error reading the table.
+      */
     public synchronized CmapTable getCmap() throws IOException
     {
         CmapTable cmap = (CmapTable)tables.get( CmapTable.TAG );
@@ -277,6 +288,7 @@ public class TrueTypeFont implements FontBoxFont, Closeable
      * Get the vhea table for this TTF.
      * 
      * @return The vhea table.
+     * @throws IOException if there was an error reading the table.
      */
     public synchronized VerticalHeaderTable getVerticalHeader() throws IOException
     {
@@ -292,6 +304,7 @@ public class TrueTypeFont implements FontBoxFont, Closeable
      * Get the vmtx table for this TTF.
      * 
      * @return The vmtx table.
+     * @throws IOException if there was an error reading the table.
      */
     public synchronized VerticalMetricsTable getVerticalMetrics() throws IOException
     {
@@ -307,6 +320,7 @@ public class TrueTypeFont implements FontBoxFont, Closeable
      * Get the VORG table for this TTF.
      * 
      * @return The VORG table.
+     * @throws IOException if there was an error reading the table.
      */
     public synchronized VerticalOriginTable getVerticalOrigin() throws IOException
     {
@@ -322,6 +336,7 @@ public class TrueTypeFont implements FontBoxFont, Closeable
      * Get the "kern" table for this TTF.
      * 
      * @return The "kern" table.
+     * @throws IOException if there was an error reading the table.
      */
     public synchronized KerningTable getKerning() throws IOException
     {
@@ -368,6 +383,7 @@ public class TrueTypeFont implements FontBoxFont, Closeable
      * Returns the number of glyphs (MaximuProfile.numGlyphs).
      * 
      * @return the number of glyphs
+     * @throws IOException if there was an error reading the table.
      */
     public int getNumberOfGlyphs() throws IOException
     {
@@ -391,6 +407,7 @@ public class TrueTypeFont implements FontBoxFont, Closeable
      * Returns the units per EM (Header.unitsPerEm).
      * 
      * @return units per EM
+     * @throws IOException if there was an error reading the table.
      */
     public int getUnitsPerEm() throws IOException
     {
@@ -415,6 +432,7 @@ public class TrueTypeFont implements FontBoxFont, Closeable
      * 
      * @param gid the GID
      * @return the width
+     * @throws IOException if there was an error reading the metrics table.
      */
     public int getAdvanceWidth(int gid) throws IOException
     {
@@ -435,6 +453,7 @@ public class TrueTypeFont implements FontBoxFont, Closeable
      * 
      * @param gid the GID
      * @return the height
+     * @throws IOException if there was an error reading the metrics table.
      */
     public int getAdvanceHeight(int gid) throws IOException
     {
@@ -544,6 +563,7 @@ public class TrueTypeFont implements FontBoxFont, Closeable
 
     /**
      * Returns the GID for the given PostScript name, if the "post" table is present.
+     * @param name the PostScript name.
      */
     public int nameToGID(String name) throws IOException
     {
@@ -613,14 +633,8 @@ public class TrueTypeFont implements FontBoxFont, Closeable
         }
         else
         {
-            GeneralPath path = glyph.getPath();
-
-            // scale to 1000upem, per PostScript convention
-            float scale = 1000f / getUnitsPerEm();
-            AffineTransform atScale = AffineTransform.getScaleInstance(scale, scale);
-            path.transform(atScale);
-
-            return path;
+            // must scaled by caller using FontMatrix
+            return glyph.getPath();
         }
     }
 
@@ -628,14 +642,7 @@ public class TrueTypeFont implements FontBoxFont, Closeable
     public float getWidth(String name) throws IOException
     {
         Integer gid = nameToGID(name);
-
-        int width = getAdvanceWidth(gid);
-        int unitsPerEM = getUnitsPerEm();
-        if (unitsPerEM != 1000)
-        {
-            width *= 1000f / unitsPerEM;
-        }
-        return width;
+        return getAdvanceWidth(gid);
     }
 
     @Override

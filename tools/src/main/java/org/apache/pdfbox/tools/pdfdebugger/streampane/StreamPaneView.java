@@ -34,26 +34,41 @@ import org.apache.pdfbox.tools.pdfdebugger.streampane.tooltip.ToolTipController;
  */
 class StreamPaneView extends JPanel
 {
-    private JPanel headerPanel;
-    private JPanel contentPanel;
+    private final JPanel headerPanel;
+    private final JPanel contentPanel;
 
-    StreamPaneView(boolean isImage, String[] filterTypes, String i, ActionListener listener)
+    /**
+     * Constructor.
+     * @param filterTypes String array that provides a list of key for available stream versions.
+     * @param initialChoice String instance. Initial choice for showing in the pane.
+     * @param listener ActionListener that listens for stream version choice changing.
+     */
+    StreamPaneView(String[] filterTypes, String initialChoice, ActionListener listener)
     {
-        headerPanel = createHeaderPanel(filterTypes, i, listener);
+        headerPanel = createHeaderPanel(filterTypes, initialChoice, listener);
         contentPanel = new JPanel(new BorderLayout());
         initUI();
     }
 
+    /**
+     * This shows the stream in text for any of  it's filtered or unfiltered version.
+     * @param document StyledDocument instance that holds the text.
+     * @param toolTipController ToolTipController instance.
+     */
     void showStreamText(StyledDocument document, ToolTipController toolTipController)
     {
         contentPanel.removeAll();
 
-        StreamTextView textView = new StreamTextView(toolTipController);
-        textView.setDocument(document);
+        StreamTextView textView = new StreamTextView(document, toolTipController);
         contentPanel.add(textView.getView(), BorderLayout.CENTER);
         this.validate();
     }
 
+
+    /**
+     * This shows the stream as image.
+     * @param image BufferedImage instance that holds the text.
+     */
     void showStreamImage(BufferedImage image)
     {
         contentPanel.removeAll();

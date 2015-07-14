@@ -18,13 +18,17 @@
 package org.apache.pdfbox.tools.pdfdebugger.streampane.tooltip;
 
 import java.awt.Color;
-import org.apache.pdfbox.pdmodel.PDResources;
 
 /**
  * @author Khyrul Bashar
+ * A class that provide tooltip for G and g.
  */
-class GToolTip extends ColorToolTip
+final class GToolTip extends ColorToolTip
 {
+    /**
+     * Constructor.
+     * @param rowText String instance.
+     */
     GToolTip(String rowText)
     {
         createMarkUp(rowText);

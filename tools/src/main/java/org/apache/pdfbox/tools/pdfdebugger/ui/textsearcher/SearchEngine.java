@@ -21,24 +21,36 @@ import java.util.ArrayList;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.Highlighter;
+import javax.swing.text.JTextComponent;
 
 /**
  * @author Khyrul Bashar
+ * A class that search a word in the JTextComponent and if find highlights them.
  */
 class SearchEngine
 {
-    private Document document;
-    private Highlighter highlighter;
+    private final Document document;
+    private final Highlighter highlighter;
+    private final Highlighter.HighlightPainter painter;
 
-    private Highlighter.HighlightPainter painter;
-
-    public SearchEngine(Document document, Highlighter highlighter, Highlighter.HighlightPainter painter)
+    /**
+     * Constructor.
+     * @param textComponent JTextComponent that is to be searched.
+     * @param painter Highlighter.HighlightPainter instance to paint the highlights.
+     */
+    SearchEngine(JTextComponent textComponent, Highlighter.HighlightPainter painter)
     {
-        this.document = document;
-        this.highlighter = highlighter;
+        this.document = textComponent.getDocument();
+        this.highlighter = textComponent.getHighlighter();
         this.painter = painter;
     }
 
+    /**
+     * Search the word.
+     * @param searchKey String. Search word.
+     * @param isCaseSensitive boolean. If search is case sensitive.
+     * @return ArrayList<Highlighter.Highlight>.
+     */
     public ArrayList<Highlighter.Highlight> search(String searchKey, boolean isCaseSensitive)
     {
         ArrayList<Highlighter.Highlight> highlights = new ArrayList<Highlighter.Highlight>();

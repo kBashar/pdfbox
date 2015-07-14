@@ -62,6 +62,7 @@ public class PDCIDFontType0 extends PDCIDFont
      * Constructor.
      * 
      * @param fontDictionary The font dictionary according to the PDF specification.
+     * @param parent The parent font.
      */
     public PDCIDFontType0(COSDictionary fontDictionary, PDType0Font parent) throws IOException
     {
@@ -119,22 +120,26 @@ public class PDCIDFontType0 extends PDCIDFont
         else
         {
             // find font or substitute
-            CIDFontMapping mapping = FontMapper.getCIDFont(getFontDescriptor(), getCIDSystemInfo());
-
+            CIDFontMapping mapping = FontMapper.getCIDFont(getBaseFont(), getFontDescriptor(),
+                                                           getCIDSystemInfo());
+            FontBoxFont font;
             if (mapping.isCIDFont())
             {
                 cidFont = (CFFCIDFont)mapping.getFont().getCFF().getFont();
                 t1Font = null;
+                font = cidFont;
             }
             else
             {
                 cidFont = null;
                 t1Font = mapping.getTrueTypeFont();
+                font = t1Font;
             }
 
             if (mapping.isFallback())
             {
-                LOG.warn("Using fallback for CID-keyed font " + getBaseFont());
+                LOG.warn("Using fallback " + font.getName() + " for CID-keyed font " +
+                         getBaseFont());
             }
             isEmbedded = false;
             isDamaged = fontIsDamaged;
@@ -144,7 +149,7 @@ public class PDCIDFontType0 extends PDCIDFont
     }
     
     @Override
-    public Matrix getFontMatrix()
+    public final Matrix getFontMatrix()
     {
         if (fontMatrix == null)
         {

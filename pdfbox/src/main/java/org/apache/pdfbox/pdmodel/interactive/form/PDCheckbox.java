@@ -17,10 +17,16 @@
 package org.apache.pdfbox.pdmodel.interactive.form;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSName;
+import org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotationWidget;
+import org.apache.pdfbox.pdmodel.interactive.annotation.PDAppearanceDictionary;
+import org.apache.pdfbox.pdmodel.interactive.annotation.PDAppearanceEntry;
 
 /**
  * A check box toggles between two states, on and off.
@@ -60,70 +66,99 @@ public final class PDCheckbox extends PDButton
      */
     public boolean isChecked()
     {
-        return getValue();
+        return getValue().compareTo(getOnValue()) == 0;
     }
 
     /**
      * Checks the check box.
+     * 
+     * @throws IOException if the appearance couldn't be generated.
      */
     public void check() throws IOException
     {
-        setValue(true);
+        setValue(getOnValue());
     }
 
     /**
      * Unchecks the check box.
+     * 
+     * @throws IOException if the appearance couldn't be generated.
      */
     public void unCheck() throws IOException
     {
-        setValue(false);
+        setValue(COSName.Off.getName());
     }
 
     /**
-     * Returns true if this field is checked.
+     * Returns the fields value entry.
      * 
-     * @return True if checked
+     * @return the fields value entry.
      */
-    public boolean getValue()
+    public String getValue()
     {
+        // the dictionary shall be a name object but it might not be
+        // so don't assume it is.
         COSBase value = getInheritableAttribute(COSName.V);
-        return value instanceof COSName && value.equals(COSName.YES);
+        if (value instanceof COSName)
+        {
+            return ((COSName)value).getName();
+        }
+        else
+        {
+            return "";
+        }
     }
 
     /**
      * Returns the default value, if any.
      *
-     * @return True if checked, false if not checked, null if missing.
+     * @return the fields default value.
      */
-    public Boolean getDefaultValue()
+    public String getDefaultValue()
     {
+        // the dictionary shall be a name object but it might not be
+        // so don't assume it is.
         COSBase value = getInheritableAttribute(COSName.DV);
-        if (value == null)
+        if (value instanceof COSName)
         {
-            return null;
+            return ((COSName)value).getName();
         }
-        return value instanceof COSName && value.equals(COSName.YES);
+        else
+        {
+            return "";
+        }
     }
 
     @Override
     public String getValueAsString()
     {
-        return getValue() ? "Yes" : "Off";
+        return getValue();
     }
 
     /**
      * Sets the checked value of this field.
+     * 
+     * <p>To retrieve the potential On value use {@link #getOnValue()} or
+     * {@link #getOnValues()}. The Off value shall always be 'Off'.</p>
      *
-     * @param value True if checked
-     * @throws IOException if the value could not be set
+     * @param value matching the On or Off state of the checkbox.
+     * @throws IOException if the appearance couldn't be generated.
+     * @throws IllegalArgumentException if the value is not a valid option for the checkbox.
      */
-    public void setValue(boolean value) throws IOException
+    public void setValue(String value) throws IOException
     {
-        COSName name = value ? COSName.YES : COSName.OFF;
-        dictionary.setItem(COSName.V, name);
-        
-        // update the appearance state (AS)
-        dictionary.setItem(COSName.AS, name);
+        if (value.compareTo(getOnValue()) != 0 && value.compareTo(COSName.Off.getName()) != 0)
+        {
+            throw new IllegalArgumentException(value + " is not a valid option for the checkbox " + getFullyQualifiedName());
+        }
+        else
+        {
+            // Update the field value and the appearance state.
+            // Both are necessary to work properly with different viewers.
+            COSName name = COSName.getPDFName(value);
+            dictionary.setItem(COSName.V, name);
+            dictionary.setItem(COSName.AS, name);
+        }
         
         applyChange();
     }
@@ -131,12 +166,80 @@ public final class PDCheckbox extends PDButton
     /**
      * Sets the default value.
      *
-     * @param value True if checked
-     * @throws IOException if the value could not be set
+     * @see #setValue(String)
+     * @param value matching the On or Off state of the checkbox.
      */
-    public void setDefaultValue(boolean value) throws IOException
+    public void setDefaultValue(String value)
     {
-        COSName name = value ? COSName.YES : COSName.OFF;
-        dictionary.setItem(COSName.DV, name);
+        if (value.compareTo(getOnValue()) != 0 && value.compareTo(COSName.Off.getName()) != 0)
+        {
+            throw new IllegalArgumentException(value + " is not a valid option for the checkbox " + getFullyQualifiedName());
+        }
+        else
+        {
+            dictionary.setName(COSName.DV, value);
+        }
     }
+
+    /**
+     * Get the value which sets the check box to the On state.
+     * 
+     * <p>The On value should be 'Yes' but other values are possible
+     * so we need to look for that. On the other hand the Off value shall
+     * always be 'Off'. If not set or not part of the normal appearance keys
+     * 'Off' is the default</p>
+     *
+     * @return the value setting the check box to the On state. 
+     *          If an empty string is returned there is no appearance definition.
+     */
+    public String getOnValue()
+    {
+        PDAnnotationWidget widget = this.getWidgets().get(0);
+        PDAppearanceDictionary apDictionary = widget.getAppearance();
+        
+        String onValue = "";
+        if (apDictionary != null) 
+        {
+            PDAppearanceEntry normalAppearance = apDictionary.getNormalAppearance();
+            if (normalAppearance != null)
+            {
+                Set<COSName> entries = normalAppearance.getSubDictionary().keySet();
+                for (COSName entry : entries)
+                {
+                    if (COSName.Off.compareTo(entry) != 0)
+                    {
+                        onValue = entry.getName();
+                    }
+                }
+            }
+        }
+        return onValue;
+    }
+    
+    /**
+     * Get the values which sets the check box to the On state.
+     * 
+     * <p>This is a convenience function to provide a similar method to 
+     * {@link PDRadioButton} </p>
+     *
+     * @see #getOnValue()
+     * @return the value setting the check box to the On state. 
+     *          If an empty List is returned there is no appearance definition.
+     */
+    public Set<String> getOnValues()
+    {
+        String onValue = getOnValue();
+        
+        if (onValue.isEmpty())
+        {
+            return Collections.emptySet();
+        }
+        else
+        {
+            Set<String> onValues = new HashSet<String>();
+            onValues.add(onValue);
+            return onValues;
+        }
+    }
+    
 }

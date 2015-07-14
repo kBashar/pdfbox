@@ -19,20 +19,11 @@ package org.apache.pdfbox.tools.pdfdebugger.streampane;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.StringTokenizer;
 import java.util.concurrent.ExecutionException;
 import javax.swing.JComboBox;
-import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingWorker;
 import javax.swing.text.BadLocationException;
@@ -45,33 +36,33 @@ import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.COSStream;
 import org.apache.pdfbox.cos.COSString;
-import org.apache.pdfbox.io.IOUtils;
 import org.apache.pdfbox.io.RandomAccessBuffer;
 import org.apache.pdfbox.pdfparser.PDFStreamParser;
-import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDResources;
 import org.apache.pdfbox.tools.pdfdebugger.streampane.tooltip.ToolTipController;
-import org.apache.pdfbox.tools.util.FileOpenSaveDialog;
 
 /**
  * @author Khyrul Bashar
+ * A class that shows the COSStream.
  */
 public class StreamPane implements ActionListener
 {
+    private final StreamPaneView view;
+    private final Stream stream;
     private ToolTipController tTController;
-
-    private StreamPaneView view;
-    private Stream stream;
-    private String currentFilter;
     private PDResources resources;
-    private boolean isContentStream = false;
+    private final boolean isContentStream;
 
+    /**
+     * Constructor.
+     * @param cosStream COSStream instance.
+     * @param streamKey COSName instance. This is the type .
+     * @param resourcesDic COSDictionary instance that holds the resource dictionary for the stream.
+     */
     public StreamPane(COSStream cosStream, COSName streamKey, COSDictionary resourcesDic)
     {
-        if (COSName.CONTENTS.equals(streamKey))
-        {
-            isContentStream = true;
-        }
+        isContentStream = COSName.CONTENTS.equals(streamKey);
+
         this.stream = new Stream(cosStream);
         if (resourcesDic != null)
         {
@@ -79,9 +70,16 @@ public class StreamPane implements ActionListener
             tTController = new ToolTipController(resources);
         }
 
-        currentFilter = Stream.UNFILTERED;
-        view = new StreamPaneView(stream.isImage(), stream.getFilterList(), currentFilter, this);
-        requestStreamText(currentFilter);
+        if (stream.isImage())
+        {
+            view = new StreamPaneView(stream.getFilterList(), Stream.IMAGE, this);
+            requestImageShowing();
+        }
+        else
+        {
+            view = new StreamPaneView(stream.getFilterList(), Stream.UNFILTERED, this);
+            requestStreamText(Stream.UNFILTERED);
+        }
     }
 
     public JPanel getPanel()
@@ -94,8 +92,8 @@ public class StreamPane implements ActionListener
     {
         if (actionEvent.getActionCommand().equals("comboBoxChanged"))
         {
-            JComboBox<String> comboBox = (JComboBox<String>) actionEvent.getSource();
-            currentFilter = (String) comboBox.getSelectedItem();
+            JComboBox comboBox = (JComboBox) actionEvent.getSource();
+            String currentFilter = (String) comboBox.getSelectedItem();
 
             if (currentFilter.equals(Stream.IMAGE))
             {
@@ -119,17 +117,19 @@ public class StreamPane implements ActionListener
         new DocumentCreator(command).execute();
     }
 
+    /**
+     * A SwingWorker extended class that convert the stream to text loads in a document.
+     */
     private class DocumentCreator extends SwingWorker<StyledDocument, Integer>
     {
 
-        private InputStream inputStream;
         private final String filterKey;
+        private final InputStream inputStream;
 
         private DocumentCreator(String filterKey)
         {
             this.filterKey = filterKey;
             this.inputStream = stream.getStream(filterKey);
-            ;
         }
 
         @Override
@@ -199,7 +199,7 @@ public class StreamPane implements ActionListener
         {
             StyledDocument docu = new DefaultStyledDocument();
 
-            PDFStreamParser parser = null;
+            PDFStreamParser parser;
             try
             {
                 parser = new PDFStreamParser(new RandomAccessBuffer(inputStream));
@@ -212,7 +212,7 @@ public class StreamPane implements ActionListener
                     }
                     else
                     {
-                        String str = "";
+                        String str;
                         if (obj instanceof COSName)
                         {
                             str = "/" + ((COSName) obj).getName();
@@ -254,7 +254,7 @@ public class StreamPane implements ActionListener
         private String getCOSVlaue(Object obj)
         {
             String str = obj.toString();
-            str = str.substring(str.indexOf("{")+1, str.length()-1);
+            str = str.substring(str.indexOf('{')+1, str.length()-1);
             if (obj instanceof COSString)
             {
                 str = "("+str+")";

@@ -27,6 +27,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotationWidget;
+import org.apache.pdfbox.pdmodel.interactive.annotation.PDAppearanceDictionary;
 
 /**
  * A button field represents an interactive control on the screen
@@ -116,55 +118,6 @@ public abstract class PDButton extends PDTerminalField
     }
     
     /**
-     * This will get the option values - the "Opt" entry.
-     * 
-     * <p>The option values are used to define the export values
-     * for the field to 
-     * <ul>
-     *  <li>hold values in non-Latin writing systems as name objects, which represent the field value, are limited
-     *      to PDFDocEncoding
-     *  </li>
-     *  <li>allow radio buttons having the same export value to be handled independently
-     *  </li>
-     * </ul>
-     * </p>
-     * 
-     * @return List containing all possible options. If there is no Opt entry an empty list will be returned.
-     */
-    public List<String> getOptions()
-    {
-        COSBase value = getInheritableAttribute(COSName.OPT);
-        if (value instanceof COSString)
-        {
-            List<String> array = new ArrayList<String>();
-            array.add(((COSString) value).getString());
-            return array;
-        }
-        else if (value instanceof COSArray)
-        {
-            return COSArrayList.convertCOSStringCOSArrayToList((COSArray)value);
-        }
-        return Collections.emptyList();
-    }
-    
-    /**
-     * This will set the options.
-     * 
-     * @see #getOptions()
-     * @param values List containing all possible options. Supplying null list will remove the Opt entry.
-     */
-    public void setOptions(List<String> values)
-    {
-        COSArray cosValues = null;
-        if (values != null)
-        {
-            cosValues = COSArrayList.convertStringListToCOSStringCOSArray(values);
-        }
-        dictionary.setItem(COSName.OPT, cosValues);
-    }
-
-    
-    /**
      * This will get the export values.
      * 
      * <p>The export values are defined in the field dictionaries /Opt key.</p>
@@ -206,7 +159,7 @@ public abstract class PDButton extends PDTerminalField
      */
     public void setExportValues(List<String> values)
     {
-        COSArray cosValues = null;
+        COSArray cosValues;
         if (values != null && !values.isEmpty())
         {
             cosValues = COSArrayList.convertStringListToCOSStringCOSArray(values);
@@ -221,7 +174,16 @@ public abstract class PDButton extends PDTerminalField
     @Override
     void constructAppearances() throws IOException
     {
-        // TODO: implement appearance generation for buttons
-        throw new UnsupportedOperationException("not implemented");
-    }
+        for (PDAnnotationWidget widget : getWidgets())
+        {
+            PDAppearanceDictionary appearance = widget.getAppearance();
+            if (appearance == null || appearance.getNormalAppearance() == null)
+            {
+                // TODO: implement appearance generation for radio buttons
+                throw new UnsupportedOperationException("Appearance generation is not implemented yet, see PDFBOX-2849");
+            }
+        }
+    }  
+
+    
 }

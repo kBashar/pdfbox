@@ -17,23 +17,27 @@
 package org.apache.pdfbox.tools.pdfdebugger.streampane;
 
 import java.awt.Dimension;
-import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JScrollPane;
-import javax.swing.JTextPane;
 
 /**
  * @author Khyrul Bashar
+ *
+ * A class that provides the container for the image in case of image showing in stream pane.
  */
 class StreamImageView
 {
     private final BufferedImage image;
     private JScrollPane scrollPane;
 
-    public StreamImageView(BufferedImage image)
+    /**
+     * constructor.
+     * @param image instance of BufferedImage.
+     */
+    StreamImageView(BufferedImage image)
     {
         this.image = image;
         initUI();
@@ -47,6 +51,10 @@ class StreamImageView
         scrollPane.setPreferredSize(new Dimension(300, 400));
     }
 
+    /**
+     * Returns the view i.e container containing image.
+     * @return A JComponent instance.
+     */
     JComponent getView()
     {
         return scrollPane;

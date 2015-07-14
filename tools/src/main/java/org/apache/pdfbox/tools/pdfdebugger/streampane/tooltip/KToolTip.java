@@ -23,14 +23,19 @@ import java.awt.color.ICC_Profile;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import org.apache.pdfbox.pdmodel.PDResources;
 import org.apache.pdfbox.pdmodel.graphics.color.PDDeviceCMYK;
 
 /**
  * @author Khyrul Bashar
+ *  A class that provide tooltip for K and k.
  */
-class KToolTip extends ColorToolTip
+final class KToolTip extends ColorToolTip
+
 {
+    /**
+     * Constructor.
+     * @param rowText String instance.
+     */
     KToolTip(String rowText)
     {
         createMarkUp(rowText);

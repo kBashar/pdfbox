@@ -137,7 +137,8 @@ public class PDCIDFontType2 extends PDCIDFont
         if (ttfFont == null)
         {
             // find font or substitute
-            CIDFontMapping mapping = FontMapper.getCIDFont(getFontDescriptor(), getCIDSystemInfo());
+            CIDFontMapping mapping = FontMapper.getCIDFont(getBaseFont(), getFontDescriptor(),
+                                                           getCIDSystemInfo());
 
             if (mapping.isCIDFont())
             {
@@ -150,7 +151,7 @@ public class PDCIDFontType2 extends PDCIDFont
 
             if (mapping.isFallback())
             {
-                LOG.warn("Using fallback for CID-keyed TrueType font " + getBaseFont());
+                LOG.warn("Using fallback font " + ttfFont.getName() + " for CID-keyed TrueType font " + getBaseFont());
             }
         }
         ttf = ttfFont;
@@ -275,7 +276,7 @@ public class PDCIDFontType2 extends PDCIDFont
                     LOG.warn("Trying to map multi-byte character using 'cmap', result will be poor");
                 }
                 
-                // a non-embedded font always has a cmap (otherwise ExternalFonts won't load it)
+                // a non-embedded font always has a cmap (otherwise FontMapper won't load it)
                 return cmap.getGlyphId(unicode.codePointAt(0));
             }
         }
@@ -405,7 +406,7 @@ public class PDCIDFontType2 extends PDCIDFont
     @Override
     public GeneralPath getPath(int code) throws IOException
     {
-        if (ttf instanceof OpenTypeFont)
+        if (ttf instanceof OpenTypeFont && ((OpenTypeFont)ttf).isPostScript())
         {
             int cid = codeToCID(code);
             Type2CharString charstring = ((OpenTypeFont)ttf).getCFF().getFont().getType2CharString(cid);

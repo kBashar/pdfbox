@@ -18,19 +18,32 @@
 package org.apache.pdfbox.tools.pdfdebugger.streampane.tooltip;
 
 import java.awt.Color;
-import java.io.IOException;
 import java.util.ArrayList;
-import org.apache.pdfbox.cos.COSName;
-import org.apache.pdfbox.pdmodel.PDResources;
-import org.apache.pdfbox.pdmodel.graphics.color.PDColorSpace;
 
 /**
  * @author Khyrul Bashar
+ * An abstract class for tooltips of color operators.
  */
 abstract class ColorToolTip implements ToolTip
 {
     String markup;
 
+    /**
+     * provides the Hex value for a Color instance.
+     * @param color
+     * @return
+     */
+    static String colorHexValue(Color color)
+    {
+        return String.format("%02x", color.getRed()) + String.format("%02x", color.getGreen()) +
+                String.format("%02x", color.getBlue());
+    }
+
+    /**
+     * Extract Color values from the row for which tooltip is going to be shown.
+     * @param rowtext String instance,
+     * @return float array containing color values.
+     */
     float[] extractColorValues(String rowtext)
     {
         ArrayList<String> words = ToolTipController.getWords(rowtext);
@@ -51,15 +64,11 @@ abstract class ColorToolTip implements ToolTip
         return values;
     }
 
-    static String colorHexValue(Color color)
-    {
-        StringBuilder builder = new StringBuilder();
-        builder.append(String.format("%02x", color.getRed()));
-        builder.append(String.format("%02x", color.getGreen()));
-        builder.append(String.format("%02x", color.getBlue()));
-        return builder.toString();
-    }
-
+    /**
+     * Create a html string that actually shows a colored rect.
+     * @param hexValue
+     * @return String instance, In html format.
+     */
     String getMarkUp(String hexValue)
     {
          return  "<html>\n" +

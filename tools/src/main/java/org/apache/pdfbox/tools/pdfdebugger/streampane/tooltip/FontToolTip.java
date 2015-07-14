@@ -24,19 +24,24 @@ import org.apache.pdfbox.pdmodel.font.PDFont;
 
 /**
  * @author Khyrul Bashar
+ * A class that provieds tooltip text for font. This shows the name of the font.
  */
-class FontToolTip implements ToolTip
+final class FontToolTip implements ToolTip
 {
-    private String fontReferenceName;
     private String markup;
 
+    /**
+     * Constructor.
+     * @param resources PDResources instance. Which corresponds the resource dictionary containing
+     *                  the concern font.
+     * @param rowText String instance of the tooltip row.
+     */
     FontToolTip(PDResources resources, String rowText)
     {
-        fontReferenceName = extractFontReference(rowText);
-        initUI(resources);
+        initUI(extractFontReference(rowText), resources);
     }
 
-    private void initUI(PDResources resources)
+    private void initUI(String fontReferenceName, PDResources resources)
     {
         PDFont font = null;
         for (COSName name: resources.getFontNames())
@@ -53,7 +58,10 @@ class FontToolTip implements ToolTip
                 }
             }
         }
-        markup = "<html>"+font.getName()+"</html>";
+        if (font != null)
+        {
+            markup = "<html>" + font.getName() + "</html>";
+        }
     }
 
     private String extractFontReference(String rowText)

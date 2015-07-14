@@ -17,36 +17,44 @@
 
 package org.apache.pdfbox.pdmodel.font;
 
-import java.lang.ref.SoftReference;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import org.apache.fontbox.FontBoxFont;
+import java.io.Serializable;
 
 /**
- * A cache for system fonts. This allows PDFBox to manage caching for a {@link FontProvider}.
- * PDFBox is free to purge this cache at will.
+ * Represents a CIDSystemInfo for the FontMapper API.
  *
  * @author John Hewson
  */
-public final class FontCache
+public final class CIDSystemInfo implements Serializable
 {
-    private final Map<FontInfo, SoftReference<FontBoxFont>> cache =
-            new ConcurrentHashMap<FontInfo, SoftReference<FontBoxFont>>();
+    private final String registry;
+    private final String ordering;
+    private final int supplement;
 
-    /**
-     * Adds the given FontBox font to the cache.
-     */
-    public void addFont(FontInfo info, FontBoxFont font)
+    CIDSystemInfo(String registry, String ordering, int supplement)
     {
-        cache.put(info, new SoftReference<FontBoxFont>(font));
+        this.registry = registry;
+        this.ordering = ordering;
+        this.supplement = supplement;
+    }
+    
+    public String getRegistry()
+    {
+        return registry;
     }
 
-    /**
-     * Returns the FontBox font associated with the given FontInfo.
-     */
-    public FontBoxFont getFont(FontInfo info)
+    public String getOrdering()
     {
-        SoftReference<FontBoxFont> reference = cache.get(info);
-        return reference != null ? reference.get() : null;
+        return ordering;
+    }
+
+    public int getSupplement()
+    {
+        return supplement;
+    }
+
+    @Override
+    public String toString()
+    {
+        return getRegistry() + "-" + getOrdering() + "-" + getSupplement();
     }
 }

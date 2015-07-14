@@ -16,6 +16,7 @@
  */
 package org.apache.pdfbox.pdmodel;
 
+import java.io.BufferedInputStream;
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -40,6 +41,7 @@ import org.apache.pdfbox.cos.COSStream;
 import org.apache.pdfbox.io.IOUtils;
 import org.apache.pdfbox.io.RandomAccessBuffer;
 import org.apache.pdfbox.io.RandomAccessBufferedFileInputStream;
+import org.apache.pdfbox.io.RandomAccessReadInputStream;
 import org.apache.pdfbox.io.RandomAccessRead;
 import org.apache.pdfbox.pdfparser.PDFParser;
 import org.apache.pdfbox.pdfwriter.COSWriter;
@@ -93,9 +95,6 @@ public class PDDocument implements Closeable
     // the pdf to be read
     private final RandomAccessRead pdfSource;
 
-    // the File to read incremental data from
-    private File incrementalFile;
-
     // the access permissions of the document
     private AccessPermission accessPermission;
     
@@ -104,6 +103,9 @@ public class PDDocument implements Closeable
     
     // Signature interface
     private SignatureInterface signInterface;
+    
+    // document-wide cached resources
+    private ResourceCache resourceCache = new DefaultResourceCache();
     
     /**
      * Creates an empty PDF document.
@@ -247,12 +249,12 @@ public class PDDocument implements Closeable
             // set visibility flags
             if (options.getVisualSignature() == null)
             {
-                signatureField.getWidget().setAnnotationFlags(PDAnnotationWidget.FLAG_NO_VIEW);
+                signatureField.getWidgets().get(0).setAnnotationFlags(PDAnnotationWidget.FLAG_NO_VIEW);
             }
             // append the signature object
             signatureField.setValue(sigObject);
             // backward linking
-            signatureField.getWidget().setPage(page);
+            signatureField.getWidgets().get(0).setPage(page);
         }
 
         // Set the AcroForm Fields
@@ -283,7 +285,7 @@ public class PDDocument implements Closeable
               ((COSArrayList) annotations).toList().equals(((COSArrayList) acroFormFields).toList()) &&
               checkFields))
         {
-            annotations.add(signatureField.getWidget());
+            annotations.add(signatureField.getWidgets().get(0));
         }
         page.getCOSObject().setNeedToBeUpdated(true);
     }
@@ -377,7 +379,7 @@ public class PDDocument implements Closeable
         // Read and set the Rectangle for visual signature
         COSArray rectAry = (COSArray) cosBaseDict.getDictionaryObject(COSName.RECT);
         PDRectangle rect = new PDRectangle(rectAry);
-        signatureField.getWidget().setRectangle(rect);
+        signatureField.getWidgets().get(0).setRectangle(rect);
     }
 
     private void assignAppearanceDictionary(PDSignatureField signatureField, COSDictionary dict)
@@ -386,7 +388,7 @@ public class PDDocument implements Closeable
         PDAppearanceDictionary ap
                 = new PDAppearanceDictionary((COSDictionary) dict.getDictionaryObject(COSName.AP));
         ap.getCOSObject().setDirect(true);
-        signatureField.getWidget().setAppearance(ap);
+        signatureField.getWidgets().get(0).setAppearance(ap);
     }
 
     private void assignAcroFormDefaultResource(PDAcroForm acroForm, COSDictionary dict)
@@ -406,7 +408,7 @@ public class PDDocument implements Closeable
             throws IOException
     {
         // Set rectangle for non-visual signature to rectangle array [ 0 0 0 0 ]
-        signatureField.getWidget().setRectangle(new PDRectangle());
+        signatureField.getWidgets().get(0).setRectangle(new PDRectangle());
         // Clear AcroForm / Set DefaultRessource
         acroForm.setDefaultResources(null);
         // Set empty Appearance-Dictionary
@@ -422,7 +424,7 @@ public class PDDocument implements Closeable
         
         ap.setNormalAppearance(aps);
         ap.getCOSObject().setDirect(true);
-        signatureField.getWidget().setAppearance(ap);
+        signatureField.getWidgets().get(0).setAppearance(ap);
     }
 
     /**
@@ -509,7 +511,7 @@ public class PDDocument implements Closeable
      */
     public PDPage importPage(PDPage page) throws IOException
     {
-        PDPage importedPage = new PDPage(new COSDictionary(page.getCOSObject()));
+        PDPage importedPage = new PDPage(new COSDictionary(page.getCOSObject()), resourceCache);
         InputStream is = null;
         OutputStream os = null;
         try
@@ -846,9 +848,7 @@ public class PDDocument implements Closeable
         RandomAccessBufferedFileInputStream raFile = new RandomAccessBufferedFileInputStream(file);
         PDFParser parser = new PDFParser(raFile, password, keyStore, alias, useScratchFiles);
         parser.parse();
-        PDDocument doc = parser.getPDDocument();
-        doc.incrementalFile = file;
-        return doc;
+        return parser.getPDDocument();
     }
 
     /**
@@ -1094,11 +1094,8 @@ public class PDDocument implements Closeable
      */
     public void saveIncremental(OutputStream output) throws IOException
     {
-        if (incrementalFile == null)
-        {
-            throw new IllegalStateException("Incremental save is only possible if the document was loaded from a file");
-        }
-        InputStream input = new RandomAccessBufferedFileInputStream(incrementalFile);
+        InputStream input = new BufferedInputStream(
+                new RandomAccessReadInputStream(pdfSource, 0, pdfSource.length()));
         COSWriter writer = null;
         try
         {
@@ -1310,5 +1307,23 @@ public class PDDocument implements Closeable
             // versions < 1.4f have a version header only
             getDocument().setVersion(newVersion);
         }
+    }
+
+    /**
+     * Returns the resource cache associated with this document, or null if there is none.
+     */
+    public ResourceCache getResourceCache()
+    {
+        return resourceCache;
+    }
+
+    /**
+     * Sets the resource cache associated with this document.
+     * 
+     * @param resourceCache A resource cache, or null.
+     */
+    public void setResourceCache(ResourceCache resourceCache)
+    {
+        this.resourceCache = resourceCache;
     }
 }

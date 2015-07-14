@@ -25,9 +25,14 @@ import org.apache.pdfbox.pdmodel.graphics.color.PDColorSpace;
 
 /**
  * @author Khyrul Bashar
+ *  A class that provide tooltip for SCN and scn.
  */
-class SCNToolTip extends ColorToolTip
+final class SCNToolTip extends ColorToolTip
 {
+    /**
+     * Constructor.
+     * @param rowText String instance.
+     */
     SCNToolTip(PDResources resources, String colorSpaceName, String rowText)
     {
         createMarkUp(resources, colorSpaceName, rowText);
