@@ -5,17 +5,24 @@ import javax.swing.JPanel;
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.pdmodel.PDResources;
+import org.apache.pdfbox.pdmodel.font.PDCIDFontType2;
 import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.pdfbox.pdmodel.font.PDSimpleFont;
+import org.apache.pdfbox.pdmodel.font.PDType0Font;
+
+interface FontPane
+{
+    JPanel getPanel();
+}
 
 /**
  * @author Khyrul Bashar
  */
-public class FontEncodingPane
+public class FontEncodingPaneController
 {
-    private SimpleFont fontPane;
+    private FontPane fontPane;
 
-    public FontEncodingPane(COSName fontName, COSDictionary dictionary)
+    public FontEncodingPaneController(COSName fontName, COSDictionary dictionary)
     {
         PDResources resources = new PDResources(dictionary);
         try
@@ -24,6 +31,10 @@ public class FontEncodingPane
             if (font instanceof PDSimpleFont)
             {
                 fontPane = new SimpleFont((PDSimpleFont)font);
+            }
+            else if (font instanceof PDType0Font && ((PDType0Font) font).getDescendantFont() instanceof PDCIDFontType2)
+            {
+                fontPane = new CIDFontType2((PDCIDFontType2) ((PDType0Font) font).getDescendantFont());
             }
         }
         catch (IOException e)

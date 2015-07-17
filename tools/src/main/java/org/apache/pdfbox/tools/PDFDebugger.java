@@ -80,7 +80,7 @@ import org.apache.pdfbox.tools.pdfdebugger.colorpane.CSDeviceN;
 import org.apache.pdfbox.tools.pdfdebugger.colorpane.CSIndexed;
 import org.apache.pdfbox.tools.pdfdebugger.colorpane.CSSeparation;
 import org.apache.pdfbox.tools.pdfdebugger.flagbitspane.FlagBitsPane;
-import org.apache.pdfbox.tools.pdfdebugger.fontencodingpane.FontEncodingPane;
+import org.apache.pdfbox.tools.pdfdebugger.fontencodingpane.FontEncodingPaneController;
 import org.apache.pdfbox.tools.pdfdebugger.pagepane.PagePane;
 import org.apache.pdfbox.tools.pdfdebugger.streampane.StreamPane;
 import org.apache.pdfbox.tools.pdfdebugger.treestatus.TreeStatus;
@@ -726,8 +726,8 @@ public class PDFDebugger extends javax.swing.JFrame
         COSName fontName = getNodeKey(selectedNode);
         COSDictionary resourceDic = (COSDictionary) getUnderneathObject(path.getParentPath().getParentPath().getLastPathComponent());
 
-        FontEncodingPane fontEncodingPane = new FontEncodingPane(fontName, resourceDic);
-        jSplitPane1.setRightComponent(fontEncodingPane.getPane());
+        FontEncodingPaneController fontEncodingPaneController = new FontEncodingPaneController(fontName, resourceDic);
+        jSplitPane1.setRightComponent(fontEncodingPaneController.getPane());
     }
 
     private COSName getNodeKey(Object selectedNode)
