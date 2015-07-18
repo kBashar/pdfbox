@@ -17,15 +17,14 @@
 package org.apache.pdfbox.tools.pdfdebugger.streampane;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
+import java.util.List;
 import javax.swing.BoxLayout;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
-import javax.swing.border.BevelBorder;
 import javax.swing.text.StyledDocument;
 import org.apache.pdfbox.tools.pdfdebugger.streampane.tooltip.ToolTipController;
 
@@ -43,7 +42,7 @@ class StreamPaneView extends JPanel
      * @param initialChoice String instance. Initial choice for showing in the pane.
      * @param listener ActionListener that listens for stream version choice changing.
      */
-    StreamPaneView(String[] filterTypes, String initialChoice, ActionListener listener)
+    StreamPaneView(List<String> filterTypes, String initialChoice, ActionListener listener)
     {
         headerPanel = createHeaderPanel(filterTypes, initialChoice, listener);
         contentPanel = new JPanel(new BorderLayout());
@@ -76,9 +75,9 @@ class StreamPaneView extends JPanel
         this.validate();
     }
 
-    private JPanel createHeaderPanel(String[] availableFilters, String i, ActionListener actionListener)
+    private JPanel createHeaderPanel(List<String> availableFilters, String i, ActionListener actionListener)
     {
-        JComboBox filters = new JComboBox<String>(availableFilters);
+        JComboBox filters = new JComboBox(availableFilters.toArray());
         filters.setSelectedItem(i);
         filters.addActionListener(actionListener);
 
@@ -98,8 +97,6 @@ class StreamPaneView extends JPanel
         this.setPreferredSize(new Dimension(300, 500));
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         this.add(headerPanel);
-
-        contentPanel.setBorder(new BevelBorder(BevelBorder.RAISED, Color.DARK_GRAY, Color.DARK_GRAY));
         this.add(contentPanel);
     }
 }

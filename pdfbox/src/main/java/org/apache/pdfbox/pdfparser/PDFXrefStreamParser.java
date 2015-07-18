@@ -20,6 +20,7 @@ import java.io.IOException;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import org.apache.pdfbox.cos.COSArray;
 import org.apache.pdfbox.cos.COSBase;
@@ -64,7 +65,13 @@ public class PDFXrefStreamParser extends BaseParser
      */
     public void parse() throws IOException
     {
-        COSArray xrefFormat = (COSArray)stream.getDictionaryObject(COSName.W);
+        COSBase w = stream.getDictionaryObject(COSName.W);
+        if (!(w instanceof COSArray))
+        {
+            throw new IOException("/W array is missing in Xref stream");
+        }
+        COSArray xrefFormat = (COSArray) w;
+        
         COSArray indexArray = (COSArray)stream.getDictionaryObject(COSName.INDEX);
         /*
          * If Index doesn't exist, we will use the default values.
@@ -76,7 +83,7 @@ public class PDFXrefStreamParser extends BaseParser
             indexArray.add(stream.getDictionaryObject(COSName.SIZE));
         }
 
-        ArrayList<Long> objNums = new ArrayList<Long>();
+        List<Long> objNums = new ArrayList<Long>();
 
         /*
          * Populates objNums with all object numbers available

@@ -55,7 +55,6 @@ import org.apache.pdfbox.pdmodel.encryption.SecurityHandler;
 import org.apache.pdfbox.pdmodel.encryption.SecurityHandlerFactory;
 import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotation;
-import org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotationWidget;
 import org.apache.pdfbox.pdmodel.interactive.annotation.PDAppearanceDictionary;
 import org.apache.pdfbox.pdmodel.interactive.annotation.PDAppearanceStream;
 import org.apache.pdfbox.pdmodel.interactive.digitalsignature.PDSignature;
@@ -249,7 +248,7 @@ public class PDDocument implements Closeable
             // set visibility flags
             if (options.getVisualSignature() == null)
             {
-                signatureField.getWidgets().get(0).setAnnotationFlags(PDAnnotationWidget.FLAG_NO_VIEW);
+                signatureField.getWidgets().get(0).setNoView(true);
             }
             // append the signature object
             signatureField.setValue(sigObject);
@@ -931,7 +930,7 @@ public class PDDocument implements Closeable
      */
     public static PDDocument load(InputStream input, String password, boolean useScratchFiles) throws IOException
     {
-        RandomAccessRead source = null;
+        RandomAccessRead source;
         if (useScratchFiles)
         {
             source = new RandomAccessBufferedFileInputStream(input);
@@ -963,7 +962,7 @@ public class PDDocument implements Closeable
     public static PDDocument load(InputStream input, String password, InputStream keyStore, 
             String alias, boolean useScratchFiles) throws IOException
     {
-        RandomAccessRead source = null;
+        RandomAccessRead source;
         if (useScratchFiles)
         {
             source = new RandomAccessBufferedFileInputStream(input);
@@ -1161,18 +1160,27 @@ public class PDDocument implements Closeable
     }
 
     /**
-     * Protects the document with the protection policy pp. The document content will be really encrypted when it will
-     * be saved. This method only marks the document for encryption.
+     * Protects the document with a protection policy. The document content will be really
+     * encrypted when it will be saved. This method only marks the document for encryption. It also
+     * calls {@link setAllSecurityToBeRemoved(false)} if it was set to true previously and logs a
+     * warning.
      *
      * @see org.apache.pdfbox.pdmodel.encryption.StandardProtectionPolicy
      * @see org.apache.pdfbox.pdmodel.encryption.PublicKeyProtectionPolicy
-     * 
+     *
      * @param policy The protection policy.
-     * 
+     *
      * @throws IOException if there isn't any suitable security handler.
      */
     public void protect(ProtectionPolicy policy) throws IOException
     {
+        if (isAllSecurityToBeRemoved())
+        {
+            LOG.warn("do not call setAllSecurityToBeRemoved(true) before calling protect(), "
+                    + "as protect() implies setAllSecurityToBeRemoved(false)");
+            setAllSecurityToBeRemoved(false);
+        }
+        
         if (!isEncrypted())
         {
             encryption = new PDEncryption();

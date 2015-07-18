@@ -345,6 +345,7 @@ public class PDFDebugger extends javax.swing.JFrame
         zoomMenu.add(zoom50Item);
         zoomMenu.add(zoom100Item);
         zoomMenu.add(zoom200Item);
+        viewMenu.add(zoomMenu);
 
         setJMenuBar(menuBar);
 
@@ -477,12 +478,12 @@ public class PDFDebugger extends javax.swing.JFrame
                 
                 if (isPage(selectedNode))
                 {
-                    menuBar.add(zoomMenu);
+                    zoomMenu.setEnabled(true);
                     SwingUtilities.updateComponentTreeUI(menuBar);
                     showPage(selectedNode);
                     return;
                 }
-                menuBar.remove(zoomMenu);
+                zoomMenu.setEnabled(false);
                 SwingUtilities.updateComponentTreeUI(menuBar);
                 
                 if (isSpecialColorSpace(selectedNode) || isOtherColorSpace(selectedNode))
@@ -511,15 +512,7 @@ public class PDFDebugger extends javax.swing.JFrame
                 {
                     jSplitPane1.setRightComponent(jScrollPane2);
                 }
-                String data = convertToString(selectedNode);
-                if (data != null)
-                {
-                    jTextPane1.setText(data);
-                }
-                else
-                {
-                    jTextPane1.setText("");
-                }
+                jTextPane1.setText(convertToString(selectedNode));
             }
             catch (Exception e)
             {
@@ -748,6 +741,10 @@ public class PDFDebugger extends javax.swing.JFrame
         else if (selectedNode instanceof ArrayEntry)
         {
             selectedNode = ((ArrayEntry) selectedNode).getValue();
+        }
+        else if (selectedNode instanceof PageEntry)
+        {
+            selectedNode = ((PageEntry) selectedNode).getDict();
         }
 
         if (selectedNode instanceof COSObject)

@@ -22,6 +22,7 @@ import java.awt.event.ActionListener;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.concurrent.ExecutionException;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
@@ -120,26 +121,29 @@ public class StreamPane implements ActionListener
     /**
      * A SwingWorker extended class that convert the stream to text loads in a document.
      */
-    private class DocumentCreator extends SwingWorker<StyledDocument, Integer>
+    private final class DocumentCreator extends SwingWorker<StyledDocument, Integer>
     {
 
         private final String filterKey;
-        private final InputStream inputStream;
 
         private DocumentCreator(String filterKey)
         {
             this.filterKey = filterKey;
-            this.inputStream = stream.getStream(filterKey);
         }
 
         @Override
-        protected StyledDocument doInBackground() throws Exception
+        protected StyledDocument doInBackground()
         {
+            InputStream inputStream = stream.getStream(filterKey);
             if (isContentStream && Stream.UNFILTERED.equals(filterKey))
             {
-                return getContentStreamDocument(inputStream);
+                StyledDocument document = getContentStreamDocument(inputStream);
+                if (document != null)
+                {
+                    return document;
+                }
+                return getDocument(stream.getStream(filterKey));
             }
-
             return getDocument(inputStream);
         }
 
@@ -176,7 +180,15 @@ public class StreamPane implements ActionListener
             {
                 e.printStackTrace();
             }
-            return byteArray.toString();
+            try
+            {
+                return byteArray.toString("ISO-8859-1");
+            }
+            catch (UnsupportedEncodingException e)
+            {
+                e.printStackTrace();
+                return null;
+            }
         }
 
 
@@ -204,6 +216,14 @@ public class StreamPane implements ActionListener
             {
                 parser = new PDFStreamParser(new RandomAccessBuffer(inputStream));
                 parser.parse();
+            }
+            catch (IOException e)
+            {
+                return null;
+            }
+
+            try
+            {
                 for (Object obj : parser.getTokens())
                 {
                     if (obj instanceof Operator)
@@ -240,10 +260,6 @@ public class StreamPane implements ActionListener
                     }
                 }
             }
-            catch (IOException e)
-            {
-                e.printStackTrace();
-            }
             catch (BadLocationException e1)
             {
                 e1.printStackTrace();
@@ -262,5 +278,5 @@ public class StreamPane implements ActionListener
             return str;
         }
 
-        }
     }
+}
