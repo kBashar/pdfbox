@@ -210,6 +210,7 @@ public class StreamPane implements ActionListener
         private StyledDocument getContentStreamDocument(InputStream inputStream)
         {
             StyledDocument docu = new DefaultStyledDocument();
+            OperatorMarker marker = new OperatorMarker();
 
             PDFStreamParser parser;
             try
@@ -228,7 +229,8 @@ public class StreamPane implements ActionListener
                 {
                     if (obj instanceof Operator)
                     {
-                        docu.insertString(docu.getLength(), ((Operator) obj).getName() + "\n", null);
+                        String operator = ((Operator) obj).getName();
+                        docu.insertString(docu.getLength(), operator + "\n", marker.getStyleForOperator(operator));
                     }
                     else
                     {
