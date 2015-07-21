@@ -1,8 +1,9 @@
 package org.apache.pdfbox.tools.pdfdebugger.fontencodingpane;
 
 import java.io.IOException;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import javax.swing.JPanel;
-import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.pdmodel.font.PDSimpleFont;
 
 /**
@@ -16,9 +17,14 @@ class SimpleFont implements FontPane
 
     SimpleFont(PDSimpleFont font) throws IOException
     {
-        String encodingName = getEncodingName(font);
-        String fontName = font.getName();
-        view = new FontEncodingView(getGlyphs(font), encodingName, fontName, totalAvailableGlyph, new String[] {"Code", "Glyph Name","Unicode Character"});
+        Object[][] tableData = getGlyphs(font);
+
+        Map<String, String> attributes = new LinkedHashMap<String, String>();
+        attributes.put("Encoding", getEncodingName(font));
+        attributes.put("Font", font.getName());
+        attributes.put("Glyph count", Integer.toString(totalAvailableGlyph));
+
+        view = new FontEncodingView(tableData, attributes, new String[] {"Code", "Glyph Name","Unicode Character"});
     }
 
     private Object[][] getGlyphs(PDSimpleFont font) throws IOException
@@ -46,12 +52,7 @@ class SimpleFont implements FontPane
 
     private String getEncodingName(PDSimpleFont font)
     {
-        String name = font.getCOSObject().getNameAsString(COSName.ENCODING);
-        if (name == null)
-        {
-            name = "DictionaryEncoding";
-        }
-        return name;
+        return font.getEncoding().getClass().getSimpleName();
     }
 
     public JPanel getPanel()

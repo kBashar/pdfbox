@@ -6,6 +6,8 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.util.Iterator;
+import java.util.Map;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -20,10 +22,9 @@ class FontEncodingView
 {
     private JPanel panel;
 
-    FontEncodingView(Object[][] tableData, String encodingName, String fontName,
-                     int totalGlyph, String[] columnNames)
+    FontEncodingView(Object[][] tableData, Map<String, String> headerAttributes, String[] columnNames)
     {
-        createView(getHeaderPanel(encodingName, fontName, totalGlyph), getTable(tableData, columnNames));
+        createView(getHeaderPanel(headerAttributes), getTable(tableData, columnNames));
     }
 
     private void createView(JPanel headerPanel, JTable table)
@@ -60,40 +61,31 @@ class FontEncodingView
         return table;
     }
 
-    private JPanel getHeaderPanel(String encodingName, String fontName, int glyphCount)
+    private JPanel getHeaderPanel(Map<String, String> attributes)
     {
         JPanel headerPanel = new JPanel(new GridBagLayout());
 
-        JLabel encodingNameLabel = new JLabel("Encoding: " + encodingName);
-        encodingNameLabel.setFont(new Font(Font.MONOSPACED, Font.BOLD, 15));
+        if (attributes != null)
+        {
+            Iterator<String> keys = attributes.keySet().iterator();
+            int row = 0;
+            while (keys.hasNext())
 
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        gbc.weighty = 0.1;
-        gbc.anchor = GridBagConstraints.LINE_START;
+            {
+                String key = keys.next();
+                JLabel encodingNameLabel = new JLabel( key +": " + attributes.get(key));
+                encodingNameLabel.setFont(new Font(Font.MONOSPACED, Font.BOLD, 16));
 
-        headerPanel.add(encodingNameLabel, gbc);
+                GridBagConstraints gbc = new GridBagConstraints();
+                gbc.gridx = 0;
+                gbc.gridy = row++;
+                gbc.weighty = 0.1;
+                gbc.anchor = GridBagConstraints.LINE_START;
 
-        JLabel fontNameLabel = new JLabel("Font: " + fontName);
-        fontNameLabel.setFont(new Font(Font.MONOSPACED, Font.BOLD, 13));
+                headerPanel.add(encodingNameLabel, gbc);
 
-        gbc.gridx = 0;
-        gbc.gridy = 1;
-        gbc.weighty = 0.1;
-
-        headerPanel.add(fontNameLabel, gbc);
-
-        JLabel glyphCountLabel = new JLabel("Glyph count: " + glyphCount);
-        glyphCountLabel.setFont(new Font(Font.MONOSPACED, Font.BOLD, 13));
-
-        gbc.gridx = 0;
-        gbc.gridy = 2;
-        gbc.weighty = 0.1;
-
-        headerPanel.add(glyphCountLabel, gbc);
-
-
+            }
+        }
         return headerPanel;
     }
 
@@ -112,7 +104,7 @@ class FontEncodingView
             {
                     JLabel label = new JLabel(o.toString());
                     label.setHorizontalAlignment(SwingConstants.CENTER);
-                    label.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 12));
+                    label.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 14));
                     if (SimpleFont.NO_GLYPH.equals(o))
                     {
                         label.setText(SimpleFont.NO_GLYPH);

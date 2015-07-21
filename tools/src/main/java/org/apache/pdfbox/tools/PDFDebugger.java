@@ -619,9 +619,18 @@ public class PDFDebugger extends javax.swing.JFrame
         if (selectedNode instanceof COSDictionary)
         {
             COSDictionary dic = (COSDictionary)selectedNode;
-            return  dic.containsKey(COSName.TYPE) && dic.getCOSName(COSName.TYPE).equals(COSName.FONT);
+            return  dic.containsKey(COSName.TYPE) &&
+                    dic.getCOSName(COSName.TYPE).equals(COSName.FONT) &&
+                    !isCIDFont(dic);
         }
         return false;
+    }
+
+    private boolean isCIDFont(COSDictionary dic)
+    {
+        return dic.containsKey(COSName.SUBTYPE) &&
+                (dic.getCOSName(COSName.SUBTYPE).equals(COSName.CID_FONT_TYPE0)
+                || dic.getCOSName(COSName.SUBTYPE).equals(COSName.CID_FONT_TYPE2));
     }
 
     /**
