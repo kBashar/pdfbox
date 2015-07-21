@@ -57,12 +57,12 @@ public class StreamPane implements ActionListener
     /**
      * Constructor.
      * @param cosStream COSStream instance.
-     * @param streamKey COSName instance. This is the type .
+     * @param isContentStream boolean instance. This says if a stream is content stream or not.
      * @param resourcesDic COSDictionary instance that holds the resource dictionary for the stream.
      */
-    public StreamPane(COSStream cosStream, COSName streamKey, COSDictionary resourcesDic)
+    public StreamPane(COSStream cosStream, boolean isContentStream, COSDictionary resourcesDic)
     {
-        isContentStream = COSName.CONTENTS.equals(streamKey);
+        this.isContentStream = isContentStream;
 
         this.stream = new Stream(cosStream);
         if (resourcesDic != null)

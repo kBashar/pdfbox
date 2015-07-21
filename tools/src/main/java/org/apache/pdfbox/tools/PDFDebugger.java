@@ -704,14 +704,26 @@ public class PDFDebugger extends javax.swing.JFrame
 
     private void showStream(Object selectedNode, TreePath path)
     {
+        boolean isContentStream = false;
+
         COSName key = getNodeKey(selectedNode);
+        COSName parentKey = getNodeKey(path.getParentPath().getLastPathComponent());
         selectedNode = getUnderneathObject(selectedNode);
         COSDictionary resourcesDic = null;
+
         if (selectedNode instanceof COSStream && COSName.CONTENTS.equals(key))
         {
             Object pageObj = path.getParentPath().getLastPathComponent();
             COSDictionary page = (COSDictionary) getUnderneathObject(pageObj);
             resourcesDic = (COSDictionary) page.getDictionaryObject(COSName.RESOURCES);
+            isContentStream = true;
+        }
+        else if (selectedNode instanceof COSStream && COSName.CONTENTS.equals(parentKey))
+        {
+            Object pageObj = path.getParentPath().getParentPath().getLastPathComponent();
+            COSDictionary page = (COSDictionary) getUnderneathObject(pageObj);
+            resourcesDic = (COSDictionary) page.getDictionaryObject(COSName.RESOURCES);
+            isContentStream = true;
         }
         else if (selectedNode instanceof COSStream &&
                 COSName.IMAGE.equals(((COSStream) selectedNode).getCOSName(COSName.SUBTYPE)))
@@ -719,7 +731,7 @@ public class PDFDebugger extends javax.swing.JFrame
             Object resourcesObj = path.getParentPath().getParentPath().getLastPathComponent();
             resourcesDic = (COSDictionary) getUnderneathObject(resourcesObj);
         }
-        StreamPane streamPane = new StreamPane((COSStream)selectedNode, key, resourcesDic);
+        StreamPane streamPane = new StreamPane((COSStream)selectedNode, isContentStream, resourcesDic);
         jSplitPane1.setRightComponent(streamPane.getPanel());
     }
 
