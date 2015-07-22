@@ -105,7 +105,7 @@ class FontEncodingView
             {
                     JLabel label = new JLabel(o.toString());
                     label.setHorizontalAlignment(SwingConstants.CENTER);
-                    label.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 20));
+                    label.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 25));
                     if (SimpleFont.NO_GLYPH.equals(o))
                     {
                         label.setText(SimpleFont.NO_GLYPH);
