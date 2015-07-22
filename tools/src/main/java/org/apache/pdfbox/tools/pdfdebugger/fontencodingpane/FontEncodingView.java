@@ -57,6 +57,7 @@ class FontEncodingView
     private JTable getTable(Object[][] tableData, String[] columnNames)
     {
         JTable table = new JTable(tableData, columnNames);
+        table.setRowHeight(40);
         table.setDefaultRenderer(Object.class, new GlyphCellRenderer());
         return table;
     }
@@ -104,7 +105,7 @@ class FontEncodingView
             {
                     JLabel label = new JLabel(o.toString());
                     label.setHorizontalAlignment(SwingConstants.CENTER);
-                    label.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 17));
+                    label.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 20));
                     if (SimpleFont.NO_GLYPH.equals(o))
                     {
                         label.setText(SimpleFont.NO_GLYPH);
