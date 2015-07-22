@@ -279,6 +279,5 @@ public class StreamPane implements ActionListener
             }
             return str;
         }
-
     }
 }
