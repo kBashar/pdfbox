@@ -500,7 +500,7 @@ public class PDFDebugger extends javax.swing.JFrame
                 }
                 if (isStream(selectedNode))
                 {
-                    showStream(selectedNode, path);
+                    showStream((COSStream)getUnderneathObject(selectedNode), path);
                     return;
                 }
                 if (isFont(selectedNode))
@@ -589,23 +589,17 @@ public class PDFDebugger extends javax.swing.JFrame
     private boolean isFontDescriptor(Object obj)
     {
         Object underneathObject = getUnderneathObject(obj);
-        if (underneathObject instanceof COSDictionary)
-        {
-            return ((COSDictionary) underneathObject).containsKey(COSName.TYPE)
-                && ((COSDictionary) underneathObject).getCOSName(COSName.TYPE).equals(COSName.FONT_DESC);
-        }
-        return false;
+        return underneathObject instanceof COSDictionary &&
+                ((COSDictionary) underneathObject).containsKey(COSName.TYPE) &&
+                ((COSDictionary) underneathObject).getCOSName(COSName.TYPE).equals(COSName.FONT_DESC);
     }
 
     private boolean isAnnot(Object obj)
     {
         Object underneathObject = getUnderneathObject(obj);
-        if (underneathObject instanceof COSDictionary)
-        {
-            return ((COSDictionary) underneathObject).containsKey(COSName.TYPE)
-                && ((COSDictionary) underneathObject).getCOSName(COSName.TYPE).equals(COSName.ANNOT);
-        }
-        return false;
+        return underneathObject instanceof COSDictionary &&
+                ((COSDictionary) underneathObject).containsKey(COSName.TYPE) &&
+                ((COSDictionary) underneathObject).getCOSName(COSName.TYPE).equals(COSName.ANNOT);
     }
 
     private boolean isStream(Object selectedNode)
@@ -702,36 +696,42 @@ public class PDFDebugger extends javax.swing.JFrame
         }
     }
 
-    private void showStream(Object selectedNode, TreePath path)
+    private void showStream(COSStream stream, TreePath path)
     {
         boolean isContentStream = false;
 
-        COSName key = getNodeKey(selectedNode);
+        COSName key = getNodeKey(path.getLastPathComponent());
         COSName parentKey = getNodeKey(path.getParentPath().getLastPathComponent());
-        selectedNode = getUnderneathObject(selectedNode);
         COSDictionary resourcesDic = null;
 
-        if (selectedNode instanceof COSStream && COSName.CONTENTS.equals(key))
+        if (COSName.CONTENTS.equals(key))
         {
             Object pageObj = path.getParentPath().getLastPathComponent();
             COSDictionary page = (COSDictionary) getUnderneathObject(pageObj);
             resourcesDic = (COSDictionary) page.getDictionaryObject(COSName.RESOURCES);
             isContentStream = true;
         }
-        else if (selectedNode instanceof COSStream && COSName.CONTENTS.equals(parentKey))
+        else if (COSName.CONTENTS.equals(parentKey) || COSName.CHAR_PROCS.equals(parentKey))
         {
             Object pageObj = path.getParentPath().getParentPath().getLastPathComponent();
             COSDictionary page = (COSDictionary) getUnderneathObject(pageObj);
             resourcesDic = (COSDictionary) page.getDictionaryObject(COSName.RESOURCES);
             isContentStream = true;
         }
-        else if (selectedNode instanceof COSStream &&
-                COSName.IMAGE.equals(((COSStream) selectedNode).getCOSName(COSName.SUBTYPE)))
+        else if (COSName.FORM.equals(stream.getCOSName(COSName.SUBTYPE)))
+        {
+            if (stream.containsKey(COSName.RESOURCES))
+            {
+                resourcesDic = (COSDictionary) stream.getDictionaryObject(COSName.RESOURCES);
+            }
+            isContentStream = true;
+        }
+        else if (COSName.IMAGE.equals((stream).getCOSName(COSName.SUBTYPE)))
         {
             Object resourcesObj = path.getParentPath().getParentPath().getLastPathComponent();
             resourcesDic = (COSDictionary) getUnderneathObject(resourcesObj);
         }
-        StreamPane streamPane = new StreamPane((COSStream)selectedNode, isContentStream, resourcesDic);
+        StreamPane streamPane = new StreamPane(stream, isContentStream, resourcesDic);
         jSplitPane1.setRightComponent(streamPane.getPanel());
     }
 
