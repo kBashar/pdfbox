@@ -244,7 +244,7 @@ public class StreamPane implements ActionListener
                             StringBuilder builder = new StringBuilder("[ ");
                             for (COSBase base : (COSArray) obj)
                             {
-                                builder.append(getCOSVlaue(base));
+                                builder.append(getCOSValue(base));
                                 builder.append(", ");
                             }
                             if (((COSArray) obj).size() > 0)
@@ -256,7 +256,7 @@ public class StreamPane implements ActionListener
                         }
                         else
                         {
-                            str = getCOSVlaue(obj);
+                            str = getCOSValue(obj);
                         }
                         docu.insertString(docu.getLength(), str+" ", null);
                     }
@@ -269,7 +269,7 @@ public class StreamPane implements ActionListener
             return docu;
         }
 
-        private String getCOSVlaue(Object obj)
+        private String getCOSValue(Object obj)
         {
             String str = obj.toString();
             str = str.substring(str.indexOf('{')+1, str.length()-1);
