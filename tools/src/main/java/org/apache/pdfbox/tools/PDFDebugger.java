@@ -718,7 +718,8 @@ public class PDFDebugger extends javax.swing.JFrame
             resourcesDic = (COSDictionary) page.getDictionaryObject(COSName.RESOURCES);
             isContentStream = true;
         }
-        else if (COSName.FORM.equals(stream.getCOSName(COSName.SUBTYPE)))
+        else if (COSName.FORM.equals(stream.getCOSName(COSName.SUBTYPE)) ||
+                COSName.PATTERN.equals(stream.getCOSName(COSName.TYPE)))
         {
             if (stream.containsKey(COSName.RESOURCES))
             {
