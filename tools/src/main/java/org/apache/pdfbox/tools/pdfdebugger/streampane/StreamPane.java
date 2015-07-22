@@ -33,6 +33,7 @@ import javax.swing.text.StyledDocument;
 import org.apache.pdfbox.contentstream.operator.Operator;
 import org.apache.pdfbox.cos.COSArray;
 import org.apache.pdfbox.cos.COSBase;
+import org.apache.pdfbox.cos.COSBoolean;
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.COSStream;
@@ -44,7 +45,7 @@ import org.apache.pdfbox.tools.pdfdebugger.streampane.tooltip.ToolTipController;
 
 /**
  * @author Khyrul Bashar
- * A class that shows the COSStream.
+ *         A class that shows the COSStream.
  */
 public class StreamPane implements ActionListener
 {
@@ -56,9 +57,10 @@ public class StreamPane implements ActionListener
 
     /**
      * Constructor.
-     * @param cosStream COSStream instance.
+     *
+     * @param cosStream       COSStream instance.
      * @param isContentStream boolean instance. This says if a stream is content stream or not.
-     * @param resourcesDic COSDictionary instance that holds the resource dictionary for the stream.
+     * @param resourcesDic    COSDictionary instance that holds the resource dictionary for the stream.
      */
     public StreamPane(COSStream cosStream, boolean isContentStream, COSDictionary resourcesDic)
     {
@@ -125,6 +127,8 @@ public class StreamPane implements ActionListener
     {
 
         private final String filterKey;
+        private StyledDocument document;
+        OperatorMarker marker;
 
         private DocumentCreator(String filterKey)
         {
@@ -195,7 +199,7 @@ public class StreamPane implements ActionListener
         private StyledDocument getDocument(InputStream inputStream)
         {
             String data = getStringOfStream(inputStream);
-            StyledDocument document = new DefaultStyledDocument();
+            document = new DefaultStyledDocument();
             try
             {
                 document.insertString(0, data, null);
@@ -209,8 +213,8 @@ public class StreamPane implements ActionListener
 
         private StyledDocument getContentStreamDocument(InputStream inputStream)
         {
-            StyledDocument docu = new DefaultStyledDocument();
-            OperatorMarker marker = new OperatorMarker();
+            document = new DefaultStyledDocument();
+            marker = new OperatorMarker();
 
             PDFStreamParser parser;
             try
@@ -223,50 +227,79 @@ public class StreamPane implements ActionListener
                 return null;
             }
 
+            for (Object obj : parser.getTokens())
+            {
+                writeObject(obj);
+            }
+            return document;
+        }
+
+        private void writeObject(Object obj)
+        {
             try
             {
-                for (Object obj : parser.getTokens())
+                if (obj instanceof Operator)
                 {
-                    if (obj instanceof Operator)
+                    Operator op = (Operator) obj;
+                    if (op.getName().equals("BI"))
                     {
-                        String operator = ((Operator) obj).getName();
-                        docu.insertString(docu.getLength(), operator + "\n", marker.getStyleForOperator(operator));
+                        document.insertString(document.getLength(), "BI" + "\n", null);
+                        COSDictionary dic = op.getImageParameters();
+                        for (COSName key : dic.keySet())
+                        {
+                            Object value = dic.getDictionaryObject(key);
+                            document.insertString(document.getLength(), "/" + key.getName() + " ", null);
+                            writeObject(value);
+                            document.insertString(document.getLength(), "\n", null);
+                        }
+                        document.insertString(document.getLength(), "ID ", null);
+                        document.insertString(document.getLength(), new String(op.getImageData()), null);
+                        document.insertString(document.getLength(), "\n", null);
+                        document.insertString(document.getLength(), "EI", null);
                     }
                     else
                     {
-                        String str;
-                        if (obj instanceof COSName)
-                        {
-                            str = "/" + ((COSName) obj).getName();
-                        }
-                        else if (obj instanceof COSArray)
-                        {
-                            StringBuilder builder = new StringBuilder("[ ");
-                            for (COSBase base : (COSArray) obj)
-                            {
-                                builder.append(getCOSValue(base));
-                                builder.append(", ");
-                            }
-                            if (((COSArray) obj).size() > 0)
-                            {
-                                builder.delete(builder.lastIndexOf(","), builder.length());
-                            }
-                            builder.append("]");
-                            str = builder.toString();
-                        }
-                        else
-                        {
-                            str = getCOSValue(obj);
-                        }
-                        docu.insertString(docu.getLength(), str+" ", null);
+                        String operator = ((Operator) obj).getName();
+                        document.insertString(document.getLength(), operator + "\n", marker.getStyleForOperator(operator));
                     }
                 }
+                else
+                {
+                    String str;
+                    if (obj instanceof COSName)
+                    {
+                        str = "/" + ((COSName) obj).getName();
+                    }
+                    else if (obj instanceof COSBoolean)
+                    {
+                        str = obj.toString();
+                    }
+                    else if (obj instanceof COSArray)
+                    {
+                        StringBuilder builder = new StringBuilder("[ ");
+                        for (COSBase base : (COSArray) obj)
+                        {
+                            builder.append(getCOSValue(base));
+                            builder.append(", ");
+                        }
+                        if (((COSArray) obj).size() > 0)
+                        {
+                            builder.delete(builder.lastIndexOf(","), builder.length());
+                        }
+                        builder.append("]");
+                        str = builder.toString();
+                    }
+                    else
+                    {
+                        str = getCOSValue(obj);
+                    }
+                    document.insertString(document.getLength(), str + " ", null);
+                }
             }
-            catch (BadLocationException e1)
+            catch (BadLocationException e)
             {
-                e1.printStackTrace();
+                e.printStackTrace();
             }
-            return docu;
         }
 
         private String getCOSValue(Object obj)
@@ -275,7 +308,7 @@ public class StreamPane implements ActionListener
             str = str.substring(str.indexOf('{')+1, str.length()-1);
             if (obj instanceof COSString)
             {
-                str = "("+str+")";
+                str = "(" + str + ")";
             }
             return str;
         }
