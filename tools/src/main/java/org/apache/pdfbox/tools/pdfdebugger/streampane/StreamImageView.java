@@ -19,6 +19,9 @@ package org.apache.pdfbox.tools.pdfdebugger.streampane;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Graphics2D;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -28,16 +31,21 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.border.LineBorder;
+import javax.swing.event.AncestorEvent;
+import javax.swing.event.AncestorListener;
+import org.apache.pdfbox.tools.pdfdebugger.ui.ZoomMenu;
 
 /**
  * @author Khyrul Bashar
  *
  * A class that provides the container for the image in case of image showing in stream pane.
  */
-class StreamImageView
+class StreamImageView implements ActionListener, AncestorListener
 {
-    private final BufferedImage image;
+    private BufferedImage image;
     private JScrollPane scrollPane;
+    private JLabel label;
+    private ZoomMenu zoomMenu;
 
     /**
      * constructor.
@@ -54,18 +62,19 @@ class StreamImageView
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 
-        JLabel label = new JLabel();
+        label = new JLabel();
         label.setBorder(new LineBorder(Color.BLACK));
         label.setAlignmentX(Component.CENTER_ALIGNMENT);
         label.setIcon(new ImageIcon(image));
-        
+
         panel.add(Box.createVerticalGlue());
         panel.add(label);
         panel.add(Box.createVerticalGlue());
-        
+
         scrollPane = new JScrollPane();
-        scrollPane.setViewportView(panel);
         scrollPane.setPreferredSize(new Dimension(300, 400));
+        scrollPane.addAncestorListener(this);
+        scrollPane.setViewportView(panel);
     }
 
     /**
@@ -75,5 +84,60 @@ class StreamImageView
     JComponent getView()
     {
         return scrollPane;
+    }
+
+    private BufferedImage zoomImage(BufferedImage origin, float scale)
+    {
+        int resizedWidth = (int) (origin.getWidth()*scale);
+        int resizedHeight = (int) (origin.getHeight()*scale);
+        BufferedImage zoomedImage = new BufferedImage(resizedWidth, resizedHeight, BufferedImage.TYPE_INT_RGB);
+        Graphics2D graphics = zoomedImage.createGraphics();
+        graphics.drawImage(origin, 0, 0, resizedWidth, resizedHeight, null);
+        graphics.dispose();
+        return zoomedImage;
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent actionEvent)
+    {
+        String actionCommand = actionEvent.getActionCommand();
+        if (actionCommand.equals(ZoomMenu.ZOOM_50_PERCENT))
+        {
+            addImage(zoomImage(image, (float) 0.5));
+        }
+        else if (actionCommand.equals(ZoomMenu.ZOOM_100_PERCENT))
+        {
+            addImage(zoomImage(image, (float) 1.0));
+        }
+        else if (actionCommand.equals(ZoomMenu.ZOOM_200_PERCENT))
+        {
+            addImage(zoomImage(image, (float) 1.5));
+        }
+    }
+
+    private void addImage(BufferedImage img)
+    {
+        label.setIcon(new ImageIcon(img));
+        label.revalidate();
+    }
+
+    @Override
+    public void ancestorAdded(AncestorEvent ancestorEvent)
+    {
+        zoomMenu = ZoomMenu.zoomMenuFactory().menuListeners(this);
+        zoomMenu.setZoomSelection(ZoomMenu.ZOOM_100_PERCENT);
+        zoomMenu.setEnableMenu(true);
+    }
+
+    @Override
+    public void ancestorRemoved(AncestorEvent ancestorEvent)
+    {
+        zoomMenu.setEnableMenu(false);
+    }
+
+    @Override
+    public void ancestorMoved(AncestorEvent ancestorEvent)
+    {
+
     }
 }
