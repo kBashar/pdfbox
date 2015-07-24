@@ -38,14 +38,15 @@ import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.COSStream;
 import org.apache.pdfbox.cos.COSString;
-import org.apache.pdfbox.io.RandomAccessBuffer;
+import org.apache.pdfbox.io.IOUtils;
 import org.apache.pdfbox.pdfparser.PDFStreamParser;
 import org.apache.pdfbox.pdmodel.PDResources;
 import org.apache.pdfbox.tools.pdfdebugger.streampane.tooltip.ToolTipController;
 
 /**
  * @author Khyrul Bashar
- *         A class that shows the COSStream.
+ * 
+ * A class that shows the COSStream.
  */
 public class StreamPane implements ActionListener
 {
@@ -127,7 +128,7 @@ public class StreamPane implements ActionListener
     {
 
         private final String filterKey;
-        private StyledDocument document;
+        private StyledDocument docu;
         OperatorMarker marker;
 
         private DocumentCreator(String filterKey)
@@ -199,27 +200,27 @@ public class StreamPane implements ActionListener
         private StyledDocument getDocument(InputStream inputStream)
         {
             String data = getStringOfStream(inputStream);
-            document = new DefaultStyledDocument();
+            docu = new DefaultStyledDocument();
             try
             {
-                document.insertString(0, data, null);
+                docu.insertString(0, data, null);
             }
             catch (BadLocationException e)
             {
                 e.printStackTrace();
             }
-            return document;
+            return docu;
         }
 
         private StyledDocument getContentStreamDocument(InputStream inputStream)
         {
-            document = new DefaultStyledDocument();
+            docu = new DefaultStyledDocument();
             marker = new OperatorMarker();
 
             PDFStreamParser parser;
             try
             {
-                parser = new PDFStreamParser(new RandomAccessBuffer(inputStream));
+                parser = new PDFStreamParser(IOUtils.toByteArray(inputStream));
                 parser.parse();
             }
             catch (IOException e)
@@ -231,7 +232,7 @@ public class StreamPane implements ActionListener
             {
                 writeObject(obj);
             }
-            return document;
+            return docu;
         }
 
         private void writeObject(Object obj)
@@ -243,24 +244,24 @@ public class StreamPane implements ActionListener
                     Operator op = (Operator) obj;
                     if (op.getName().equals("BI"))
                     {
-                        document.insertString(document.getLength(), "BI" + "\n", null);
+                        docu.insertString(docu.getLength(), "BI" + "\n", marker.getStyle("BI"));
                         COSDictionary dic = op.getImageParameters();
                         for (COSName key : dic.keySet())
                         {
                             Object value = dic.getDictionaryObject(key);
-                            document.insertString(document.getLength(), "/" + key.getName() + " ", null);
+                            docu.insertString(docu.getLength(), "/" + key.getName() + " ", null);
                             writeObject(value);
-                            document.insertString(document.getLength(), "\n", null);
+                            docu.insertString(docu.getLength(), "\n", null);
                         }
-                        document.insertString(document.getLength(), "ID ", null);
-                        document.insertString(document.getLength(), new String(op.getImageData()), null);
-                        document.insertString(document.getLength(), "\n", null);
-                        document.insertString(document.getLength(), "EI", null);
+                        docu.insertString(docu.getLength(), "ID\n", marker.getStyle("ID"));
+                        docu.insertString(docu.getLength(), new String(op.getImageData()), null);
+                        docu.insertString(docu.getLength(), "\n", null);
+                        docu.insertString(docu.getLength(), "EI\n", marker.getStyle("EI"));
                     }
                     else
                     {
                         String operator = ((Operator) obj).getName();
-                        document.insertString(document.getLength(), operator + "\n", marker.getStyleForOperator(operator));
+                        docu.insertString(docu.getLength(), operator + "\n", marker.getStyle(operator));
                     }
                 }
                 else
@@ -293,7 +294,7 @@ public class StreamPane implements ActionListener
                     {
                         str = getCOSValue(obj);
                     }
-                    document.insertString(document.getLength(), str + " ", null);
+                    docu.insertString(docu.getLength(), str + " ", null);
                 }
             }
             catch (BadLocationException e)

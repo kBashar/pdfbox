@@ -23,22 +23,19 @@ package org.apache.pdfbox.preflight.process;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import javax.imageio.ImageIO;
 import javax.xml.bind.DatatypeConverter;
-
 import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSDocument;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.COSObject;
-import org.apache.pdfbox.io.IOUtils;
+import org.apache.pdfbox.cos.COSStream;
 import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.pdmodel.common.PDStream;
 import org.apache.pdfbox.preflight.PreflightConstants;
 import org.apache.pdfbox.preflight.PreflightContext;
 import org.apache.pdfbox.preflight.ValidationResult.ValidationError;
@@ -67,11 +64,10 @@ public class MetadataValidationProcess extends AbstractProcess
         {
             PDDocument document = ctx.getDocument();
 
-            byte[] tmp = getXpacket(document.getDocument());
-            DomXmpParser builder;
-            builder = new DomXmpParser();
-            XMPMetadata metadata;
-            metadata = builder.parse(tmp);
+            InputStream is = getXpacket(document.getDocument());
+            DomXmpParser builder = new DomXmpParser();
+            XMPMetadata metadata = builder.parse(is);
+            is.close();
             ctx.setMetadata(metadata);
 
             // 6.7.5 no deprecated attribute in xpacket processing instruction
@@ -255,7 +251,7 @@ public class MetadataValidationProcess extends AbstractProcess
     /**
      * Return the xpacket from the dictionary's stream
      */
-    public static byte[] getXpacket(COSDocument cdocument) throws IOException, XpacketParsingException
+    private static InputStream getXpacket(COSDocument cdocument) throws IOException, XpacketParsingException
     {
         COSObject catalog = cdocument.getCatalog();
         COSBase cb = catalog.getDictionaryObject(COSName.METADATA);
@@ -275,14 +271,17 @@ public class MetadataValidationProcess extends AbstractProcess
                     "Filter specified in metadata dictionnary");
             throw new XpacketParsingException("Failed while retrieving xpacket", error);
         }
+        
+        if (!(metadataDictionnary instanceof COSStream))
+        {
+            // missing Metadata Key in catalog
+            ValidationError error = new ValidationError(PreflightConstants.ERROR_METADATA_FORMAT,
+                    "Metadata is not a stream");
+            throw new XpacketParsingException("Failed while retrieving xpacket", error);
+        }
 
-        PDStream stream = PDStream.createFromCOS(metadataDictionnary);
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        InputStream is = stream.createInputStream();
-        IOUtils.copy(is, bos);
-        is.close();
-        bos.close();
-        return bos.toByteArray();
+        COSStream stream = (COSStream) metadataDictionnary;
+        return stream.getUnfilteredStream();
     }
 
     /**

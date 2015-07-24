@@ -29,6 +29,7 @@ import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.pdfbox.pdmodel.font.PDType0Font;
 import org.apache.pdfbox.pdmodel.graphics.color.PDOutputIntent;
 import org.apache.xmpbox.XMPMetadata;
+import org.apache.xmpbox.schema.DublinCoreSchema;
 import org.apache.xmpbox.schema.PDFAIdentificationSchema;
 import org.apache.xmpbox.type.BadFieldValueException;
 import org.apache.xmpbox.xml.XmpSerializer;
@@ -72,12 +73,15 @@ public class CreatePDFA
 
             // add XMP metadata
             XMPMetadata xmp = XMPMetadata.createXMPMetadata();
+            
             try
             {
+                DublinCoreSchema dc = xmp.createAndAddDublinCoreSchema();
+                dc.setTitle(file);
+                
                 PDFAIdentificationSchema id = xmp.createAndAddPFAIdentificationSchema();
                 id.setPart(1);
                 id.setConformance("B");
-                id.setAboutAsSimple("PDFBox PDF/A sample");
                 
                 XmpSerializer serializer = new XmpSerializer();
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
