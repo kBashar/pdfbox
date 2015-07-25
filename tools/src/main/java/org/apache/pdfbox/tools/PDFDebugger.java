@@ -458,6 +458,11 @@ public class PDFDebugger extends javax.swing.JFrame
                     showStream((COSStream)getUnderneathObject(selectedNode), path);
                     return;
                 }
+                if (isFont(selectedNode))
+                {
+                    showFont(selectedNode, path);
+                    return;
+                }
                 if (!jSplitPane1.getRightComponent().equals(jScrollPane2))
                 {
                     jSplitPane1.setRightComponent(jScrollPane2);
