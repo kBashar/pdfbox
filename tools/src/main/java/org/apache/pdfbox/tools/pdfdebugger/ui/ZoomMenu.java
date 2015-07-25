@@ -33,7 +33,7 @@ public class ZoomMenu
     public static final String ZOOM_100_PERCENT = "100%";
     public static final String ZOOM_200_PERCENT = "200%";
 
-    private static ZoomMenu zoomMenu;
+    private static ZoomMenu instance;
     private JMenu menu = null;
     private JRadioButtonMenuItem zoom50Item;
     private JRadioButtonMenuItem zoom100Item;
@@ -44,13 +44,13 @@ public class ZoomMenu
         menu = createZoomMenu();
     }
 
-    public static ZoomMenu zoomMenuFactory()
+    public static ZoomMenu getInstance()
     {
-        if (zoomMenu == null)
+        if (instance == null)
         {
-            zoomMenu = new ZoomMenu();
+            instance = new ZoomMenu();
         }
-        return zoomMenu;
+        return instance;
     }
 
     public JMenu getMenu()
@@ -71,7 +71,7 @@ public class ZoomMenu
             removeActionListeners(menuItem);
             menuItem.addActionListener(listener);
         }
-        return zoomMenu;
+        return instance;
     }
 
     public void setZoomSelection(String selection)

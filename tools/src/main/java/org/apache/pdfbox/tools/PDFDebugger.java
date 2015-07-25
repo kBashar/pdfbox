@@ -303,7 +303,7 @@ public class PDFDebugger extends javax.swing.JFrame
         aboutMenuItem.setText("About");
         helpMenu.add(aboutMenuItem);
         
-        ZoomMenu zoomMenu = ZoomMenu.zoomMenuFactory();
+        ZoomMenu zoomMenu = ZoomMenu.getInstance();
         zoomMenu.setEnableMenu(false);
         viewMenu.add(zoomMenu.getMenu());
 

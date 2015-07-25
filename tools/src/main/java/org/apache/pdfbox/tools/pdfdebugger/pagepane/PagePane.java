@@ -115,7 +115,7 @@ public class PagePane implements ActionListener, AncestorListener
     @Override
     public void ancestorAdded(AncestorEvent ancestorEvent)
     {
-        zoomMenu = ZoomMenu.zoomMenuFactory().menuListeners(this);
+        zoomMenu = ZoomMenu.getInstance().menuListeners(this);
         zoomMenu.setZoomSelection(ZoomMenu.ZOOM_100_PERCENT);
         zoomMenu.setEnableMenu(true);
     }

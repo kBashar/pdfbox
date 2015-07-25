@@ -90,7 +90,7 @@ class StreamImageView implements ActionListener, AncestorListener
     {
         int resizedWidth = (int) (origin.getWidth()*scale);
         int resizedHeight = (int) (origin.getHeight()*scale);
-        return origin.getScaledInstance(resizedWidth, resizedHeight, BufferedImage.SCALE_DEFAULT);
+        return origin.getScaledInstance(resizedWidth, resizedHeight, BufferedImage.SCALE_SMOOTH);
     }
 
     @Override
@@ -120,7 +120,7 @@ class StreamImageView implements ActionListener, AncestorListener
     @Override
     public void ancestorAdded(AncestorEvent ancestorEvent)
     {
-        zoomMenu = ZoomMenu.zoomMenuFactory().menuListeners(this);
+        zoomMenu = ZoomMenu.getInstance().menuListeners(this);
         zoomMenu.setZoomSelection(ZoomMenu.ZOOM_100_PERCENT);
         zoomMenu.setEnableMenu(true);
     }
