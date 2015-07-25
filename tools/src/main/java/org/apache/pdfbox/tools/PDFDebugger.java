@@ -46,7 +46,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.KeyStroke;
-import javax.swing.SwingUtilities;
 import javax.swing.TransferHandler;
 import javax.swing.UIManager;
 import javax.swing.border.BevelBorder;
@@ -438,11 +437,9 @@ public class PDFDebugger extends javax.swing.JFrame
                 
                 if (isPage(selectedNode))
                 {
-                    SwingUtilities.updateComponentTreeUI(menuBar);
                     showPage(selectedNode);
                     return;
                 }
-                SwingUtilities.updateComponentTreeUI(menuBar);
                 
                 if (isSpecialColorSpace(selectedNode) || isOtherColorSpace(selectedNode))
                 {
@@ -459,11 +456,6 @@ public class PDFDebugger extends javax.swing.JFrame
                 if (isStream(selectedNode))
                 {
                     showStream((COSStream)getUnderneathObject(selectedNode), path);
-                    return;
-                }
-                if (isFont(selectedNode))
-                {
-                    showFont(selectedNode, path);
                     return;
                 }
                 if (!jSplitPane1.getRightComponent().equals(jScrollPane2))

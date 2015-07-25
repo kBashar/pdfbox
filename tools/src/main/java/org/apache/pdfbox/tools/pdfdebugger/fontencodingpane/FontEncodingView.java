@@ -74,7 +74,7 @@ class FontEncodingView
 
             {
                 String key = keys.next();
-                JLabel encodingNameLabel = new JLabel( key +": " + attributes.get(key));
+                JLabel encodingNameLabel = new JLabel(key + ": " + attributes.get(key));
                 encodingNameLabel.setFont(new Font(Font.MONOSPACED, Font.BOLD, 17));
 
                 GridBagConstraints gbc = new GridBagConstraints();
@@ -103,15 +103,15 @@ class FontEncodingView
         {
             if (o != null)
             {
-                    JLabel label = new JLabel(o.toString());
-                    label.setHorizontalAlignment(SwingConstants.CENTER);
-                    label.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 25));
-                    if (SimpleFont.NO_GLYPH.equals(o))
-                    {
-                        label.setText(SimpleFont.NO_GLYPH);
-                        label.setForeground(Color.RED);
-                    }
-                    return label;
+                JLabel label = new JLabel(o.toString());
+                label.setHorizontalAlignment(SwingConstants.CENTER);
+                label.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 25));
+                if (SimpleFont.NO_GLYPH.equals(o) || ".notdef".equals(o))
+                {
+                    label.setText(o.toString());
+                    label.setForeground(Color.RED);
+                }
+                return label;
             }
             return new JLabel();
         }
