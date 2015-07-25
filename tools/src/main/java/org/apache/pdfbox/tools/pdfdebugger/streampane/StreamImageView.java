@@ -19,7 +19,7 @@ package org.apache.pdfbox.tools.pdfdebugger.streampane;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
@@ -86,15 +86,11 @@ class StreamImageView implements ActionListener, AncestorListener
         return scrollPane;
     }
 
-    private BufferedImage zoomImage(BufferedImage origin, float scale)
+    private Image zoomImage(BufferedImage origin, float scale)
     {
         int resizedWidth = (int) (origin.getWidth()*scale);
         int resizedHeight = (int) (origin.getHeight()*scale);
-        BufferedImage zoomedImage = new BufferedImage(resizedWidth, resizedHeight, BufferedImage.TYPE_INT_RGB);
-        Graphics2D graphics = zoomedImage.createGraphics();
-        graphics.drawImage(origin, 0, 0, resizedWidth, resizedHeight, null);
-        graphics.dispose();
-        return zoomedImage;
+        return origin.getScaledInstance(resizedWidth, resizedHeight, BufferedImage.SCALE_DEFAULT);
     }
 
     @Override
@@ -103,19 +99,19 @@ class StreamImageView implements ActionListener, AncestorListener
         String actionCommand = actionEvent.getActionCommand();
         if (actionCommand.equals(ZoomMenu.ZOOM_50_PERCENT))
         {
-            addImage(zoomImage(image, (float) 0.5));
+            addImage(zoomImage(image, 0.5f));
         }
         else if (actionCommand.equals(ZoomMenu.ZOOM_100_PERCENT))
         {
-            addImage(zoomImage(image, (float) 1.0));
+            addImage(zoomImage(image, 1));
         }
         else if (actionCommand.equals(ZoomMenu.ZOOM_200_PERCENT))
         {
-            addImage(zoomImage(image, (float) 1.5));
+            addImage(zoomImage(image, 2));
         }
     }
 
-    private void addImage(BufferedImage img)
+    private void addImage(Image img)
     {
         label.setIcon(new ImageIcon(img));
         label.revalidate();

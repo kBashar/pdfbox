@@ -11,7 +11,7 @@ import org.apache.pdfbox.pdmodel.font.PDSimpleFont;
  */
 class SimpleFont implements FontPane
 {
-    public static final String NO_GLYPH = "No glyph available";
+    public static final String NO_GLYPH = "No glyph";
     private int totalAvailableGlyph = 0;
     private FontEncodingView view;
 
