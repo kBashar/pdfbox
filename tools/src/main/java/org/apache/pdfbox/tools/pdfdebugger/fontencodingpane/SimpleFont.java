@@ -24,6 +24,7 @@ import org.apache.pdfbox.pdmodel.font.PDSimpleFont;
 
 /**
  * @author Khyrul Bashar
+ * A class that shows the glyph table along with unicode characters for SimpleFont.
  */
 class SimpleFont implements FontPane
 {
@@ -31,6 +32,11 @@ class SimpleFont implements FontPane
     private int totalAvailableGlyph = 0;
     private FontEncodingView view;
 
+    /**
+     * Constructor.
+     * @param font PDSimpleFont instance.
+     * @throws IOException If fails to parse unicode characters.
+     */
     SimpleFont(PDSimpleFont font) throws IOException
     {
         Object[][] tableData = getGlyphs(font);

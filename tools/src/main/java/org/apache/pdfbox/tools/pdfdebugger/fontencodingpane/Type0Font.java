@@ -28,28 +28,37 @@ import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.COSStream;
 import org.apache.pdfbox.io.IOUtils;
 import org.apache.pdfbox.pdmodel.font.PDCIDFontType2;
+import org.apache.pdfbox.pdmodel.font.PDFont;
 
 /**
  * @author Khyrul Bashar
+ * A class that shows the CIDToGID table along with unicode characters for Type0Fonts when descendent
+ * font is of type PDCIDFontType2.
  */
-class CIDFontType2 implements FontPane
+class Type0Font implements FontPane
 {
     FontEncodingView view;
 
-    CIDFontType2(PDCIDFontType2 font) throws IOException
+    /**
+     * Constructor.
+     * @param descendantFont PDCIDFontType2 instance.
+     * @param parentFont PDFont instance.
+     * @throws IOException If fails to parse cidtogid map.
+     */
+    Type0Font(PDCIDFontType2 descendantFont, PDFont parentFont) throws IOException
     {
-        Object[][] cidtogid = readCIDToGIDMap(font);
+        Object[][] cidtogid = readCIDToGIDMap(descendantFont, parentFont);
         if (cidtogid != null)
         {
             Map<String, String> attributes = new LinkedHashMap<String, String>();
-            attributes.put("Font", font.getName());
+            attributes.put("Font", descendantFont.getName());
             attributes.put("CID count", Integer.toString(cidtogid.length));
 
-            view = new FontEncodingView(cidtogid, attributes, new String[]{"CID", "GID"});
+            view = new FontEncodingView(cidtogid, attributes, new String[]{"CID", "GID", "Unicode Character"});
         }
     }
 
-    private Object[][] readCIDToGIDMap(PDCIDFontType2 font) throws IOException
+    private Object[][] readCIDToGIDMap(PDCIDFontType2 font, PDFont parentFont) throws IOException
     {
         Object[][] cid2gid = null;
         COSDictionary dict = font.getCOSObject();
@@ -62,13 +71,17 @@ class CIDFontType2 implements FontPane
             byte[] mapAsBytes = IOUtils.toByteArray(is);
             IOUtils.closeQuietly(is);
             int numberOfInts = mapAsBytes.length / 2;
-            cid2gid = new Object[numberOfInts][2];
+            cid2gid = new Object[numberOfInts][3];
             int offset = 0;
             for (int index = 0; index < numberOfInts; index++)
             {
                 int gid = (mapAsBytes[offset] & 0xff) << 8 | mapAsBytes[offset + 1] & 0xff;
                 cid2gid[index][0] = index;
                 cid2gid[index][1] = gid;
+                if (gid != 0 && parentFont.toUnicode(index) != null)
+                {
+                    cid2gid[index][2] = parentFont.toUnicode(index);
+                }
                 offset += 2;
             }
         }
@@ -82,7 +95,7 @@ class CIDFontType2 implements FontPane
     {
         if (view != null)
         {
-           return view.getPanel();
+            return view.getPanel();
         }
         JPanel panel = new JPanel();
         panel.setPreferredSize(new Dimension(300, 500));

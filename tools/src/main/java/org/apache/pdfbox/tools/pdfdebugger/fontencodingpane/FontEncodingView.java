@@ -33,11 +33,19 @@ import javax.swing.table.TableCellRenderer;
 
 /**
  * @author Khyrul Bashar
+ * A class that creates the UI for font encoding pane.
  */
 class FontEncodingView
 {
     private JPanel panel;
 
+    /**
+     * Constructor.
+     * @param tableData Object[][] instance as table data.
+     * @param headerAttributes Map<String, String> instance which contains info for showing in header
+     *                         panel. Here keys will be info type.
+     * @param columnNames String array containing the columns name.
+     */
     FontEncodingView(Object[][] tableData, Map<String, String> headerAttributes, String[] columnNames)
     {
         createView(getHeaderPanel(headerAttributes), getTable(tableData, columnNames));

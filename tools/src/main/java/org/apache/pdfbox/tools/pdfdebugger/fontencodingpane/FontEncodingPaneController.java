@@ -33,11 +33,18 @@ interface FontPane
 
 /**
  * @author Khyrul Bashar
+ * A class that shows the glyph table or CIDToGID map depending on the font type. PDSimple and
+ * PDType0Font are supported.
  */
 public class FontEncodingPaneController
 {
     private FontPane fontPane;
 
+    /**
+     * Constructor.
+     * @param fontName COSName instance, Font name in the fonts dictionary.
+     * @param dictionary COSDictionary instance for resources which resides the font.
+     */
     public FontEncodingPaneController(COSName fontName, COSDictionary dictionary)
     {
         PDResources resources = new PDResources(dictionary);
@@ -50,7 +57,7 @@ public class FontEncodingPaneController
             }
             else if (font instanceof PDType0Font && ((PDType0Font) font).getDescendantFont() instanceof PDCIDFontType2)
             {
-                fontPane = new CIDFontType2((PDCIDFontType2) ((PDType0Font) font).getDescendantFont());
+                fontPane = new Type0Font((PDCIDFontType2) ((PDType0Font) font).getDescendantFont(), font);
             }
         }
         catch (IOException e)
