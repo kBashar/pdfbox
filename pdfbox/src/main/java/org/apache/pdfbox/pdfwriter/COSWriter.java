@@ -619,7 +619,15 @@ public class COSWriter implements ICOSVisitor, Closeable
             }
 
             COSDictionary trailer = doc.getTrailer();
-            trailer.removeItem(COSName.PREV);
+            if (incrementalUpdate)
+            {
+                // use previous startXref value as new PREV value
+                trailer.setLong(COSName.PREV, doc.getStartXref());
+            }
+            else
+            {
+                trailer.removeItem(COSName.PREV);
+            }
             pdfxRefStream.addTrailerInfo(trailer);
             // the size is the highest object number+1. we add one more
             // for the xref stream object we are going to write
