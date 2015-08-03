@@ -39,7 +39,6 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.pdfbox.contentstream.PDFGraphicsStreamEngine;
-import org.apache.pdfbox.cos.COSArray;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.font.PDCIDFontType0;
@@ -289,18 +288,6 @@ public class PageDrawer extends PDFGraphicsStreamEngine
         endTextClip();
     }
     
-    @Override
-    public void showTextString(byte[] string) throws IOException
-    {
-        super.showTextString(string);
-    }
-
-    @Override
-    public void showTextStrings(COSArray array) throws IOException
-    {
-        super.showTextStrings(array);
-    }
-
     /**
      * Begin buffering the text clipping path, if any.
      */
