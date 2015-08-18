@@ -24,6 +24,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
@@ -64,6 +65,9 @@ public class StreamPane implements ActionListener
     public static final String INLINE_IMAGE_BEGIN = "BI";
     public static final String IMAGE_DATA = "ID";
     public static final String INLINE_IMAGE_END = "EI";
+    public static final String BEGIN_MARKED_CONTENT1 = "BMC";
+    public static final String BEGIN_MARKED_CONTENT2 = "BDC";
+    public static final String END_MARKED_CONTENT = "EMC";
     
     private static final StyleContext CONTEXT = StyleContext.getDefaultStyleContext();
     private static final Style OPERATOR_STYLE = CONTEXT.addStyle("operator", null);
@@ -350,6 +354,17 @@ public class StreamPane implements ActionListener
                 }
                 docu.insertString(docu.getLength(), str + " ", NUMBER_STYLE);
             }
+            else if (obj instanceof COSDictionary)
+            {
+                docu.insertString(docu.getLength(), "<< ", null);
+                COSDictionary dict = (COSDictionary) obj;
+                for (Map.Entry<COSName, COSBase> entry : dict.entrySet())
+                {
+                    writeOperand(entry.getKey(), docu);
+                    writeOperand(entry.getValue(), docu);
+                }
+                docu.insertString(docu.getLength(), ">> ", null);                
+            }
             else
             {
                 String str = obj.toString();
@@ -362,13 +377,15 @@ public class StreamPane implements ActionListener
         {
             Operator op = (Operator) obj;
             
-            if (!op.getName().equals(END_TEXT_OBJECT) &&
-                !op.getName().equals(RESTORE_GRAPHICS_STATE))
+            if (op.getName().equals(END_TEXT_OBJECT)
+                    || op.getName().equals(RESTORE_GRAPHICS_STATE)
+                    || op.getName().equals(END_MARKED_CONTENT))
             {
-                writeIndent(docu);
+                indent--;
             }
-            
-            if (op.getName().equals("BI"))
+            writeIndent(docu);
+
+            if (op.getName().equals(INLINE_IMAGE_BEGIN))
             {
                 docu.insertString(docu.getLength(), INLINE_IMAGE_BEGIN + "\n", OPERATOR_STYLE);
                 COSDictionary dic = op.getImageParameters();
@@ -390,17 +407,13 @@ public class StreamPane implements ActionListener
                 String operator = ((Operator) obj).getName();
                 docu.insertString(docu.getLength(), operator + "\n", OPERATOR_STYLE);
                 
-                // nested operators
+                // nested opening operators
                 if (op.getName().equals(BEGIN_TEXT_OBJECT) ||
-                    op.getName().equals(SAVE_GRAPHICS_STATE))
+                    op.getName().equals(SAVE_GRAPHICS_STATE) ||
+                    op.getName().equals(BEGIN_MARKED_CONTENT1) ||
+                    op.getName().equals(BEGIN_MARKED_CONTENT2))
                 {
                     indent++;
-                    
-                }
-                else if (op.getName().equals(END_TEXT_OBJECT) ||
-                         op.getName().equals(RESTORE_GRAPHICS_STATE))
-                {
-                    indent--;
                 }
             }
             needIndent = true;

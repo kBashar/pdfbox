@@ -491,6 +491,12 @@ public class PageDrawer extends PDFGraphicsStreamEngine
     {
         if (softMask != null) 
         {
+            //TODO PDFBOX-2934
+            if (COSName.ALPHA.equals(softMask.getSubType()))
+            {
+                LOG.info("alpha smask not implemented yet, is ignored");
+                return parentPaint;
+            }
             return new SoftMaskPaint(parentPaint, createSoftMaskRaster(softMask));
         }
         else 
@@ -536,7 +542,11 @@ public class PageDrawer extends PDFGraphicsStreamEngine
             for (int i = 0; i < dashArray.length; ++i)
             {
                 // minimum line dash width avoids JVM crash, see PDFBOX-2373
-                dashArray[i] = Math.max(transformWidth(dashArray[i]), 0.016f);
+                float w = transformWidth(dashArray[i]);
+                if (w != 0)
+                {
+                    dashArray[i] = Math.max(w, 0.016f);
+                }
             }
             phaseStart = (int)transformWidth(phaseStart);
 
