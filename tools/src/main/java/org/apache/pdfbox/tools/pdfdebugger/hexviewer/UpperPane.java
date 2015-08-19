@@ -2,13 +2,13 @@ package org.apache.pdfbox.tools.pdfdebugger.hexviewer;
 
 import java.awt.Dimension;
 import java.awt.Graphics;
-import javax.swing.JComponent;
+import javax.swing.JPanel;
 import javax.swing.border.BevelBorder;
 
 /**
  * @author Khyrul Bashar
  */
-class UpperPane extends JComponent
+class UpperPane extends JPanel
 {
     UpperPane()
     {
@@ -21,7 +21,7 @@ class UpperPane extends JComponent
     {
         super.paintComponent(g);
         int x = HexView.LINE_INSET-2;
-        int y = 20;
+        int y = 30;
 
         g.drawString("Offset", x, y);
 
@@ -35,17 +35,5 @@ class UpperPane extends JComponent
 
         x+=HexView.LINE_INSET*2;
         g.drawString("Dump", x, y);
-    }
-
-    @Override
-    public Dimension getMaximumSize()
-    {
-        return new Dimension(HexView.TOTAL_WIDTH, 30);
-    }
-
-    @Override
-    public Dimension getMinimumSize()
-    {
-        return new Dimension(HexView.TOTAL_WIDTH, 30);
     }
 }

@@ -105,12 +105,10 @@ class HexEditor extends JPanel implements SelectionChangeListener, BlankClickLis
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.anchor = GridBagConstraints.FIRST_LINE_START;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        //gbc.gridwidth = 5;
-        gbc.weighty = 0.0;
-        gbc.weightx = 0.1;
+        gbc.fill = GridBagConstraints.BOTH;
+        gbc.weighty = 0.05;
         add(upperPane, gbc);
-        gbc.anchor = GridBagConstraints.FIRST_LINE_END;
+        gbc.anchor = GridBagConstraints.LINE_START;
         gbc.gridy = 1;
         gbc.weighty = 1;
         gbc.weightx = 1;
@@ -119,14 +117,11 @@ class HexEditor extends JPanel implements SelectionChangeListener, BlankClickLis
         gbc.gridy = 2;
         gbc.weightx = 0.1;
         gbc.weighty = 0.0;
-        gbc.anchor = GridBagConstraints.PAGE_END;
+        gbc.anchor = GridBagConstraints.LAST_LINE_START;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         add(statusPane, gbc);
 
-
         hexPane.addSelectionChangeListener(this);
-        setPreferredSize(new Dimension(640, 50 + HexView.CHAR_HEIGHT * 20));
-
 
         KeyStroke jumpKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_G, InputEvent.CTRL_DOWN_MASK);
         this.getInputMap(WHEN_IN_FOCUSED_WINDOW).put(jumpKeyStroke, "jump");
