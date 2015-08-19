@@ -13,7 +13,7 @@ class UpperPane extends JPanel
     UpperPane()
     {
         setFont(HexView.BOLD_FONT);
-        setPreferredSize(new Dimension(HexView.TOTAL_WIDTH, 30));
+        setPreferredSize(new Dimension(HexView.TOTAL_WIDTH, 20));
         setBorder(new BevelBorder(BevelBorder.RAISED));
     }
     @Override
@@ -21,7 +21,7 @@ class UpperPane extends JPanel
     {
         super.paintComponent(g);
         int x = HexView.LINE_INSET-2;
-        int y = 30;
+        int y = 16;
 
         g.drawString("Offset", x, y);
 

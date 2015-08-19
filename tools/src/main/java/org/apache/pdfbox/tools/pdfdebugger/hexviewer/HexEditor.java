@@ -75,7 +75,6 @@ class HexEditor extends JPanel implements SelectionChangeListener, BlankClickLis
 
         JScrollPane scrollPane = new JScrollPane();
         scrollPane.setViewportView(panel);
-        //scrollPane.setPreferredSize(new Dimension(640, HexView.CHAR_HEIGHT * 20));
 
         scrollPane.getActionMap().put("unitScrollDown", new AbstractAction()
         {
@@ -106,7 +105,7 @@ class HexEditor extends JPanel implements SelectionChangeListener, BlankClickLis
         gbc.gridy = 0;
         gbc.anchor = GridBagConstraints.FIRST_LINE_START;
         gbc.fill = GridBagConstraints.BOTH;
-        gbc.weighty = 0.05;
+        gbc.weighty = 0.02;
         add(upperPane, gbc);
         gbc.anchor = GridBagConstraints.LINE_START;
         gbc.gridy = 1;
