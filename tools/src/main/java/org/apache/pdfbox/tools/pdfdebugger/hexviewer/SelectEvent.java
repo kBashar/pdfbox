@@ -3,7 +3,7 @@ package org.apache.pdfbox.tools.pdfdebugger.hexviewer;
 /**
  * @author Khyrul Bashar
  */
-public class SelectEvent
+class SelectEvent
 {
     public static final String NEXT = "next";
     public static final String PREVIOUS = "previous";

@@ -14,10 +14,8 @@ import javax.swing.JComponent;
  *
  * This class shows the address of the currently selected byte.
  */
-public class AddressPane extends JComponent implements MouseListener
+class AddressPane extends JComponent implements MouseListener
 {
-
-    public static final int WIDTH = 90;
     private ArrayList<BlankClickListener> blankClickListeners = new ArrayList<BlankClickListener>();
 
     private int totalLine;
@@ -28,24 +26,27 @@ public class AddressPane extends JComponent implements MouseListener
     AddressPane(int total, HexModel model)
     {
         totalLine = total;
-        setPreferredSize(new Dimension(WIDTH, (model.totalLine()+1)*Util.CHAR_HEIGHT));
-        setFont(Util.FONT);
+        setPreferredSize(new Dimension(HexView.ADDRESS_PANE_WIDTH, HexView.TOTAL_HEIGHT));
+        setFont(HexView.FONT);
     }
 
     @Override
     protected void paintComponent(Graphics g)
     {
         super.paintComponent(g);
-        Rectangle bound = g.getClipBounds();
-        int x = bound.x;
+        Rectangle bound = getVisibleRect();
+
+        int x = HexView.LINE_INSET;
         int y = bound.y;
+
+        //TODO delete debug line
         System.out.println("Count: " +count++ + "---> Address pane " + "X: " + x + " Y: " + y);
+
         int firstLine = HexModel.lineForYValue(y);
 
-        x+=10;
-        y += Util.CHAR_HEIGHT;
+        y += HexView.CHAR_HEIGHT;
 
-        for (int line = firstLine; line < firstLine + bound.getHeight()/Util.CHAR_HEIGHT; line++)
+        for (int line = firstLine; line < firstLine + bound.getHeight()/HexView.CHAR_HEIGHT; line++)
         {
             if (line > totalLine)
             {
@@ -59,21 +60,21 @@ public class AddressPane extends JComponent implements MouseListener
             {
                 g.drawString(String.format("%08X", (line - 1)*16), x, y);
             }
-            x = 10;
-            y += Util.CHAR_HEIGHT;
+            x = HexView.LINE_INSET;
+            y += HexView.CHAR_HEIGHT;
         }
     }
 
 
     private void paintSelected(Graphics g, int x, int y)
     {
-        g.setColor(Util.SELECTED_COLOR);
-        g.setFont(Util.BOLD_FONT);
+        g.setColor(HexView.SELECTED_COLOR);
+        g.setFont(HexView.BOLD_FONT);
 
         g.drawString(String.format("%08X", selectedIndex), x, y);
 
         g.setColor(Color.black);
-        g.setFont(Util.FONT);
+        g.setFont(HexView.FONT);
     }
 
     public void addBlankClickListener(BlankClickListener listener)

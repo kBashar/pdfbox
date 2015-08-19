@@ -23,40 +23,22 @@ import javax.swing.SwingUtilities;
 /**
  * @author Khyrul Bashar
  */
-public class HexEditor extends JPanel implements SelectionChangeListener, BlankClickListener
+class HexEditor extends JPanel implements SelectionChangeListener, BlankClickListener
 {
     private HexModel model;
     private HexPane hexPane;
     private ASCIIPane asciiPane;
     private AddressPane addressPane;
-    private UpperPane upperPane;
     private StatusPane statusPane;
 
     private JScrollBar verticalScrollBar;
-    JDialog jumpDialog;
 
     private Action jumpToIndex = new AbstractAction()
     {
         @Override
         public void actionPerformed(ActionEvent actionEvent)
         {
-            if (jumpDialog == null)
-            {
-                jumpDialog= createJumpDialog();
-            }
-            jumpDialog.setVisible(true);
-        }
-    };
-
-    private Action closeJumpDialog = new AbstractAction()
-    {
-        @Override
-        public void actionPerformed(ActionEvent actionEvent)
-        {
-            if (jumpDialog != null)
-            {
-                jumpDialog.setVisible(false);
-            }
+            createJumpDialog().setVisible(true);
         }
     };
 
@@ -71,27 +53,28 @@ public class HexEditor extends JPanel implements SelectionChangeListener, BlankC
 
     private void createView()
     {
-        setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
         addressPane = new AddressPane(model.totalLine(), model);
         hexPane = new HexPane(model);
         hexPane.addHexChangeListeners(model);
         asciiPane = new ASCIIPane(model);
-        upperPane = new UpperPane();
+        //upperPane = new UpperPane();
+        UpperPane upperPane = new UpperPane();
         statusPane = new StatusPane();
 
         model.addHexModelChangeListener(hexPane);
         model.addHexModelChangeListener(asciiPane);
 
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
-        panel.setPreferredSize(new Dimension(640, (Util.CHAR_HEIGHT) * model.totalLine()));
+        panel.setPreferredSize(new Dimension(HexView.TOTAL_WIDTH, HexView.TOTAL_HEIGHT));
         panel.add(addressPane);
         panel.add(hexPane);
         panel.add(asciiPane);
 
         JScrollPane scrollPane = new JScrollPane();
         scrollPane.setViewportView(panel);
-        scrollPane.setPreferredSize(new Dimension(640, Util.CHAR_HEIGHT * 19));
+        scrollPane.setPreferredSize(new Dimension(640, HexView.CHAR_HEIGHT * 20));
 
         scrollPane.getActionMap().put("unitScrollDown", new AbstractAction()
         {
@@ -110,9 +93,9 @@ public class HexEditor extends JPanel implements SelectionChangeListener, BlankC
         });
 
         verticalScrollBar = scrollPane.createVerticalScrollBar();
-        verticalScrollBar.setUnitIncrement(Util.CHAR_HEIGHT);
-        verticalScrollBar.setBlockIncrement(Util.CHAR_HEIGHT);
-        verticalScrollBar.setValues(0, 1, 0, (model.totalLine() + 1) * (Util.CHAR_HEIGHT));
+        verticalScrollBar.setUnitIncrement(HexView.CHAR_HEIGHT);
+        verticalScrollBar.setBlockIncrement(HexView.CHAR_HEIGHT);
+        verticalScrollBar.setValues(0, 1, 0, HexView.TOTAL_HEIGHT);
         scrollPane.setVerticalScrollBar(verticalScrollBar);
 
         scrollPane.setViewportView(panel);
@@ -122,8 +105,8 @@ public class HexEditor extends JPanel implements SelectionChangeListener, BlankC
 
         hexPane.addSelectionChangeListener(this);
 
-        int height = 50 + Util.CHAR_HEIGHT * 19;
-        setPreferredSize(new Dimension(640,height));
+        int height = 50 + HexView.CHAR_HEIGHT * 19;
+        setPreferredSize(new Dimension(640, height));
 
 
         KeyStroke jumpKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_G, InputEvent.CTRL_DOWN_MASK);
@@ -170,7 +153,7 @@ public class HexEditor extends JPanel implements SelectionChangeListener, BlankC
 
     private JDialog createJumpDialog()
     {
-        JDialog dialog = new JDialog(SwingUtilities.windowForComponent(this), "Jump to index");
+        final JDialog dialog = new JDialog(SwingUtilities.windowForComponent(this), "Jump to index");
         dialog.setLocationRelativeTo(this);
         final JLabel nowLabel = new JLabel("Present index: " + selectedIndex);
         final JLabel label = new JLabel("Index to go:");
@@ -186,7 +169,7 @@ public class HexEditor extends JPanel implements SelectionChangeListener, BlankC
                 if (index >= 0 && index <= model.size() - 1)
                 {
                     selectionChanged(new SelectEvent(index, SelectEvent.IN));
-                    jumpDialog.setVisible(false);
+                    dialog.dispose();
                 }
             }
         });

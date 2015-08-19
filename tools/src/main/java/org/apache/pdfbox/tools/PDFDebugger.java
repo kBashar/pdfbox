@@ -75,6 +75,7 @@ import org.apache.pdfbox.tools.gui.OSXAdapter;
 import org.apache.pdfbox.tools.gui.PDFTreeCellRenderer;
 import org.apache.pdfbox.tools.gui.PDFTreeModel;
 import org.apache.pdfbox.tools.gui.PageEntry;
+import org.apache.pdfbox.tools.pdfdebugger.stringpane.StringPane;
 import org.apache.pdfbox.tools.pdfdebugger.colorpane.CSArrayBased;
 import org.apache.pdfbox.tools.pdfdebugger.colorpane.CSDeviceN;
 import org.apache.pdfbox.tools.pdfdebugger.colorpane.CSIndexed;
@@ -114,6 +115,7 @@ public class PDFDebugger extends JFrame
     private TreeStatusPane statusPane;
     private RecentFiles recentFiles;
     private boolean isPageMode;
+    private boolean isHexMode;
 
     private PDDocument document;
     private String currentFilePath;
@@ -611,6 +613,12 @@ public class PDFDebugger extends JFrame
                     showFont(selectedNode, path);
                     return;
                 }
+                if (isString(selectedNode))
+                {
+                    System.out.println("It's stream: " + selectedNode.toString());
+                    showString(selectedNode);
+                    return;
+                }
                 if (!jSplitPane1.getRightComponent().equals(jScrollPane2))
                 {
                     jSplitPane1.setRightComponent(jScrollPane2);
@@ -723,6 +731,11 @@ public class PDFDebugger extends JFrame
         return false;
     }
 
+    private boolean isString(Object selectedNode)
+    {
+        return getUnderneathObject(selectedNode) instanceof COSString;
+    }
+
     private boolean isCIDFont(COSDictionary dic)
     {
         return dic.containsKey(COSName.SUBTYPE) &&
@@ -799,7 +812,7 @@ public class PDFDebugger extends JFrame
         }
     }
 
-    private void showStream(COSStream stream, TreePath path)
+    private void showStream(COSStream stream, TreePath path) throws IOException
     {
         boolean isContentStream = false;
         boolean isThumb = false;
@@ -852,6 +865,12 @@ public class PDFDebugger extends JFrame
 
         FontEncodingPaneController fontEncodingPaneController = new FontEncodingPaneController(fontName, resourceDic);
         jSplitPane1.setRightComponent(fontEncodingPaneController.getPane());
+    }
+
+    private void showString(Object selectedNode)
+    {
+        COSString string = (COSString)getUnderneathObject(selectedNode);
+        jSplitPane1.setRightComponent(new StringPane(string).getPane());
     }
 
     private COSName getNodeKey(Object selectedNode)

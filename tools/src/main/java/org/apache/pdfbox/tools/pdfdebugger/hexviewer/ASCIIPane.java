@@ -16,8 +16,6 @@ class ASCIIPane extends JComponent implements MouseListener, HexModelChangeListe
 {
     private HexModel model;
 
-    static final int LINE_WIDTH = 130;
-
     private int selectedLine = -1;
     private int selectedIndex = -1;
 
@@ -29,8 +27,9 @@ class ASCIIPane extends JComponent implements MouseListener, HexModelChangeListe
     {
         this.model = model;
         addMouseListener(this);
-        setPreferredSize(new Dimension(LINE_WIDTH, (model.totalLine() + 1) * Util.CHAR_HEIGHT));
+        setPreferredSize(new Dimension(HexView.ASCII_PANE_WIDTH, HexView.TOTAL_HEIGHT));
         model.addHexModelChangeListener(this);
+        setFont(HexView.FONT);
     }
 
 
@@ -38,16 +37,17 @@ class ASCIIPane extends JComponent implements MouseListener, HexModelChangeListe
     protected void paintComponent(Graphics g)
     {
         super.paintComponent(g);
-        Rectangle bound = g.getClipBounds();
-        int x = bound.x;
+        Rectangle bound = getVisibleRect();
+
+        int x = HexView.LINE_INSET;
         int y = bound.y;
 
         System.out.println("Count: " + count++ + "---> Ascii pane " + "X: " + x + " Y: " + y);
         int firstLine = HexModel.lineForYValue(y);
 
-        y += Util.CHAR_HEIGHT;
+        y += HexView.CHAR_HEIGHT;
 
-        for (int line = firstLine; line < firstLine + bound.getHeight()/Util.CHAR_HEIGHT; line++)
+        for (int line = firstLine; line < firstLine + bound.getHeight()/HexView.CHAR_HEIGHT; line++)
         {
             if (line > model.totalLine())
             {
@@ -62,25 +62,25 @@ class ASCIIPane extends JComponent implements MouseListener, HexModelChangeListe
                 char[] chars = model.getLineChars(line);
                 g.drawChars(chars, 0, chars.length, x, y);
             }
-            x = 0;
-            y += Util.CHAR_HEIGHT;
+            x = HexView.LINE_INSET;
+            y += HexView.CHAR_HEIGHT;
         }
     }
 
     private void paintInSelected(Graphics g, int x, int y)
     {
-        g.setFont(Util.BOLD_FONT);
+        g.setFont(HexView.BOLD_FONT);
         char[] content = model.getLineChars(selectedLine);
         g.drawChars(content, 0, selectedIndexInLine - 0, x, y);
 
-        g.setColor(Util.SELECTED_COLOR);
+        g.setColor(HexView.SELECTED_COLOR);
         x += g.getFontMetrics().charsWidth(content, 0, selectedIndexInLine-0);
         g.drawChars(content, selectedIndexInLine, 1, x, y);
 
         g.setColor(Color.black);
         x+= g.getFontMetrics().charWidth(content[selectedIndexInLine]);
         g.drawChars(content, selectedIndexInLine+1, (content.length-1)-selectedIndexInLine, x, y);
-        g.setFont(Util.FONT);
+        g.setFont(HexView.FONT);
     }
 
     public void addBlankClickListener(BlankClickListener listener)

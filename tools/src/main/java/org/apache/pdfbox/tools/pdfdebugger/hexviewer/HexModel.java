@@ -8,7 +8,7 @@ import java.util.ArrayList;
  * A class that acts as a model for the hex viewer. It holds the data and provide the data as ncessary.
  * It'll let listen for any underlying data changes.
  */
-public class HexModel implements HexChangeListener
+class HexModel implements HexChangeListener
 {
     private ArrayList<Byte> data;
     private ArrayList<HexModelChangeListener> modelChangeListeners;
@@ -138,7 +138,7 @@ public class HexModel implements HexChangeListener
 
     public static int lineForYValue(int y)
     {
-        return (y / Util.CHAR_HEIGHT) + 1;
+        return (y / HexView.CHAR_HEIGHT) + 1;
     }
 
     private void fireModelChanged(int index)

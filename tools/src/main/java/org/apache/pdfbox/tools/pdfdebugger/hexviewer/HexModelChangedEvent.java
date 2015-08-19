@@ -3,7 +3,7 @@ package org.apache.pdfbox.tools.pdfdebugger.hexviewer;
 /**
  * @author Khyrul Bashar
  */
-public class HexModelChangedEvent
+class HexModelChangedEvent
 {
     public static int BULK_CHANGE = 1;
     public static int SINGLE_CHANGE = 2;

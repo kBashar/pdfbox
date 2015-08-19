@@ -3,12 +3,12 @@ package org.apache.pdfbox.tools.pdfdebugger.hexviewer;
 /**
  * @author Khyrul Bashar
  */
-public class HexChangedEvent
+class HexChangedEvent
 {
     private final byte newValue;
     private final int byteIndex;
 
-    public HexChangedEvent(byte newValue, int byteIndex)
+    HexChangedEvent(byte newValue, int byteIndex)
     {
         this.newValue = newValue;
         this.byteIndex = byteIndex;

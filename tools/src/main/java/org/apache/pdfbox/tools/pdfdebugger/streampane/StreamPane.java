@@ -27,7 +27,8 @@ import java.io.UnsupportedEncodingException;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import javax.swing.JComboBox;
-import javax.swing.JPanel;
+import javax.swing.JComponent;
+import javax.swing.JTabbedPane;
 import javax.swing.SwingWorker;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultStyledDocument;
@@ -48,7 +49,9 @@ import org.apache.pdfbox.cos.COSString;
 import org.apache.pdfbox.io.IOUtils;
 import org.apache.pdfbox.pdfparser.PDFStreamParser;
 import org.apache.pdfbox.pdmodel.PDResources;
+import org.apache.pdfbox.tools.pdfdebugger.hexviewer.HexView;
 import org.apache.pdfbox.tools.pdfdebugger.streampane.tooltip.ToolTipController;
+import org.apache.pdfbox.tools.util.Util;
 import org.apache.pdfbox.util.Charsets;
 
 /**
@@ -86,7 +89,8 @@ public class StreamPane implements ActionListener
         StyleConstants.setForeground(NAME_STYLE, new Color(140, 38, 145));
         StyleConstants.setForeground(INLINE_IMAGE_STYLE, new Color(116, 113, 39));
     }
-    
+
+    private final JTabbedPane tabbedPane;
     private final StreamPaneView view;
     private final Stream stream;
     private ToolTipController tTController;
@@ -102,7 +106,7 @@ public class StreamPane implements ActionListener
      * @param resourcesDic COSDictionary instance that holds the resource dictionary for the stream.
      */
     public StreamPane(COSStream cosStream, boolean isContentStream, boolean isThumb,
-                      COSDictionary resourcesDic)
+                      COSDictionary resourcesDic) throws IOException
     {
         this.isContentStream = isContentStream;
 
@@ -123,11 +127,15 @@ public class StreamPane implements ActionListener
             view = new StreamPaneView(stream.getFilterList(), Stream.UNFILTERED, this);
             requestStreamText(Stream.UNFILTERED);
         }
+        tabbedPane = new JTabbedPane();
+        tabbedPane.setPreferredSize(Util.RIGHT_PANE_PREFERRED_DIMENSION);
+        tabbedPane.add("Text view", view.getStreamPanel());
+        tabbedPane.add("Hex view", new HexView(stream).getPane());
     }
 
-    public JPanel getPanel()
+    public JComponent getPanel()
     {
-        return view.getStreamPanel();
+        return tabbedPane;
     }
 
     @Override

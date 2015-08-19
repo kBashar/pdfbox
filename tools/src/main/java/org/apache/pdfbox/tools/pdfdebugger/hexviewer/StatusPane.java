@@ -8,7 +8,7 @@ import javax.swing.JPanel;
 /**
  * @author Khyrul Bashar
  */
-public class StatusPane extends JPanel
+class StatusPane extends JPanel
 {
     private int height = 20;
     private JLabel lineLabel;
@@ -17,7 +17,7 @@ public class StatusPane extends JPanel
 
     StatusPane()
     {
-        setPreferredSize(new Dimension(AddressPane.WIDTH + HexPane.WIDTH + ASCIIPane.LINE_WIDTH, height));
+        setPreferredSize(new Dimension(HexView.TOTAL_WIDTH, height));
         setLayout(new FlowLayout(FlowLayout.LEFT));
         createView();
     }
@@ -26,12 +26,12 @@ public class StatusPane extends JPanel
     {
         JLabel line = new JLabel("Line:");
         JLabel column = new JLabel("Column:");
-        lineLabel = new JLabel("-1");
+        lineLabel = new JLabel("");
         lineLabel.setPreferredSize(new Dimension(100, height));
-        colLabel = new JLabel("-1");
+        colLabel = new JLabel("");
         colLabel.setPreferredSize(new Dimension(100, height));
         JLabel index = new JLabel("Index:");
-        indexLabel = new JLabel("-1");
+        indexLabel = new JLabel("");
 
         add(line);
         add(lineLabel);

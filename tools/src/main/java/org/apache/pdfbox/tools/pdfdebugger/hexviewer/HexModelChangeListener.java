@@ -3,7 +3,7 @@ package org.apache.pdfbox.tools.pdfdebugger.hexviewer;
 /**
  * @author Khyrul Bashar
  */
-public interface HexModelChangeListener
+interface HexModelChangeListener
 {
-    public void hexModelChanged(HexModelChangedEvent event);
+    void hexModelChanged(HexModelChangedEvent event);
 }

@@ -5,7 +5,7 @@ import java.awt.Point;
 /**
  * @author Khyrul Bashar
  */
-public interface BlankClickListener
+interface BlankClickListener
 {
      void blankClick(Point point);
 }
