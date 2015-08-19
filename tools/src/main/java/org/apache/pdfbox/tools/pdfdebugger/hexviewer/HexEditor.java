@@ -10,6 +10,7 @@ import java.text.NumberFormat;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.BoxLayout;
+import javax.swing.DefaultBoundedRangeModel;
 import javax.swing.JDialog;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
@@ -94,8 +95,23 @@ class HexEditor extends JPanel implements SelectionChangeListener, BlankClickLis
 
         verticalScrollBar = scrollPane.createVerticalScrollBar();
         verticalScrollBar.setUnitIncrement(HexView.CHAR_HEIGHT);
-        verticalScrollBar.setBlockIncrement(HexView.CHAR_HEIGHT);
-        verticalScrollBar.setValues(0, 1, 0, HexView.TOTAL_HEIGHT);
+        verticalScrollBar.setBlockIncrement(HexView.CHAR_HEIGHT * 20);
+        verticalScrollBar.setModel(new DefaultBoundedRangeModel(0, 1, 0, HexView.TOTAL_HEIGHT)
+        {
+            int oldValue;
+
+            @Override
+            public int getValue()
+            {
+                if (!getValueIsAdjusting() &&
+                        !(oldValue == super.getValue()))
+                {
+                    oldValue = super.getValue();
+                    fireStateChanged();
+                }
+                return oldValue;
+            }
+        });
         scrollPane.setVerticalScrollBar(verticalScrollBar);
 
         scrollPane.setViewportView(panel);
