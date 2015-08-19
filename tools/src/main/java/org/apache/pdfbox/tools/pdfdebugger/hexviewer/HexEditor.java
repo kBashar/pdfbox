@@ -60,7 +60,6 @@ class HexEditor extends JPanel implements SelectionChangeListener, BlankClickLis
         hexPane = new HexPane(model);
         hexPane.addHexChangeListeners(model);
         asciiPane = new ASCIIPane(model);
-        //upperPane = new UpperPane();
         UpperPane upperPane = new UpperPane();
         statusPane = new StatusPane();
 

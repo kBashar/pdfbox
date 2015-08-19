@@ -1,6 +1,7 @@
 package org.apache.pdfbox.tools.pdfdebugger.hexviewer;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
@@ -21,11 +22,10 @@ import org.apache.pdfbox.tools.pdfdebugger.streampane.Stream;
 public class HexView implements ActionListener
 {
     private JComponent mainPane;
-    private JComponent contentPane;
     private Stream stream;
 
     static final Font FONT = new Font("monospaced", Font.PLAIN, 15);
-    static final int CHAR_HEIGHT = 30;
+    static final int CHAR_HEIGHT = 20;
     static final int CHAR_WIDTH = 35;
     static final int LINE_INSET = 20;
     static final Color SELECTED_COLOR = new Color(98, 134, 198);
@@ -56,7 +56,6 @@ public class HexView implements ActionListener
     private void createView()
     {
         mainPane = new JPanel();
-        //mainPane.setPreferredSize(Util.RIGHT_PANE_PREFERRED_DIMENSION);
         mainPane.setLayout(new BoxLayout(mainPane, BoxLayout.PAGE_AXIS));
     }
 
@@ -103,8 +102,17 @@ public class HexView implements ActionListener
         filters.setSelectedItem(0);
         filters.addActionListener(this);
 
-        JPanel panel = new JPanel(new FlowLayout());
+        JPanel panel = new JPanel()
+        {
+            @Override
+            public Dimension getMaximumSize()
+            {
+                return new Dimension(HexView.TOTAL_WIDTH, 45);
+            }
+        };
+        panel.setLayout(new FlowLayout());
         panel.add(filters);
+        panel.setPreferredSize(new Dimension(HexView.TOTAL_WIDTH, 45));
         return panel;
     }
 }
