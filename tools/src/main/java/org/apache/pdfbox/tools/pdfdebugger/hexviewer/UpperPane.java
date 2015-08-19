@@ -20,7 +20,6 @@ class UpperPane extends JComponent
     protected void paintComponent(Graphics g)
     {
         super.paintComponent(g);
-
         int x = HexView.LINE_INSET-2;
         int y = 20;
 
@@ -40,6 +39,12 @@ class UpperPane extends JComponent
 
     @Override
     public Dimension getMaximumSize()
+    {
+        return new Dimension(HexView.TOTAL_WIDTH, 30);
+    }
+
+    @Override
+    public Dimension getMinimumSize()
     {
         return new Dimension(HexView.TOTAL_WIDTH, 30);
     }

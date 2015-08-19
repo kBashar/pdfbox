@@ -17,7 +17,6 @@ class StatusPane extends JPanel
 
     StatusPane()
     {
-        setPreferredSize(new Dimension(HexView.TOTAL_WIDTH, height));
         setLayout(new FlowLayout(FlowLayout.LEFT));
         createView();
     }

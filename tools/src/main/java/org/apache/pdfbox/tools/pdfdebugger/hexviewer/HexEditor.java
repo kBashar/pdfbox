@@ -2,6 +2,8 @@ package org.apache.pdfbox.tools.pdfdebugger.hexviewer;
 
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
@@ -10,7 +12,6 @@ import java.text.NumberFormat;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.BoxLayout;
-import javax.swing.DefaultBoundedRangeModel;
 import javax.swing.JDialog;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
@@ -54,7 +55,7 @@ class HexEditor extends JPanel implements SelectionChangeListener, BlankClickLis
 
     private void createView()
     {
-        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+        setLayout(new GridBagLayout());
 
         addressPane = new AddressPane(model.totalLine(), model);
         hexPane = new HexPane(model);
@@ -74,7 +75,7 @@ class HexEditor extends JPanel implements SelectionChangeListener, BlankClickLis
 
         JScrollPane scrollPane = new JScrollPane();
         scrollPane.setViewportView(panel);
-        scrollPane.setPreferredSize(new Dimension(640, HexView.CHAR_HEIGHT * 20));
+        //scrollPane.setPreferredSize(new Dimension(640, HexView.CHAR_HEIGHT * 20));
 
         scrollPane.getActionMap().put("unitScrollDown", new AbstractAction()
         {
@@ -95,33 +96,36 @@ class HexEditor extends JPanel implements SelectionChangeListener, BlankClickLis
         verticalScrollBar = scrollPane.createVerticalScrollBar();
         verticalScrollBar.setUnitIncrement(HexView.CHAR_HEIGHT);
         verticalScrollBar.setBlockIncrement(HexView.CHAR_HEIGHT * 20);
-        verticalScrollBar.setModel(new DefaultBoundedRangeModel(0, 1, 0, HexView.TOTAL_HEIGHT)
-        {
-            int oldValue;
-
-            @Override
-            public int getValue()
-            {
-                if (!getValueIsAdjusting() &&
-                        !(oldValue == super.getValue()))
-                {
-                    oldValue = super.getValue();
-                    fireStateChanged();
-                }
-                return oldValue;
-            }
-        });
+        verticalScrollBar.setValues(0, 1, 0, HexView.TOTAL_HEIGHT);
         scrollPane.setVerticalScrollBar(verticalScrollBar);
 
         scrollPane.setViewportView(panel);
-        add(upperPane);
-        add(scrollPane);
-        add(statusPane);
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.anchor = GridBagConstraints.FIRST_LINE_START;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        //gbc.gridwidth = 5;
+        gbc.weighty = 0.0;
+        gbc.weightx = 0.1;
+        add(upperPane, gbc);
+        gbc.anchor = GridBagConstraints.FIRST_LINE_END;
+        gbc.gridy = 1;
+        gbc.weighty = 1;
+        gbc.weightx = 1;
+        gbc.fill = GridBagConstraints.BOTH;
+        add(scrollPane, gbc);
+        gbc.gridy = 2;
+        gbc.weightx = 0.1;
+        gbc.weighty = 0.0;
+        gbc.anchor = GridBagConstraints.PAGE_END;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        add(statusPane, gbc);
+
 
         hexPane.addSelectionChangeListener(this);
-
-        int height = 50 + HexView.CHAR_HEIGHT * 19;
-        setPreferredSize(new Dimension(640, height));
+        setPreferredSize(new Dimension(640, 50 + HexView.CHAR_HEIGHT * 20));
 
 
         KeyStroke jumpKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_G, InputEvent.CTRL_DOWN_MASK);
