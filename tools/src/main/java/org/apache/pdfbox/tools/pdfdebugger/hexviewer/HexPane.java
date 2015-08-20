@@ -21,7 +21,7 @@ import javax.swing.JPanel;
  */
 class HexPane extends JPanel implements KeyListener, MouseListener, MouseMotionListener, HexModelChangeListener
 {
-    private HexModel model;
+    private final HexModel model;
     private static int selectedIndex = -1;
     private static final byte EDIT = 2;
     private static final byte SELECTED = 1;
@@ -30,8 +30,8 @@ class HexPane extends JPanel implements KeyListener, MouseListener, MouseMotionL
     private byte state = NORMAL;
     private int selectedChar = 0;
 
-    private List<HexChangeListener> hexChangeListeners = new ArrayList<HexChangeListener>();
-    private List<SelectionChangeListener> selectionChangeListeners = new ArrayList<SelectionChangeListener>();
+    private final List<HexChangeListener> hexChangeListeners = new ArrayList<HexChangeListener>();
+    private final List<SelectionChangeListener> selectionChangeListeners = new ArrayList<SelectionChangeListener>();
     private int count;
 
     HexPane(HexModel model)

@@ -4,29 +4,22 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Rectangle;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.util.ArrayList;
 import javax.swing.JComponent;
 
 /**
  * @author Khyrul Bashar
  */
-class ASCIIPane extends JComponent implements MouseListener, HexModelChangeListener
+class ASCIIPane extends JComponent implements HexModelChangeListener
 {
-    private HexModel model;
+    private final HexModel model;
 
     private int selectedLine = -1;
-    private int selectedIndex = -1;
-
-    private ArrayList<BlankClickListener> blankClickListeners = new ArrayList<BlankClickListener>();
     private int selectedIndexInLine;
-    private int count;
+
 
     ASCIIPane(HexModel model)
     {
         this.model = model;
-        addMouseListener(this);
         setPreferredSize(new Dimension(HexView.ASCII_PANE_WIDTH, HexView.TOTAL_HEIGHT));
         model.addHexModelChangeListener(this);
         setFont(HexView.FONT);
@@ -42,7 +35,6 @@ class ASCIIPane extends JComponent implements MouseListener, HexModelChangeListe
         int x = HexView.LINE_INSET;
         int y = bound.y;
 
-        System.out.println("Count: " + count++ + "---> Ascii pane " + "X: " + x + " Y: " + y);
         if (y == 0 || y%HexView.CHAR_HEIGHT != 0)
         {
             y += HexView.CHAR_HEIGHT - y%HexView.CHAR_HEIGHT;
@@ -84,45 +76,7 @@ class ASCIIPane extends JComponent implements MouseListener, HexModelChangeListe
         g.drawChars(content, selectedIndexInLine+1, (content.length-1)-selectedIndexInLine, x, y);
         g.setFont(HexView.FONT);
     }
-
-    public void addBlankClickListener(BlankClickListener listener)
-    {
-        blankClickListeners.add(listener);
-    }
-
-    @Override
-    public void mouseClicked(MouseEvent mouseEvent)
-    {
-
-    }
-
-    @Override
-    public void mousePressed(MouseEvent mouseEvent)
-    {
-        for (BlankClickListener listener: blankClickListeners)
-        {
-            listener.blankClick(mouseEvent.getPoint());
-        }
-    }
-
-    @Override
-    public void mouseReleased(MouseEvent mouseEvent)
-    {
-
-    }
-
-    @Override
-    public void mouseEntered(MouseEvent mouseEvent)
-    {
-
-    }
-
-    @Override
-    public void mouseExited(MouseEvent mouseEvent)
-    {
-
-    }
-
+    
     @Override
     public void hexModelChanged(HexModelChangedEvent event)
     {
@@ -131,11 +85,8 @@ class ASCIIPane extends JComponent implements MouseListener, HexModelChangeListe
 
     public void setSelected(int index)
     {
-        if (index != selectedIndex)
-        {
             selectedLine = HexModel.lineNumber(index);
             selectedIndexInLine = HexModel.elementIndexInLine(index);
             repaint();
-        }
     }
 }

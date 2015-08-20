@@ -10,7 +10,7 @@ import javax.swing.JPanel;
  */
 class StatusPane extends JPanel
 {
-    private int height = 20;
+    private final int height = 20;
     private JLabel lineLabel;
     private JLabel colLabel;
     private JLabel indexLabel;

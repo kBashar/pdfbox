@@ -11,7 +11,7 @@ class HexModelChangedEvent
     private final int startIndex;
     private final int changeType;
 
-    public HexModelChangedEvent(int startIndex, int changeType)
+    HexModelChangedEvent(int startIndex, int changeType)
     {
         this.startIndex = startIndex;
         this.changeType = changeType;

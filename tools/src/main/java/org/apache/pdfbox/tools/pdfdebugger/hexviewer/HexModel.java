@@ -37,7 +37,7 @@ class HexModel implements HexChangeListener
      */
     public byte getByte(int index)
     {
-        return data.get(index).byteValue();
+        return data.get(index);
     }
 
     /**
@@ -134,11 +134,6 @@ class HexModel implements HexChangeListener
                 listener.hexModelChanged(new HexModelChangedEvent(index, HexModelChangedEvent.SINGLE_CHANGE));
             }
         }
-    }
-
-    public static int lineForYValue(int y)
-    {
-        return (y / HexView.CHAR_HEIGHT) + 1;
     }
 
     private void fireModelChanged(int index)

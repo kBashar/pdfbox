@@ -4,9 +4,6 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Rectangle;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.util.ArrayList;
 import javax.swing.JComponent;
 
 /**
@@ -14,14 +11,11 @@ import javax.swing.JComponent;
  *
  * This class shows the address of the currently selected byte.
  */
-class AddressPane extends JComponent implements MouseListener
+class AddressPane extends JComponent
 {
-    private ArrayList<BlankClickListener> blankClickListeners = new ArrayList<BlankClickListener>();
-
     private int totalLine;
     private int selectedLine = -1;
     private int selectedIndex = -1;
-    int count = 0;
 
     AddressPane(int total, HexModel model)
     {
@@ -39,14 +33,12 @@ class AddressPane extends JComponent implements MouseListener
         int x = HexView.LINE_INSET;
         int y = bound.y;
 
-        //TODO delete debug line
-        System.out.println("Count: " +count++ + "---> Address pane " + "X: " + x + " Y: " + y);
         if (y == 0 || y%HexView.CHAR_HEIGHT != 0)
         {
             y += HexView.CHAR_HEIGHT - y%HexView.CHAR_HEIGHT;
         }
         int firstLine = y/HexView.CHAR_HEIGHT;
-        
+
         for (int line = firstLine; line < firstLine + bound.getHeight()/HexView.CHAR_HEIGHT; line++)
         {
             if (line > totalLine)
@@ -66,7 +58,6 @@ class AddressPane extends JComponent implements MouseListener
         }
     }
 
-
     private void paintSelected(Graphics g, int x, int y)
     {
         g.setColor(HexView.SELECTED_COLOR);
@@ -76,44 +67,6 @@ class AddressPane extends JComponent implements MouseListener
 
         g.setColor(Color.black);
         g.setFont(HexView.FONT);
-    }
-
-    public void addBlankClickListener(BlankClickListener listener)
-    {
-        blankClickListeners.add(listener);
-    }
-
-    @Override
-    public void mouseClicked(MouseEvent mouseEvent)
-    {
-
-    }
-
-    @Override
-    public void mousePressed(MouseEvent mouseEvent)
-    {
-        for (BlankClickListener listener: blankClickListeners)
-        {
-            listener.blankClick(mouseEvent.getPoint());
-        }
-    }
-
-    @Override
-    public void mouseReleased(MouseEvent mouseEvent)
-    {
-
-    }
-
-    @Override
-    public void mouseEntered(MouseEvent mouseEvent)
-    {
-
-    }
-
-    @Override
-    public void mouseExited(MouseEvent mouseEvent)
-    {
-
     }
 
     public void setSelected(int index)

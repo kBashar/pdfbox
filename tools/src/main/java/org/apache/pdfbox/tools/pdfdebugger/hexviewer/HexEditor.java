@@ -27,7 +27,7 @@ import javax.swing.SwingUtilities;
  */
 class HexEditor extends JPanel implements SelectionChangeListener, BlankClickListener
 {
-    private HexModel model;
+    private final HexModel model;
     private HexPane hexPane;
     private ASCIIPane asciiPane;
     private AddressPane addressPane;
@@ -35,20 +35,21 @@ class HexEditor extends JPanel implements SelectionChangeListener, BlankClickLis
 
     private JScrollBar verticalScrollBar;
 
-    private Action jumpToIndex = new AbstractAction()
-    {
-        @Override
-        public void actionPerformed(ActionEvent actionEvent)
-        {
-            createJumpDialog().setVisible(true);
-        }
-    };
+    private final Action jumpToIndex;
 
     public static int selectedIndex = -1;
 
     HexEditor(HexModel model)
     {
         super();
+        this.jumpToIndex = new AbstractAction()
+        {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent)
+            {
+                createJumpDialog().setVisible(true);
+            }
+        };
         this.model = model;
         createView();
     }
