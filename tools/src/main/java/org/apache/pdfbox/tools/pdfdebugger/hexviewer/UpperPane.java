@@ -16,6 +16,7 @@ class UpperPane extends JPanel
         setPreferredSize(new Dimension(HexView.TOTAL_WIDTH, 20));
         setBorder(new BevelBorder(BevelBorder.RAISED));
     }
+
     @Override
     protected void paintComponent(Graphics g)
     {

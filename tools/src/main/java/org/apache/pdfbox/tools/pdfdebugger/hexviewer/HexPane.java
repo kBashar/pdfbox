@@ -14,12 +14,12 @@ import java.awt.font.TextAttribute;
 import java.text.AttributedString;
 import java.util.ArrayList;
 import java.util.List;
-import javax.swing.JComponent;
+import javax.swing.JPanel;
 
 /**
  * @author Khyrul Bashar
  */
-class HexPane extends JComponent implements KeyListener, MouseListener, MouseMotionListener, HexModelChangeListener
+class HexPane extends JPanel implements KeyListener, MouseListener, MouseMotionListener, HexModelChangeListener
 {
     private HexModel model;
     private static int selectedIndex = -1;
@@ -59,9 +59,11 @@ class HexPane extends JComponent implements KeyListener, MouseListener, MouseMot
         int y = bound.y;
         System.out.println("Count: " + count++ + "---> Hex Pane : " + "X: " + x + " Y: " + y + " Width: " + bound.width
                 + " Height: " + bound.height);
-        int firstLine = HexModel.lineForYValue(y);
-
-        y += HexView.CHAR_HEIGHT;
+        if (y == 0 || y%HexView.CHAR_HEIGHT != 0)
+        {
+            y += HexView.CHAR_HEIGHT - y%HexView.CHAR_HEIGHT;
+        }
+        int firstLine = y/HexView.CHAR_HEIGHT;
 
         g.setColor(Color.BLACK);
         for (int i = firstLine; i <= firstLine + bound.height/HexView.CHAR_HEIGHT; i++)

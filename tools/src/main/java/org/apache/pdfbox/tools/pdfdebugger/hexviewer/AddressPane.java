@@ -41,11 +41,12 @@ class AddressPane extends JComponent implements MouseListener
 
         //TODO delete debug line
         System.out.println("Count: " +count++ + "---> Address pane " + "X: " + x + " Y: " + y);
-
-        int firstLine = HexModel.lineForYValue(y);
-
-        y += HexView.CHAR_HEIGHT;
-
+        if (y == 0 || y%HexView.CHAR_HEIGHT != 0)
+        {
+            y += HexView.CHAR_HEIGHT - y%HexView.CHAR_HEIGHT;
+        }
+        int firstLine = y/HexView.CHAR_HEIGHT;
+        
         for (int line = firstLine; line < firstLine + bound.getHeight()/HexView.CHAR_HEIGHT; line++)
         {
             if (line > totalLine)
